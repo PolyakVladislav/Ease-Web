@@ -1,5 +1,4 @@
 export interface IProfileForm {
-    username: string;
-    profilePicture?: string; 
-  }
-  
+  username: string;
+  profilePicture?: string; 
+}

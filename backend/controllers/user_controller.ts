@@ -17,6 +17,7 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage });
 
+// פעולה להחזרת כל המשתמשים
 export const getAllUsers = async (req: Request, res: Response): Promise<void> => {
   try {
     const users = await userModel.find(); 
@@ -27,6 +28,7 @@ export const getAllUsers = async (req: Request, res: Response): Promise<void> =>
   }
 };
 
+// פעולה להחזרת פרופיל משתמש
 export const getUserProfile = async (req: Request, res: Response): Promise<void> => {
   try {
     const userId = req.query.userId as string;
@@ -60,6 +62,7 @@ export const getUserProfile = async (req: Request, res: Response): Promise<void>
     res.status(500).json({ message: "Server Error." });
   }
 };
+
 
 export const updateUserProfile = async (req: Request, res: Response): Promise<void> => {
   const userId = req.query.userId as string;

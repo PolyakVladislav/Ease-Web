@@ -130,6 +130,8 @@ router.post('/', authMiddleware,(req, res, next) => {
  *   get:
  *     summary: Get all posts with pagination
  *     tags: [Posts]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: query
  *         name: page
@@ -175,6 +177,8 @@ router.get("/", paginatedResults(PostModel), (req, res) => {
  *   get:
  *     summary: Get a post by ID
  *     tags: [Posts]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -204,6 +208,8 @@ router.get("/:id", (req, res) => {
  *   get:
  *     summary: Get posts by sender ID
  *     tags: [Posts]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: senderId

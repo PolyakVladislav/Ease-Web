@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import userModel, { IUser } from '../models/Users';
 import bcrypt from 'bcrypt';
-import jwt from 'jsonwebtoken';
+import jwt, { Secret } from 'jsonwebtoken';
 import { Document } from 'mongoose';
 
 const CLIENT_CONNECT = process.env.CLIENT_CONNECT;
@@ -15,17 +15,19 @@ const generateToken = (userId: string): tTokens | null => {
   if (!process.env.TOKEN_SECRET) {
     return null;
   }
+
   const random = Math.random().toString();
+
   const accessToken = jwt.sign(
     { _id: userId, random },
-    process.env.TOKEN_SECRET,
-    { expiresIn: process.env.TOKEN_EXPIRES }
+    process.env.TOKEN_SECRET as Secret, 
+    { expiresIn: process.env.TOKEN_EXPIRES as string } as jwt.SignOptions
   );
 
   const refreshToken = jwt.sign(
     { _id: userId, random },
-    process.env.TOKEN_SECRET,
-    { expiresIn: process.env.REFRESH_TOKEN_EXPIRES } 
+    process.env.TOKEN_SECRET as Secret,
+    { expiresIn: process.env.REFRESH_TOKEN_EXPIRES as string } as jwt.SignOptions 
   );
 
   return { accessToken, refreshToken };
@@ -64,7 +66,7 @@ const register = async (req: Request, res: Response, next: NextFunction): Promis
       profilePictureUrl = `${SERVER_CONNECT}/uploads/${req.file.filename}`;
     } else {
       const SERVER_CONNECT = process.env.SERVER_CONNECT;
-      profilePictureUrl = `${SERVER_CONNECT}/uploads/default-profile-pic.jpg`;
+      profilePictureUrl = `${SERVER_CONNECT}/uploads/1741781673180-376059482.jpg`;
     }
 
     const user = await userModel.create({
@@ -279,9 +281,8 @@ const googleCallback = async (req: Request, res: Response) => {
 
     if (!user.profilePicture) {
       const SERVER_CONNECT = process.env.SERVER_CONNECT;
-      user.profilePicture = `${SERVER_CONNECT}/uploads/default-profile-pic.jpg`; 
+      user.profilePicture = `${SERVER_CONNECT}/uploads/1741781673180-376059482.jpg`; 
     }
-
     const tokens = generateToken(user._id);
     if (!tokens) {
       res.status(500).json({ message: 'No token' });
@@ -336,7 +337,6 @@ export const authMiddleware = (req: Request, res: Response, next: NextFunction):
           res.status(401).send('Access Denied');
           return;
         }
-        // Добавляем пользователя в req, чтобы другие middleware могли к нему обращаться
         (req as any).user = user;
         next();
       })

@@ -17,6 +17,9 @@ const router = Router();
  *   schemas:
  *     User:
  *       type: object
+ *       required:
+ *         - username
+ *         - email
  *       properties:
  *         _id:
  *           type: string
@@ -66,6 +69,8 @@ const router = Router();
  *   get:
  *     summary: Get all users
  *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
  *     responses:
  *       200:
  *         description: List of all users

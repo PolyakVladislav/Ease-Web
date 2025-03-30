@@ -10,6 +10,7 @@ export const setupSocket = (io: Server) => {
     if (userId) {
       connectedUsers[userId] = socket.id;
     } else {
+      console.warn(`[SOCKET] Connection without userId, socket.id=${socket.id}`);
     }
 
     socket.on("sendMessage", async (fromUserId: string, toUserId: string, msgContent: string) => {
@@ -31,8 +32,10 @@ export const setupSocket = (io: Server) => {
             timestamp: new Date(),
           });
         } else {
+          console.warn(`[SOCKET] Receiver ${toUserId} is not connected`);
         }
       } catch (error) {
+        // console.error("[SOCKET] Error saving message:", error);
       }
     });
 

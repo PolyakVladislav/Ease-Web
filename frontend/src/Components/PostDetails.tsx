@@ -103,6 +103,7 @@ const PostDetails = () => {
     <div className={styles.postDetailsContainer}>
       <div className={styles.postDetails}>
         <div className={styles.postHeader}>
+          {/* Аватар автора (опционально) */}
           {/* <img src={`${CONFIG.SERVER_URL}${post.authorAvatar}`} alt="Author Avatar" className={styles.authorAvatar} /> */}
           <div className={styles.postAuthorInfo}>
             <span className={styles.authorName}>{post.author}</span>

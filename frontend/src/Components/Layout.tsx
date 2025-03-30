@@ -7,7 +7,7 @@ import {
   FaComments,
   FaRobot,
 } from "react-icons/fa";
-import { MdArticle } from "react-icons/md";
+//import { MdArticle } from "react-icons/md";
 import styles from "../css/Layout.module.css";
 import { handleLogout } from "../utiles/authHelpers";
 
@@ -30,13 +30,13 @@ const Layout: React.FC = () => {
       <aside className={styles.sidebar}>
         <ul className={styles.sidebarList}>
           <li className={styles.sidebarItem}>
-            <Link to="/profile" className={styles.sidebarLink}>
-              <FaUser className={styles.icon} /> Profile
+            <Link to="/all-posts" className={styles.sidebarLink}>
+              <FaClipboard className={styles.icon} /> Feed
             </Link>
           </li>
           <li className={styles.sidebarItem}>
-            <Link to="/all-posts" className={styles.sidebarLink}>
-              <FaClipboard className={styles.icon} /> Posts
+            <Link to="/profile" className={styles.sidebarLink}>
+              <FaUser className={styles.icon} /> Profile
             </Link>
           </li>
           <li className={styles.sidebarItem}>
@@ -50,14 +50,14 @@ const Layout: React.FC = () => {
             </Link>
           </li>
           
-          <li className={styles.sidebarItem}>
+          {/*<li className={styles.sidebarItem}>
             <Link to="/articles" className={styles.sidebarLink}>
               <MdArticle className={styles.icon} /> Articles
             </Link>
-          </li>
+          </li>*/}
           <li className={styles.sidebarItem}>
             <Link to="/chatgpt" className={styles.sidebarLink}>
-              <FaRobot className={styles.icon} /> ChatGPT
+              <FaRobot className={styles.icon} /> AI Assistant
             </Link>
           </li>
         </ul>

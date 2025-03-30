@@ -1,11 +1,9 @@
 import { Request, Response } from "express";
 import CommentModel from "../models/Comment";
 import PostModel from "../models/Post";
-import UserModel from "../models/Users";
 import fetch from "node-fetch";
 
 //get all comments
-
 const getAll = async(req: Request, res: Response) =>{
   try {
     const comments = await CommentModel.find();
@@ -20,37 +18,37 @@ const getAll = async(req: Request, res: Response) =>{
 };
 
 // new comment
-const createComment = async (req: Request, res: Response) => {
+export const createComment = async (req: Request, res: Response): Promise<void> => {
   try {
     const { postId, content, author } = req.body;
-
+    
     if (!postId || !content || !author) {
-      return res.status(400).json({ message: "All fields are required" });
+      res.status(400).json({ message: "All fields are required" });
+      return;
     }
-
-    const postExists = await PostModel.findById(postId);
-    if (!postExists) {
-      return res.status(404).json({ message: "Post not found" });
+    
+    const post = await PostModel.findById(postId);
+    if (!post) {
+      res.status(404).json({ message: "Post not found" });
+      return;
     }
-    const userExists = await UserModel.findById(author);
-    if (!userExists) {
-      return res.status(404).json({ message: "User not found" });
-    }
-
+    
     const comment = new CommentModel({ postId, content, author });
     await comment.save();
-
+    
     await PostModel.findByIdAndUpdate(
       postId,
-      { $push: { comments: comment._id } }, 
+      { $push: { comments: comment._id } },
       { new: true }
     );
-
+    
     res.status(201).json(comment);
   } catch (err: any) {
+    //console.error("Error creating comment:", err);
     res.status(500).json({ message: "Error creating comment", error: err.message });
   }
 };
+
 
 
 // get comments by post id
@@ -172,7 +170,10 @@ const generateSuggestedComment = async (req: Request, res: Response) => {
     
     const { title, content, author } = post;
 
-    const prompt = `Title: "${title}"\nContent: "${content}"\n Auther: "${author}"\n\nWrite a recommended comment for this post.`;
+    const prompt = `Title: ${title}\nContent: ${content}\nAuthor: ${author}\n
+    \nGenerate a natural and relevant comment for this post.
+    Do not include any formatting,
+    quotes, or extra words—only the comment itself.`;
 
     const openAIResponse = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",

@@ -58,25 +58,33 @@ export const chatWithGPT = async (
         Authorization: `Bearer ${OPENAI_API_KEY}`,
       },
       body: JSON.stringify({
-        model: "gpt-3.5-turbo", 
+        model: "gpt-3.5-turbo",
         messages: [
-          { role: "system", content: "You are a helpful assistant." },
-          { role: "user", content: message },
+          {
+            role: "system",
+            content: "You are an AI assistant for doctors. Your task is to provide concise, accurate, and relevant answers to medical questions. Focus on health-related topics, and avoid giving personal advice or recommending specific treatments unless asked.",
+
+          },
+          {
+            role: "user",
+            content: message,
+          },
         ],
-        max_tokens: 250, 
+        max_tokens: 250,
       }),
     });
 
     if (!response.ok) {
       const errorData = await response.json();
-      if (process.env.NODE_ENV !== "test") {
-      }
       res.status(response.status).json({ error: errorData });
       return;
     }
 
-    const data: OpenAIResponse = await response.json() as OpenAIResponse;
-    const gptMessage = data.choices[0].message.content.trim();
+    const data: OpenAIResponse = (await response.json()) as OpenAIResponse;
+    let gptMessage = data.choices[0]?.message?.content?.trim() || "";
+
+    gptMessage = gptMessage.replace(/recommended comment[:]?/gi, "").trim();
+    gptMessage = gptMessage.replace(/^"(.*)"$/, "$1").trim();
 
     cache.set(message, gptMessage);
 

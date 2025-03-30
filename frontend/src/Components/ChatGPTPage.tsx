@@ -84,7 +84,7 @@ const ChatGPTPage: React.FC = () => {
 
   return (
     <div className={styles.chatgptContainer}>
-      <h2 className={styles.header}>Chat with ChatGPT</h2>
+      <h2 className={styles.header}>Doctor's Assistant: AI-powered Chat</h2>
       {error && <div className={styles.errorMessage}>{error}</div>}
       <div className={styles.messagesContainer}>
         {messages.map((msg, index) => (

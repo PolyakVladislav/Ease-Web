@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState, useCallback, useRef } from "react";
 import axios from "axios";
 import styles from "../css/UserProfile.module.css";
 import CONFIG from "../config";
@@ -24,6 +24,8 @@ const UserProfile: React.FC = () => {
   const [hasMorePosts, setHasMorePosts] = useState<boolean>(true);
   const [usernameError, setUsernameError] = useState<string | null>(null);
   const [selectedPostImage, setSelectedPostImage] = useState<File | null>(null);
+  const [postEditError, setPostEditError] = useState<string | null>(null);
+  const editRef = useRef<HTMLDivElement>(null);
 
   const fetchUserData = useCallback(async () => {
     const token = localStorage.getItem("accessToken");
@@ -94,6 +96,11 @@ const UserProfile: React.FC = () => {
     const { name, value } = e.target;
     setFormData((prev: IProfileForm) => ({ ...prev, [name]: value }));
   };
+  useEffect(() => {
+    if (postEditMode && editRef.current) {
+      editRef.current.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+  }, [postEditMode]);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -104,20 +111,26 @@ const UserProfile: React.FC = () => {
   const handleSaveChanges = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
     setUsernameError(null);
-
+    setError(null);
+  
+    if (!formData.username.trim()) {
+      setUsernameError("Username cannot be empty.");
+      return;
+    }
+  
     const token = localStorage.getItem("accessToken");
     if (!token) {
       setError("No token found");
       return;
     }
-
+  
     try {
       const formDataToSend = new FormData();
-      formDataToSend.append("username", formData.username);
+      formDataToSend.append("username", formData.username.trim());
       if (selectedFile) {
         formDataToSend.append("profilePicture", selectedFile);
       }
-
+  
       const response = await api.put(
         `${CONFIG.SERVER_URL}/api/users/profile`,
         formDataToSend,
@@ -129,14 +142,14 @@ const UserProfile: React.FC = () => {
           params: { userId: localStorage.getItem("userId") },
         }
       );
-
+  
       if (response.data?.user?.profilePicture) {
         localStorage.setItem("profilePicture", response.data.user.profilePicture);
       }
-
-      setPage(1);            
-      setPosts([]);          
-      await fetchUserData(); 
+  
+      setPage(1);
+      setPosts([]);
+      await fetchUserData();
       setEditable(false);
     } catch (error: unknown) {
       if (axios.isAxiosError(error) && error.response && error.response.status === 409) {
@@ -160,14 +173,21 @@ const UserProfile: React.FC = () => {
       setError("No token found");
       return;
     }
-
+  
+    if (!currentPostTitle.trim() || !currentPostContent.trim()) {
+      setPostEditError("Title and content cannot be empty.");
+      return;
+    } else {
+      setPostEditError(null);
+    }
+  
     const formData = new FormData();
-    formData.append("title", currentPostTitle);
-    formData.append("content", currentPostContent);
+    formData.append("title", currentPostTitle.trim());
+    formData.append("content", currentPostContent.trim());
     if (selectedPostImage) {
       formData.append("PostImage", selectedPostImage);
     }
-
+  
     try {
       const response = await api.put(
         `${CONFIG.SERVER_URL}/posts/${postId}`,
@@ -175,18 +195,17 @@ const UserProfile: React.FC = () => {
         {
           headers: {
             "Content-Type": "multipart/form-data",
-            "Authorization": `Bearer ${token}`,
+            Authorization: `Bearer ${token}`,
           },
         }
       );
-
-      // Update the post in the state
+  
       setPosts((prevPosts) =>
         prevPosts.map((post) =>
           post._id === postId ? { ...post, ...response.data } : post
         )
       );
-
+  
       setPostEditMode(null);
       setCurrentPostTitle("");
       setCurrentPostContent("");
@@ -195,6 +214,7 @@ const UserProfile: React.FC = () => {
       setError("Error saving post changes");
     }
   };
+  
 
   const handleDeletePost = async (postId: string) => {
     const token = localStorage.getItem("accessToken");
@@ -290,26 +310,46 @@ const UserProfile: React.FC = () => {
                 {posts.map((post) => (
                   <li key={post._id} className={styles.postItem}>
                     {postEditMode === post._id ? (
-                      <div className={styles.postEditContainer}>
-                      <div>
-                        <label>Post Title:</label>
-                        <div className={styles.postEditField}>
-                          <input
-                            type="text"
-                            value={currentPostTitle}
-                            onChange={(e) => setCurrentPostTitle(e.target.value)}
-                            className={styles.postInput}
-                          />
-                        </div>
-                        <label>Post Content:</label>
-                        <div className={styles.postEditField}>
-                          <input
-                            type="text"
-                            value={currentPostContent}
-                            onChange={(e) => setCurrentPostContent(e.target.value)}
-                            className={styles.postInput}
-                          />
+                      <div className={styles.postEditContainer} ref={editRef}>
+                        {postEditError && <p className={styles.postEditError}>{postEditError}</p>}
+                        <div>
+                          <label>Post Title:</label>
+                          <div className={styles.postEditField}>
+                            <input
+                              type="text"
+                              value={currentPostTitle}
+                              onChange={(e) => setCurrentPostTitle(e.target.value)}
+                              className={styles.postInput}
+                            />
                           </div>
+                          <label>Post Content:</label>
+                          <div className={styles.postEditField}>
+                            <textarea
+                              value={currentPostContent}
+                              onChange={(e) => setCurrentPostContent(e.target.value)}
+                              className={styles.postInput}
+                              rows={5}
+                            />
+                          </div>
+                          {selectedPostImage ? (
+                            <div className={styles.currentPostImageContainer}>
+                              <img
+                                src={URL.createObjectURL(selectedPostImage)}
+                                alt="New Post"
+                                className={styles.currentPostImage}
+                              />
+                            </div>
+                          ) : (
+                            post.image && (
+                              <div className={styles.currentPostImageContainer}>
+                                <img
+                                  src={`${CONFIG.SERVER_URL}${post.image}`}
+                                  alt="Current Post"
+                                  className={styles.currentPostImage}
+                                />
+                              </div>
+                            )
+                          )}
                           <label>Post Image:</label>
                           <div className={styles.postEditField}>
                             <input
@@ -318,22 +358,22 @@ const UserProfile: React.FC = () => {
                               onChange={(e) => e.target.files && setSelectedPostImage(e.target.files[0])}
                               className={styles.postInput}
                             />
+                          </div>
+                          <div className={styles.buttonGroup}>
+                            <button
+                              onClick={() => handleSavePostChanges(post._id)}
+                              className={styles.saveButton}
+                            >
+                              Save
+                            </button>
+                            <button
+                              onClick={() => setPostEditMode(null)}
+                              className={styles.cancelButton}
+                            >
+                              Cancel
+                            </button>
+                          </div>
                         </div>
-                        <div className={styles.buttonGroup}>
-                          <button
-                            onClick={() => handleSavePostChanges(post._id)}
-                            className={styles.saveButton}
-                          >
-                            Save
-                          </button>
-                          <button
-                            onClick={() => setPostEditMode(null)}
-                            className={styles.cancelButton}
-                          >
-                            Cancel
-                          </button>
-                        </div>
-                      </div>
                       </div>
                     ) : (
                       <div>

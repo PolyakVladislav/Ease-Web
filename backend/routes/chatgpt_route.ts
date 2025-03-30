@@ -16,6 +16,8 @@ const router = Router();
  *   post:
  *     summary: Chat with GPT-3.5 Turbo
  *     tags: [ChatGPT]
+ *     security:
+ *      - bearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
