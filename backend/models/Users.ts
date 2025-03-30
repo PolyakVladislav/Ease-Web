@@ -1,16 +1,19 @@
-
 import mongoose from "mongoose";
+
 export interface IUser {
   username: string;
   email: string;
   password?: string;
   _id?: string;
-  profilePicture: string; 
+  profilePicture: string;
   posts: mongoose.Types.ObjectId[];
   refreshToken?: string[];
-  likedPosts?: mongoose.Schema.Types.ObjectId[]; 
+  likedPosts?: mongoose.Schema.Types.ObjectId[];
   googleId?: string;
   role?: string;
+  phoneNumber?: string;  
+  dateOfBirth?: Date;         
+  gender?: 'male' | 'female' | 'other'; 
 }
 
 const userSchema = new mongoose.Schema<IUser>({
@@ -28,34 +31,45 @@ const userSchema = new mongoose.Schema<IUser>({
     type: String,
     required: false,
   },
-  profilePicture: { 
+  profilePicture: {
     type: String,
-    default: '' 
+    default: '',
   },
-  posts: [{ 
+  posts: [{
     type: mongoose.Types.ObjectId,
-     ref: 'Post'
+    ref: 'Post'
   }],
   refreshToken: {
     type: [String],
     default: [],
-    }, 
-    likedPosts: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Post",
-      },
-    ],
-	googleId: { 
-      type: String,
-      unique: true,
-      sparse: true,
-    },
-    role: {  
-      type: String,
-      enum: ['patient', 'doctor', 'admin'], 
-      default: 'patient',           
-    },
+  },
+  likedPosts: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Post",
+  }],
+  googleId: {
+    type: String,
+    unique: true,
+    sparse: true,
+  },
+  role: {
+    type: String,
+    enum: ['patient', 'doctor', 'admin'],
+    default: 'patient',
+  },
+  phoneNumber: {
+    type: String,
+    required: false,
+  },
+  dateOfBirth: {
+    type: Date,
+    required: false,
+  },
+  gender: {
+    type: String,
+    enum: ['male', 'female', 'other'],
+    required: false,
+  },
 });
 
 const userModel = mongoose.model<IUser>("Users", userSchema);

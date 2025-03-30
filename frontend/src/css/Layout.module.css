@@ -1,40 +1,21 @@
-:root {
-  --primary-color: #007AFF;
-  --secondary-color: #E0E0E0;
-  --text-color: #333333;
-  --background-color: #f0f2f5;
-  --header-height: 60px;
-  --sidebar-width: 20%;
-  --min-sidebar-width: 200px;
-  --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-}
-
-body {
-  margin: 0;
-  font-family: var(--font-family);
-  background-color: #262627;
-  color: var(--text-color);
-}
-
 .dashboardContainer {
   display: flex;
-  overflow: hidden; 
+  min-height: 100vh;
 }
 
 .topBar {
   position: fixed;
   top: 0;
   left: 0;
-  width: 100%;
-  height: var(--header-height);
-  background-color: var(--primary-color);
+  width: 98%;
+  height: 60px;
+  background-color: #1877f2;
   color: white;
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  justify-content: space-between;
   padding: 0 20px;
-  box-sizing: border-box;
-  z-index: 2;
+  z-index: 100;
 }
 
 .title {
@@ -42,32 +23,59 @@ body {
 }
 
 .logoutButton {
-  padding: 6px 12px;
   background-color: #ff4d4d;
-  color: white;
   border: none;
-  border-radius: 8px;
+  padding: 8px 12px;
+  border-radius: 6px;
+  color: white;
   cursor: pointer;
-  font-size: 0.9rem;
-  transition: background-color 0.3s ease;
-}
-
-.logoutButton:hover {
-  background-color: #d81818a1;
 }
 
 .sidebar {
   position: fixed;
-  top: var(--header-height); 
+  top: 60px;
   left: 0;
-  width: var(--sidebar-width);
-  min-width: var(--min-sidebar-width);
-  height: calc(100vh - var(--header-height));
-  background-color: #FFFFFF;
-  border-right: 1px solid var(--secondary-color);
+  width: 250px;
+  height: calc(100vh - 60px);
+  background-color: #ffffff;
+  border-right: 1px solid #e0e0e0;
   padding: 20px;
   box-sizing: border-box;
-  overflow-y: auto; 
+  overflow-y: auto;
+}
+
+.userBlock {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.userAvatar {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-bottom: 10px;
+}
+
+.avatarPlaceholder {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background-color: #ccc;
+  margin: 0 auto 10px;
+}
+
+.userName {
+  font-size: 1.2rem;
+  margin: 0;
+  font-weight: 600;
+  color: black;
+}
+
+.userRole {
+  font-size: 0.9rem;
+  color: #888;
+  margin: 0;
 }
 
 .sidebarList {
@@ -77,27 +85,22 @@ body {
 }
 
 .sidebarItem {
-  margin: 15px 0;
-  font-size: 1rem;
-  cursor: pointer;
-  border-radius: 8px;
-  transition: background-color 0.3s ease, color 0.3s ease;
+  margin-bottom: 15px;
 }
 
 .sidebarLink {
   display: flex;
   align-items: center;
-  padding: 10px 10px;
-  color: var(--text-color);
   text-decoration: none;
-  width: 100%;
-  border-radius: 8px;
-  transition: background-color 0.3s ease, color 0.3s ease;
+  color: #333;
+  font-size: 1rem;
+  padding: 8px;
+  border-radius: 6px;
+  transition: background-color 0.3s;
 }
 
 .sidebarLink:hover {
-  background-color: #E8E8E8;
-  color: #000000;
+  background-color: #f0f0f0;
 }
 
 .icon {
@@ -105,28 +108,11 @@ body {
 }
 
 .mainContent {
-  margin-top: var(--header-height);   
-  margin-left: var(--sidebar-width);   
-  background-color: var(--background-color);
-  box-sizing: border-box;
-  min-height: calc(100vh - var(--header-height));
-  overflow-y: auto; 
-  width: calc(100% - var(--sidebar-width));
-}
-
-.activities {
-  margin-top: 20px;
-}
-
-.activities h2 {
-  font-size: 1.5rem;
-  color: #1D1D1F;
-}
-
-.activities p {
-  color: #666666;
-  font-size: 1rem;
-  line-height: 1.5;
+  margin-top: 60px;
+  margin-left: 250px;
+  width: calc(100% - 250px);
+  background-color: #f0f2f5;
+  min-height: calc(100vh - 60px);
 }
 
 @media (max-width: 768px) {
@@ -135,17 +121,16 @@ body {
     height: auto;
     position: relative;
     border-right: none;
-    border-bottom: 1px solid var(--secondary-color);
+    border-bottom: 1px solid #e0e0e0;
   }
-
+  
   .mainContent {
     margin-left: 0;
-    margin-top: calc(var(--header-height) + 10px); 
+    margin-top: 60px;
     width: 100%;
   }
-
+  
   .dashboardContainer {
     flex-direction: column;
-    height: auto;
   }
 }

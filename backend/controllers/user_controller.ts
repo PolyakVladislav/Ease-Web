@@ -28,12 +28,12 @@ export const getAllUsers = async (req: Request, res: Response): Promise<void> =>
   }
 };
 
-// פעולה להחזרת פרופיל משתמש
+
 export const getUserProfile = async (req: Request, res: Response): Promise<void> => {
   try {
     const userId = req.query.userId as string;
-    let page = Number(req.query.page) || 1;
-    let limit = Number(req.query.limit) || 5;
+    const page = Number(req.query.page) || 1;
+    const limit = Number(req.query.limit) || 5;
 
     const user = await userModel.findById(userId).select("-password");
     if (!user) {
@@ -66,7 +66,7 @@ export const getUserProfile = async (req: Request, res: Response): Promise<void>
 
 export const updateUserProfile = async (req: Request, res: Response): Promise<void> => {
   const userId = req.query.userId as string;
-  const { username } = req.body;
+  const { username, phoneNumber, dateOfBirth, gender } = req.body;
 
   const profilePicture = req.file ? `/uploads/${req.file.filename}` : undefined;
 
@@ -88,25 +88,28 @@ export const updateUserProfile = async (req: Request, res: Response): Promise<vo
       return;
     }
 
-    const oldUsername = user.username;
-
     user.username = username;
-
+    user.phoneNumber = phoneNumber; 
+    user.gender = gender;
+    if (dateOfBirth) {
+      user.dateOfBirth = new Date(dateOfBirth);
+    }
     if (profilePicture) {
-      user.profilePicture = `${SERVER_CONNECT}${profilePicture}`; 
+      user.profilePicture = `${SERVER_CONNECT}${profilePicture}`;
     }
 
     await user.save();
 
-    const updateResult = await postModel.updateMany(
-      { author: oldUsername },
-      { $set: { author: username } }
-    );
+    // Если требуется, можно обновить авторство постов (при изменении username)
+    // const updateResult = await postModel.updateMany(
+    //   { author: user.username },
+    //   { $set: { author: username } }
+    // );
 
     res.status(200).json({ 
       message: 'User updated successfully', 
       user,
-      updatedPostsCount: updateResult.modifiedCount
+      // updatedPostsCount: updateResult.modifiedCount // если используется
     });
   } catch (error) {
     res.status(500).json({ message: 'Server error.' });

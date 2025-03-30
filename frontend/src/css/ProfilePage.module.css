@@ -1,0 +1,269 @@
+.profilePage {
+    width: 100%;
+    min-height: 100vh;
+    background-color: #f8f9fa;
+    font-family: "Segoe UI", sans-serif;
+  }
+  
+  .heroSection {
+    background: linear-gradient(90deg, #8fa7c9 0%, #e0e0b1 100%);
+    height: 200px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+  }
+  
+  .heroContent {
+    width: 100%;
+    max-width: 1200px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    position: relative;
+    padding: 0 20px;
+  }
+  
+  .avatarWrapper {
+    position: relative;
+    width: 120px;
+    height: 120px;
+  }
+  
+  .avatar {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid #fff;
+  }
+  
+  .avatarPlaceholder {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background-color: #ccc;
+    border: 3px solid #fff;
+  }
+  
+  .editPictureWrapper {
+    position: absolute;
+    bottom: -25px;
+    left: 10px;
+  }
+  
+  .editPictureButton {
+    background-color: #6c757d;
+    color: #fff;
+    padding: 0px 17px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    display: inline-block;
+  }
+  
+  .userBasicInfo {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .userFullName {
+    margin: 0;
+    font-size: 1.8rem;
+    color: #333;
+    font-weight: 600;
+  }
+  
+  .userEmail {
+    margin: 5px 0;
+    font-size: 1rem;
+    color: #666;
+  }
+  
+  .editButton,
+  .editButtons {
+    position: absolute;
+    right: 20px;
+    top: 20px;
+  }
+  
+  .editButton {
+    background-color: #1877f2;
+    color: #fff;
+    padding: 10px 16px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: background-color 0.3s, transform 0.2s;
+  }
+  
+  .editButton:hover {
+    background-color: #1558b0;
+    transform: translateY(-2px);
+  }
+  
+  .editButtons {
+    display: flex;
+    gap: 10px;
+  }
+  
+  .saveButton {
+    background-color: #1877f2;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 10px 16px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: background-color 0.3s, transform 0.2s;
+  }
+  
+  .saveButton:hover {
+    background-color: #1558b0;
+    transform: translateY(-2px);
+  }
+  
+  .cancelButton {
+    background-color: #6c757d;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 10px 16px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: background-color 0.3s, transform 0.2s;
+  }
+  
+  .cancelButton:hover {
+    background-color: #5a6268;
+    transform: translateY(-2px);
+  }
+  
+  .formContainer {
+    max-width: 1200px;
+    margin: 0 auto;
+    background-color: #fff;
+    margin-top: 30px;
+    padding: 40px;
+    border-radius: 8px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+  }
+  
+  .formRow {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 20px;
+  }
+  
+  .formField {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .formField label {
+    font-size: 0.9rem;
+    color: #555;
+    margin-bottom: 6px;
+    font-weight: 500;
+  }
+  
+  .formField input,
+  .formField select {
+    padding: 12px;
+    border: 1px solid #ccd0d5;
+    border-radius: 6px;
+    font-size: 1rem;
+    background-color: #fff;
+    transition: border-color 0.2s;
+  }
+  
+  .formField input[disabled],
+  .formField select[disabled] {
+    background-color: #e9ecef;
+    color: #666;
+  }
+  
+  .formField input:focus,
+  .formField select:focus {
+    outline: none;
+    border-color: #1877f2;
+    box-shadow: 0 0 0 2px rgba(24, 119, 242, 0.2);
+  }
+  
+  .patientsTableContainer {
+    max-width: 1240px;
+    margin: 40px auto;
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.1);
+  }
+  
+  .tableTitle {
+    margin-bottom: 20px;
+    font-size: 1.5rem;
+    color: #333;
+  }
+  
+  .patientsTable {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    overflow: hidden;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  }
+  
+  .patientsTable th,
+  .patientsTable td {
+    padding: 12px 15px;
+    border: 1px solid #ddd;
+    text-align: left;
+    font-size: 0.95rem;
+    color: #333;
+  }
+  
+  .patientsTable th {
+    background-color: #4a90e2;
+    color: #fff;
+    font-weight: 600;
+  }
+  
+  .patientsTable tr:nth-child(even) {
+    background-color: #f9f9f9;
+  }
+  
+  .patientsTable tr:hover {
+    background-color: #e0f7fa;
+  }
+  
+  .chatButton {
+    background-color: #1877f2;
+    color: #fff;
+    padding: 6px 12px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: background-color 0.3s, transform 0.2s;
+  }
+  
+  .chatButton:hover {
+    background-color: #1558b0;
+    transform: scale(1.05);
+  }
+  
+  @media (max-width: 768px) {
+    .formContainer {
+      margin-top: 0;
+      padding: 20px;
+    }
+    
+    .formRow {
+      flex-direction: column;
+    }
+  }
+  
