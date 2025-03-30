@@ -1,0 +1,132 @@
+.fullscreenBg {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f0f2f5; 
+    height: 100vh;
+    width: 100%;
+}
+
+.registerContainer {
+    background: #ffffff;
+    padding: 40px;
+    width: 100%;
+    max-width: 400px;
+    border-radius: 10px;
+    box-shadow: 0 4px 25px rgba(0, 0, 0, 0.1);
+    text-align: center;
+}
+
+.headline {
+    color: #1877f2;
+    margin-bottom: 30px;
+    font-size: 2rem;
+}
+
+.registerForm {
+    display: flex;
+    flex-direction: column;
+}
+
+.formGroup {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 20px;
+    text-align: left;
+}
+
+.label {
+    margin-bottom: 5px;
+    font-size: 1rem;
+    color: #4b4f56;
+}
+
+.input {
+    padding: 12px 15px;
+    border: 1px solid #ccd0d5;
+    border-radius: 8px;
+    font-size: 1rem;
+    color: #2e2e2e;
+    background-color: #f0f2f5; 
+    transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+.input:focus {
+    outline: none;
+    border-color: #1877f2;
+    box-shadow: 0 0 0 2px rgba(24, 119, 242, 0.2);
+}
+
+.inputError {
+    border-color: #e74c3c;
+    box-shadow: 0 0 0 2px rgba(231, 76, 60, 0.2);
+}
+
+.error {
+    color: #e74c3c;
+    font-size: 0.875rem;
+    margin-top: 5px;
+}
+
+.success {
+    color: #28a745;
+    font-size: 0.875rem;
+    margin-bottom: 15px;
+}
+
+.registerButton {
+    padding: 12px 20px;
+    background-color: #1877f2; 
+    color: #ffffff;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: background-color 0.3s;
+}
+
+.registerButton:hover {
+    background-color: #1558b0;
+}
+
+.registerButton:disabled {
+    background-color: #a5d6a7;
+    cursor: not-allowed;
+}
+
+.loginPrompt {
+    margin-top: 20px;
+    font-size: 0.9rem;
+    color: #606770;
+}
+
+.loginLink {
+    color: #1877f2;
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.3s;
+}
+
+.loginLink:hover {
+    color: #1558b0;
+}
+
+@media (max-width: 480px) {
+    .registerContainer {
+        padding: 30px 20px;
+    }
+
+    .headline {
+        font-size: 1.5rem;
+        margin-bottom: 20px;
+    }
+
+    .registerButton {
+        font-size: 0.9rem;
+        padding: 10px 15px;
+    }
+
+    .loginPrompt {
+        font-size: 0.8rem;
+    }
+}

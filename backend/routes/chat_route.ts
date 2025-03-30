@@ -16,6 +16,8 @@ const router = Router();
  *   post:
  *     summary: Start a new chat between two users
  *     tags: [Chat]
+ *     security:
+ *      - bearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -64,6 +66,8 @@ router.post("/start", startChat);
  *   get:
  *     summary: Get messages between two users
  *     tags: [Chat]
+ *     security:
+ *      - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: userId

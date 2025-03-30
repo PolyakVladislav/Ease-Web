@@ -1,0 +1,165 @@
+.chatgptContainer {
+  display: flex;
+  flex-direction: column;
+  height: 80vh;
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+  background-color: #ffffff;
+  border-radius: 10px;
+  box-shadow: 0 4px 25px rgba(0, 0, 0, 0.1);
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 20px;
+  color: #1877f2; 
+}
+
+.errorMessage {
+  color: #e74c3c;
+  background-color: #fdecea;
+  padding: 10px;
+  border-radius: 8px;
+  margin-bottom: 10px;
+  text-align: center;
+}
+
+.messagesContainer {
+  flex: 1;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  padding: 10px;
+  overflow-y: auto;
+  background-color: #f9f9f9;
+  scroll-behavior: smooth; 
+}
+
+.messagesContainer::-webkit-scrollbar {
+  width: 8px;
+}
+
+.messagesContainer::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+.messagesContainer::-webkit-scrollbar-thumb {
+  background: #ccc;
+  border-radius: 4px;
+}
+
+.messagesContainer::-webkit-scrollbar-thumb:hover {
+  background: #aaa;
+}
+
+.message {
+  display: flex;
+  margin-bottom: 10px;
+}
+
+.userMessage {
+  justify-content: flex-end;
+}
+
+.gptMessage {
+  justify-content: flex-start;
+}
+
+.messageContent {
+  max-width: 70%;
+  padding: 10px 15px;
+  border-radius: 20px;
+  word-wrap: break-word;
+  background-color: #e0f7fa;
+  position: relative;
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+.userMessage .messageContent {
+  background-color: #c8e6c9;
+}
+
+.gptMessage .messageContent {
+  background-color: #f1f0f0;
+}
+
+.inputArea {
+  display: flex;
+  margin-top: 10px;
+}
+
+.inputField {
+  flex: 1;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 20px;
+  outline: none;
+  transition: border-color 0.2s ease;
+}
+
+.inputField:focus {
+  border-color: #1877f2;
+  box-shadow: 0 0 5px rgba(24, 119, 242, 0.3);
+}
+
+.sendButton {
+  margin-left: 10px;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 20px;
+  background-color: #1877f2;
+  color: white;
+  cursor: pointer;
+  font-weight: 600;
+  transition: background-color 0.3s ease;
+}
+
+.sendButton:hover {
+  background-color: #1558b0;
+}
+
+.sendButton:disabled {
+  background-color: #a5d6a7;
+  cursor: not-allowed;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.chatPlaceholder {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #555;
+  text-align: center;
+}
+
+@media (max-width: 768px) {
+  .chatgptContainer {
+    height: 90vh;
+    padding: 10px;
+  }
+
+  .messagesContainer {
+    height: 60vh;
+  }
+
+  .inputArea {
+    flex-direction: column;
+  }
+
+  .sendButton {
+    margin-left: 0;
+    margin-top: 10px;
+    width: 100%;
+  }
+
+  .messageContent {
+    max-width: 85%;
+  }
+}

@@ -131,6 +131,8 @@ export const deletePost = async (req: Request, res: Response): Promise<void> => 
 // Toggle like for a post
 export const toggleLike = async (req: Request, res: Response): Promise<void> => {
   try {
+    // console.log("req.params.userId: " + req.params.userId);
+    // console.log("req.query.userId: " + req.query.userId);
     const postId = req.params.id;
     const userId = req.params.userId || req.query.userId;
     
@@ -138,6 +140,7 @@ export const toggleLike = async (req: Request, res: Response): Promise<void> => 
       res.status(400).json({ message: "Post ID is required." });
       return;
     }
+    // console.log("user id is:" + userId);
     if (!userId) {
       res.status(401).json({ message: "User ID is required." });
       return;
@@ -181,6 +184,7 @@ export const toggleLike = async (req: Request, res: Response): Promise<void> => 
       likesCount: post.likesCount,
     });
   } catch (error) {
+    //console.error("Error toggling like:", error);
     res.status(500).json({ message: "Internal server error" });
   }
 };

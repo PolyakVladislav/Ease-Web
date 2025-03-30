@@ -12,6 +12,7 @@ import swaggerUi from "swagger-ui-express";
 import swaggerJsDoc from "swagger-jsdoc";
 import chatRoutes from "./routes/chat_route";
 import userRoutes from "./routes/user_route";
+import admin_routes from "./routes/admin_routes";
 import chatgptRoutes from "./routes/chatgpt_route"; 
 import './config/passport'; 
 import cookieParser from "cookie-parser";
@@ -71,6 +72,8 @@ app.use("/api/chat", chatRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api", chatgptRoutes); 
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+app.use("/user", admin_routes);
+
 
 
 const server = http.createServer(app);

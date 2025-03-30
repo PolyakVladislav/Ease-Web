@@ -1,0 +1,165 @@
+.container {
+  padding: 20px;
+  background-color: #f0f2f5;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.createPostContainer {
+  background-color: #ffffff;
+  padding: 25px;
+  border-radius: 10px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 600px;
+}
+
+.heading {
+  font-size: 1.8rem;
+  color: #050505;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.confirmationMessage {
+  color: #28a745; 
+  margin-bottom: 10px;
+  text-align: center;
+}
+
+.errorMessage {
+  color: #e74c3c; 
+  margin-bottom: 10px;
+  text-align: center;
+}
+
+.createPostForm {
+  display: flex;
+  flex-direction: column;
+}
+
+.formField {
+  margin-bottom: 15px;
+}
+
+.uploadSection {
+  display: flex;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.imageUploadButton {
+  display: flex;
+  align-items: center;
+  background-color: #e4e6eb; 
+  color: #050505;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 15px;
+  cursor: pointer;
+  transition: background-color 0.3s, color 0.3s;
+  font-size: 1rem;
+}
+
+.imageUploadButton:hover {
+  background-color: #d8dadf;
+}
+
+.uploadIcon {
+  margin-right: 8px;
+}
+
+.uploadText {
+  font-weight: 500;
+}
+
+.inputFile {
+  display: none;
+}
+
+.imagePreviewContainer {
+  position: relative;
+  display: inline-block;
+}
+
+.imagePreview {
+  width: 150px;
+  height: 150px;
+  object-fit: cover;
+  border-radius: 8px;
+  display: block;
+  margin: 10px auto;
+}
+
+.removeImageButton {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  background: rgba(0, 0, 0, 0.6);
+  color: #ffffff;
+  border: none;
+  border-radius: 50%;
+  padding: 5px;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.removeImageButton:hover {
+  background: rgba(0, 0, 0, 0.8);
+}
+
+.createPostButton {
+  padding: 12px 20px;
+  background-color: #1877f2; 
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background-color 0.3s;
+  align-self: flex-end;
+}
+
+.createPostButton:hover {
+  background-color: #1558b0;
+}
+
+.createPostForm textarea.autoResize {
+  overflow: hidden;
+}
+
+@media (max-width: 768px) {
+  .createPostContainer {
+    padding: 15px;
+  }
+
+  .heading {
+    font-size: 1.5rem;
+  }
+
+  .createPostButton {
+    width: 100%;
+    align-self: center;
+  }
+
+  .imagePreview {
+    width: 100px;
+    height: 100px;
+  }
+
+  .uploadSection {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .imageUploadButton {
+    width: 100%;
+    justify-content: center;
+    margin-bottom: 10px;
+  }
+
+  .uploadText {
+    display: none; 
+  }
+}

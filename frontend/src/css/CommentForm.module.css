@@ -1,0 +1,92 @@
+
+.commentForm {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  margin-top: 15px;
+}
+
+.textarea {
+  width: 100%;
+  padding: 12px 14px;
+  margin-bottom: 10px;
+  border-radius: 8px;
+  border: 1px solid #ccd0d5;
+  font-size: 16px;
+  font-family: inherit;
+  resize: none; 
+  box-sizing: border-box;
+  background-color: #ffffff;
+  transition: border-color 0.3s, box-shadow 0.3s;
+  min-height: 50px; 
+  overflow: hidden;
+}
+
+.textarea:focus {
+  outline: none;
+  border-color: #1877f2; 
+  box-shadow: 0 0 0 2px rgba(24, 119, 242, 0.2);
+}
+
+.commentFormButtons {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.generateCommentButton {
+  padding: 8px 16px;
+  background-color: #1877f2; 
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.3s;
+  margin-right: 10px;
+}
+
+.generateCommentButton:hover {
+  background-color: #1558b0;
+}
+
+.generateCommentButton:disabled {
+  background-color: #a5d6a7;
+  cursor: not-allowed;
+}
+
+.postCommentButton {
+  padding: 8px 16px;
+  background-color: #28a745; 
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.3s;
+}
+
+.postCommentButton:hover {
+  background-color: #218838;
+}
+
+.postCommentButton:disabled {
+  background-color: #a5d6a7;
+  cursor: not-allowed;
+}
+
+.autoResize {
+  overflow: hidden;
+}
+
+@media (max-width: 768px) {
+  .commentFormButtons {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .generateCommentButton,
+  .postCommentButton {
+    width: 100%;
+    margin: 5px 0;
+  }
+}

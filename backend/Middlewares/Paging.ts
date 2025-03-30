@@ -1,7 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import { Document, Model } from "mongoose";
 import userModel from "../models/Users"; // Assuming IUser is already imported if needed
-import { IPost } from "../models/Post"; // Import the Post interface
 
 export interface PaginatedResults<T> {
   next?: { page: number; limit: number };

@@ -24,10 +24,11 @@ export const getMessages = async (req: Request, res: Response) => {
         { from: otherUserId, to: userId }
       ]
     }).sort({ timestamp: 1 });
-    if(messages.length === 0) {
-      res.status(500).send("Server error");
+
+    if (messages.length === 0) {
+      res.status(200).json([]);
       return;
-     }
+    }
 
     const transformed = messages.map(doc => ({
       from: doc.from,
@@ -36,11 +37,12 @@ export const getMessages = async (req: Request, res: Response) => {
       timestamp: doc.timestamp,
     }));
 
-    res.json(transformed);
+    res.status(200).json(transformed);
   } catch (error) {
     res.status(500).send("Server error");
   }
 };
+
 
 
 
