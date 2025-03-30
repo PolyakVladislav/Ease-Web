@@ -87,6 +87,11 @@ const Layout: React.FC = () => {
             </Link>
           </li>
           <li className={styles.sidebarItem}>
+            <Link to="/appointmens" className={styles.sidebarLink}>
+              <FaRobot className={styles.icon} /> Appointments
+            </Link>
+          </li>
+          <li className={styles.sidebarItem}>
             <Link to="/chatgpt" className={styles.sidebarLink}>
               <FaRobot className={styles.icon} /> AI Assistant
             </Link>

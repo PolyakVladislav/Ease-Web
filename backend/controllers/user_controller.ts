@@ -142,4 +142,27 @@ export const updateUserRole = async (req: Request, res: Response): Promise<void>
   }
 };
 
+export const searchPatients = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const query = req.query.query as string;
+    if (!query) {
+      res.status(400).json({ message: "Query parameter is required" });
+      return;
+    }
+
+    const patients = await userModel.find({
+      role: "patient",
+      $or: [
+        { username: { $regex: query, $options: "i" } },
+        { email: { $regex: query, $options: "i" } }
+      ]
+    }).select("username email profilePicture role");
+
+    res.status(200).json({ patients });
+  } catch (error) {
+    console.error("Error searching patients:", error);
+    res.status(500).json({ message: "Internal server error", error });
+  }
+};
+
 export { upload };

@@ -35,3 +35,11 @@ export const updateUserProfileWithImage = async (
   });
   return response.data;
 };
+
+export const searchPatients = async (query: string) => {
+  const response = await api.get(`${CONFIG.SERVER_URL}/api/users/search`, {
+    params: { query },
+    withCredentials: true,
+  });
+  return response.data;
+};

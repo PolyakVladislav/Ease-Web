@@ -337,7 +337,7 @@ export const authMiddleware = (req: Request, res: Response, next: NextFunction):
           res.status(401).send('Access Denied');
           return;
         }
-        (req as any).user = user;
+        (req as any).user = user;  
         next();
       })
       .catch(error => {

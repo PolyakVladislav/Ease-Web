@@ -10,6 +10,7 @@ import PostDetails from "./PostDetails";
 import OAuthCallback from "./OAuthCallback"; 
 import ChatGPTPage from "./ChatGPTPage";
 //import UserProfile from "./UserProfile";
+import AppointmentsPage from "./ManageAppointmentsPage";
 import UserProfileClean from "./UserProfileClean";
 
 import Articles from "./MedicalNews";
@@ -29,6 +30,8 @@ function App() {
           <Route path="post/:postId" element={<PostDetails />} /> 
           <Route path="chatgpt" element={<ChatGPTPage />} /> 
           <Route path="articles" element={< Articles/>} /> 
+          <Route path="appointmens" element={< AppointmentsPage/>} /> 
+
         </Route>
       </Routes>
     </Router>

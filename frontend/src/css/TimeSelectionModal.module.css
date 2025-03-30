@@ -1,0 +1,172 @@
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0,0,0,0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+}
+
+.modal {
+  background: #fff;
+  width: 500px;
+  max-width: 90%;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.modalHeader {
+  background: linear-gradient(90deg, #6f8ab1 0%, #8fa7c9 100%);
+  padding: 16px 20px;
+  color: #fff;
+}
+
+.modalHeader h3 {
+  margin: 0;
+  font-size: 1.2rem;
+}
+
+.modalBody {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  position: relative;
+}
+
+.label {
+  font-weight: 500;
+  color: #333;
+  margin-bottom: 5px;
+}
+
+.dateTimeInput {
+  padding: 10px 14px;
+  border: 1px solid #ccd0d5;
+  border-radius: 8px;
+  font-size: 1rem;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.dateTimeInput:focus {
+  outline: none;
+  border-color: #1877f2;
+  box-shadow: 0 0 0 3px rgba(24,119,242,0.2);
+}
+
+.emergencyRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.emergencyCheckbox {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+}
+
+.emergencyLabel {
+  font-size: 1rem;
+  color: #333;
+  cursor: pointer;
+  transition: color 0.3s, transform 0.2s;
+}
+
+.emergencyLabelActive {
+  font-size: 1rem;
+  color: #e74c3c;
+  cursor: pointer;
+  font-weight: 600;
+  transition: color 0.3s, transform 0.2s;
+  transform: scale(1.05);
+}
+
+.notesInput {
+  width: 100%;
+  padding: 10px 14px;
+  border: 1px solid #ccd0d5;
+  border-radius: 8px;
+  font-size: 1rem;
+  resize: vertical;
+  min-height: 80px;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.notesInput:focus {
+  outline: none;
+  border-color: #1877f2;
+  box-shadow: 0 0 0 3px rgba(24,119,242,0.2);
+}
+
+.error {
+  color: #e74c3c;
+  font-size: 0.9rem;
+  position: absolute;
+  bottom: -20px;
+  left: 20px;
+  height: 20px;
+  margin: 0;
+}
+
+.modalFooter {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 10px 20px;
+  border-top: 1px solid #eee;
+}
+
+.confirmButton {
+  background-color: #1877f2;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 16px;
+  cursor: pointer;
+  font-size: 0.95rem;
+  transition: background-color 0.3s, transform 0.2s;
+}
+
+.confirmButton:hover {
+  background-color: #1558b0;
+  transform: translateY(-2px);
+}
+
+.cancelButton {
+  background-color: #6c757d;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 16px;
+  cursor: pointer;
+  font-size: 0.95rem;
+  transition: background-color 0.3s, transform 0.2s;
+}
+
+.cancelButton:hover {
+  background-color: #5a6268;
+  transform: translateY(-2px);
+}
+
+@media (max-width: 480px) {
+  .modal {
+    width: 90%;
+    border-radius: 8px;
+  }
+
+  .modalHeader h3 {
+    font-size: 1.1rem;
+  }
+  
+  .dateTimeInput, .notesInput {
+    font-size: 0.9rem;
+  }
+}

@@ -1,6 +1,7 @@
 import { Router } from "express";
-import { getAllUsers, getUserProfile, updateUserProfile, upload } from "../controllers/user_controller";
+import { getAllUsers, getUserProfile, updateUserProfile, upload, searchPatients } from "../controllers/user_controller";
 import { authMiddleware } from "../controllers/auth_controller";
+
 
 const router = Router();
 
@@ -182,5 +183,6 @@ router.get("/profile", authMiddleware, getUserProfile);
  *         description: Server error
  */
 router.put("/profile", authMiddleware, upload.single('profilePicture'), updateUserProfile);
+router.get("/users/search", searchPatients);
 
 export default router;
