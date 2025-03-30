@@ -1,0 +1,365 @@
+/* client/src/css/UserProfile.module.css */
+
+/* Контейнер профиля пользователя */
+.userProfileContainer {
+  display: flex;
+  justify-content: center;
+  padding: 20px;
+  background-color: #f0f2f5; /* Светлый фон, похожий על Facebook */
+  min-height: 100vh;
+}
+
+/* Карточка профиля */
+.userProfileCard {
+  background-color: #ffffff;
+  width: 100%;
+  max-width: 900px;
+  border-radius: 15px;
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+/* סדנת כיסוי */
+.userInfo {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  margin-bottom: 30px;
+  padding: 20px;
+  gap: 20px;
+}
+
+.profilePicture {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 4px solid #1877f2; /* סיומת כחולה, דומה לפייסבוק */
+  background-color: #fff;
+}
+
+.viewDetails {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.username {
+  font-size: 2rem;
+  margin-bottom: 5px;
+  color: #1c1e21;
+}
+
+.userEmail {
+  font-size: 1rem;
+  color: #606770;
+}
+
+.editButton {
+  padding: 8px 20px;
+  background-color: #ffa500; /* כתום */
+  border: none;
+  color: white;
+  cursor: pointer;
+  border-radius: 5px;
+  transition: background-color 0.3s;
+}
+
+.editButton:hover {
+  background-color: #cc8400; /* כהה יותר בכתום */
+}
+
+.editForm {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  width: 75%;
+}
+
+.inputField {
+  padding: 10px 15px;
+  border: 1px solid #ccd0d5;
+  border-radius: 8px;
+  font-size: 1rem;
+  color: #2e2e2e;
+  background-color: #f0f2f5; 
+  transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+.inputField:focus {
+  outline: none;
+  border-color: #1877f2;
+  box-shadow: 0 0 0 2px rgba(24, 119, 242, 0.2);
+}
+.inputError {
+  border-color: #e74c3c;
+  box-shadow: 0 0 0 2px rgba(231, 76, 60, 0.2);
+}
+.postInput {
+  padding: 10px 15px;
+  border: 1px solid #ccd0d5;
+  border-radius: 8px;
+  font-size: 1rem;
+  color: #2e2e2e;
+  background-color: #f0f2f5; 
+  transition: border-color 0.3s, box-shadow 0.3s;
+  width: 75%;
+}
+
+.postInput:focus {
+  outline: none;
+  border-color: #1877f2;
+  box-shadow: 0 0 0 2px rgba(24, 119, 242, 0.2);
+}
+.postEditContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 15px; 
+}
+
+.buttonGroup {
+  display: flex;
+  gap: 10px;
+  margin-top: 15px;
+}
+
+.saveButton {
+  padding: 8px 20px;
+  background-color: #28a745; /* ירוק */
+  border: none;
+  color: white;
+  cursor: pointer;
+  border-radius: 5px;
+  transition: background-color 0.3s;
+}
+
+.saveButton:hover {
+  background-color: #218838; /* ירוק כהה יותר */
+}
+
+.cancelButton {
+  padding: 8px 20px;
+  background-color: #6c757d; /* אפור */
+  border: none;
+  color: white;
+  cursor: pointer;
+  border-radius: 5px;
+  transition: background-color 0.3s;
+}
+
+.cancelButton:hover {
+  background-color: #5a6268; /* אפור כהה יותר */
+}
+
+.viewDetails h1 {
+  font-size: 2rem;
+  color: #1c1e21;
+}
+
+.viewDetails p {
+  font-size: 1rem;
+  color: #606770;
+}
+
+.errorMessage {
+  color: #e74c3c;
+  font-size: 1rem;
+  margin-bottom: 20px;
+  text-align: left;
+}
+
+/* סשניית פוסטים */
+.userPosts {
+  padding: 20px;
+}
+
+.postsHeader {
+  font-size: 1.8rem;
+  color: #1c1e21;
+  margin-bottom: 15px;
+}
+
+.postsList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.postItem {
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 20px;
+  transition: background-color 0.3s;
+  text-align: left;
+  position: relative;
+}
+
+.postItem:hover {
+  background-color: #e9e9e9;
+}
+
+.postTitle {
+  font-size: 1.5rem;
+  color: #1877f2;
+  margin-bottom: 10px;
+}
+
+.postContent {
+  font-size: 1.1rem;
+  color: #666;
+}
+
+.postImage {
+  width: 100%;
+  max-height: 400px;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+.postActions {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.editButton {
+  padding: 6px 12px;
+  background-color: #ffa500; /* כתום */
+  border: none;
+  color: white;
+  cursor: pointer;
+  border-radius: 5px;
+  transition: background-color 0.3s;
+}
+
+.editButton:hover {
+  background-color: #cc8400; /* כהה יותר בכתום */
+}
+
+.deleteButton {
+  padding: 6px 12px;
+  background-color: #dc3545; /* אדום */
+  border: none;
+  color: white;
+  cursor: pointer;
+  border-radius: 5px;
+  transition: background-color 0.3s;
+}
+
+.deleteButton:hover {
+  background-color: #c82333; /* אדום כהה יותר */
+}
+
+.noPosts {
+  text-align: center;
+  color: #606770;
+  margin-top: 20px;
+}
+
+.loadingMore {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 20px;
+  color: #606770;
+}
+
+.spinner {
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #1877f2;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  animation: spin 2s linear infinite;
+  margin-right: 10px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.noMorePosts {
+  text-align: center;
+  color: #606770;
+  margin-top: 20px;
+}
+
+/* וופפוי אישור מחיקה */
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5); /* רקע שחור שקוף */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000; /* מעל לכל שאר האלמנטים */
+}
+
+.modal {
+  background-color: #fff;
+  padding: 30px;
+  border-radius: 10px;
+  width: 90%;
+  max-width: 400px;
+  text-align: center;
+}
+
+.modal p {
+  font-size: 1.2rem;
+  color: #333;
+  margin-bottom: 20px;
+}
+
+.modalButtons {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+}
+
+.confirmDeleteButton {
+  padding: 8px 20px;
+  background-color: #dc3545; /* אדום */
+  border: none;
+  color: white;
+  cursor: pointer;
+  border-radius: 5px;
+  transition: background-color 0.3s;
+}
+
+.confirmDeleteButton:hover {
+  background-color: #c82333; /* אדום כהה יותר */
+}
+
+.cancelDeleteButton {
+  padding: 8px 20px;
+  background-color: #6c757d; /* אפור */
+  border: none;
+  color: white;
+  cursor: pointer;
+  border-radius: 5px;
+  transition: background-color 0.3s;
+}
+
+.cancelDeleteButton:hover {
+  background-color: #5a6268; /* אפור כהה יותר */
+}
+
+/* טעינה בתוך פוסטים נוספים */
+.loadingMore {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 20px;
+  color: #606770;
+}

@@ -1,0 +1,37 @@
+
+.allPostsContainer {
+  max-width: 600px; 
+  margin: 20px auto; 
+  padding: 20px;
+  background-color: #f0f2f5; 
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+}
+
+.pageTitle {
+  font-size: 24px;
+  color: #050505;
+  margin-bottom: 20px;
+  font-weight: 600;
+  text-align: center;
+}
+
+.error {
+  color: #e74c3c;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.postsList {
+  display: flex;
+  flex-direction: column;
+}
+
+.loading,
+.noMorePosts {
+  text-align: center;
+  color: #65676b;
+  font-size: 14px;
+  margin-top: 10px;
+}

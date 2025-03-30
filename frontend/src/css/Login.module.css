@@ -1,0 +1,224 @@
+.loginPage {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: #f0f2f5; 
+  height: 100vh;
+  width: 100%;
+}
+
+.containerLogin {
+  display: flex;
+  width: 80%;
+  max-width: 900px;
+  height: 78%;
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 4px 25px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+.left {
+  flex: 1;
+  padding: 40px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.formContainer {
+  width: 100%;
+  max-width: 400px;
+  text-align: center;
+  margin: 0 auto;
+}
+
+.headline {
+  margin-bottom: 10px;
+  font-size: 2rem;
+  color: #1877f2; 
+}
+
+.subHeadline {
+  margin-bottom: 30px;
+  font-size: 1rem;
+  color: #606770;
+}
+
+.loginForm {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+}
+
+.inputContainer {
+  position: relative;
+  width: 100%;
+  margin-bottom: 20px;
+}
+
+.inputIcon {
+  position: absolute;
+  top: 50%;
+  left: 15px;
+  transform: translateY(-50%);
+  color: #606770;
+  font-size: 1.2rem;
+}
+
+.input {
+  width: 100%;
+  padding: 12px 15px 12px 45px;
+  border: 1px solid #ccd0d5;
+  border-radius: 8px;
+  font-size: 1rem;
+  color: #2e2e2e;
+  background-color: #f0f2f5;
+  transition: border-color 0.3s, box-shadow 0.3s;
+  box-sizing: border-box; 
+}
+
+.input:focus {
+  outline: none;
+  border-color: #1877f2;
+  box-shadow: 0 0 0 2px rgba(24, 119, 242, 0.2);
+}
+
+.inputError {
+  border-color: #e74c3c;
+  box-shadow: 0 0 0 2px rgba(231, 76, 60, 0.2);
+}
+
+.loginButton {
+  width: 100%;
+  padding: 12px;
+  background-color: #1877f2;
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background-color 0.3s, transform 0.2s;
+}
+
+.loginButton:hover {
+  background-color: #1558b0;
+  transform: translateY(-2px);
+}
+
+.errorMessage {
+  color: #e74c3c;
+  font-size: 0.875rem;
+  
+}
+
+.footer {
+  margin-top: 20px;
+  font-size: 0.9rem;
+  color: #606770;
+}
+
+.registerLink {
+  color: #1877f2;
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.3s;
+}
+
+.registerLink:hover {
+  color: #1558b0;
+}
+
+.orText {
+  margin: 15px 0;
+  font-size: 0.9rem;
+  color: #606770;
+}
+
+.googleLogin {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #ffffff;
+  color: #606770;
+  border: 1px solid #ccd0d5;
+  border-radius: 8px;
+  padding: 10px 15px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background-color 0.3s, box-shadow 0.3s;
+  margin-top: 10px;
+  width: 100%;
+}
+
+.googleLogin:hover {
+  background-color: #f0f2f5;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.googleIcon {
+  margin-right: 10px;
+  font-size: 1.2rem;
+}
+
+.easeLogo {
+  width: 200px;
+  height: auto;
+  margin-top: 30px;
+}
+
+.right {
+  flex: 1;
+  background: #1877f2; 
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+}
+
+.textBox {
+  text-align: center;
+  color: #ffffff;
+  font-weight: bold;
+}
+
+.textBox p {
+  margin: 10px 0;
+  font-size: 1.5rem;
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+  .containerLogin {
+      flex-direction: column;
+      height: auto;
+      width: 90%;
+  }
+
+  .right {
+      display: none;
+  }
+
+  .left {
+      padding: 20px;
+  }
+
+  .formContainer {
+      max-width: 100%;
+  }
+
+  .loginButton, .googleLogin {
+      font-size: 0.9rem;
+      padding: 10px;
+  }
+
+  .headline {
+      font-size: 1.5rem;
+  }
+
+  .subHeadline {
+      font-size: 0.9rem;
+      margin-bottom: 20px;
+  }
+}

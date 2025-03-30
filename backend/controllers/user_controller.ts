@@ -6,19 +6,17 @@ import multer from "multer";
 const SERVER_CONNECT = process.env.SERVER_CONNECT;
 
 
-// הגדרת שמירת קבצים ב-Multer (אם יש תמונה להעלות)
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, "uploads/"); // תיקיית העלאת קבצים
+    cb(null, "uploads/"); 
   },
   filename: (req, file, cb) => {
-    cb(null, `${Date.now()}-${file.originalname}`); // שם ייחודי לקובץ
+    cb(null, `${Date.now()}-${file.originalname}`); 
   },
 });
 
 const upload = multer({ storage });
 
-// פעולה להחזרת כל המשתמשים
 export const getAllUsers = async (req: Request, res: Response): Promise<void> => {
   try {
     const users = await userModel.find(); 
@@ -29,7 +27,6 @@ export const getAllUsers = async (req: Request, res: Response): Promise<void> =>
   }
 };
 
-// פעולה להחזרת פרופיל משתמש
 export const getUserProfile = async (req: Request, res: Response): Promise<void> => {
   try {
     const userId = req.query.userId as string;
@@ -64,13 +61,10 @@ export const getUserProfile = async (req: Request, res: Response): Promise<void>
   }
 };
 
-
-// פעולה לעדכון פרופיל משתמש, כולל העלאת תמונה (אם קיימת)
 export const updateUserProfile = async (req: Request, res: Response): Promise<void> => {
   const userId = req.query.userId as string;
   const { username } = req.body;
 
-  // טיפול בהעלאת תמונה אם קיימת
   const profilePicture = req.file ? `/uploads/${req.file.filename}` : undefined;
 
   try {
@@ -96,7 +90,7 @@ export const updateUserProfile = async (req: Request, res: Response): Promise<vo
     user.username = username;
 
     if (profilePicture) {
-      user.profilePicture = `${SERVER_CONNECT}${profilePicture}`; // עדכון תמונה עם URL המלא
+      user.profilePicture = `${SERVER_CONNECT}${profilePicture}`; 
     }
 
     await user.save();
@@ -111,6 +105,32 @@ export const updateUserProfile = async (req: Request, res: Response): Promise<vo
       user,
       updatedPostsCount: updateResult.modifiedCount
     });
+  } catch (error) {
+    res.status(500).json({ message: 'Server error.' });
+  }
+};
+
+export const updateUserRole = async (req: Request, res: Response): Promise<void> => {
+  const { userId, role } = req.body;
+  
+  if (!['patient', 'doctor', 'admin'].includes(role)) {
+    res.status(400).json({ message: 'Invalid role specified' });
+    return;
+  }
+
+  try {
+    const user = await userModel.findByIdAndUpdate(
+      userId,
+      { role },
+      { new: true }
+    );
+
+    if (!user) {
+      res.status(404).json({ message: 'User not found' });
+      return;
+    }
+    
+    res.status(200).json({ message: 'User role updated successfully', user });
   } catch (error) {
     res.status(500).json({ message: 'Server error.' });
   }

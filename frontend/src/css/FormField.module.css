@@ -1,0 +1,69 @@
+.formField {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .label {
+    font-size: 1rem;
+    color: #4b4f56;
+    margin-bottom: 5px;
+  }
+  
+  .inputField input {
+    width: 100%;
+    padding: 12px 15px;
+    border-radius: 8px;
+    border: 1px solid #ccd0d5;
+    font-size: 1rem;
+    font-family: inherit;
+    box-sizing: border-box;
+    background-color: #ffffff;
+    transition: border-color 0.3s, box-shadow 0.3s;
+  }
+  
+  .inputField input:focus {
+    outline: none;
+    border-color: #1877f2;
+    box-shadow: 0 0 0 2px rgba(24, 119, 242, 0.2);
+  }
+  
+  .textareaField textarea {
+    width: 100%;
+    padding: 12px 15px;
+    border-radius: 8px;
+    border: 1px solid #ccd0d5;
+    font-size: 1rem;
+    font-family: inherit;
+    resize: none;
+    box-sizing: border-box;
+    background-color: #ffffff;
+    transition: border-color 0.3s, box-shadow 0.3s;
+    min-height: 100px;
+    overflow: hidden;
+  }
+  
+  .textareaField textarea:focus {
+    outline: none;
+    border-color: #1877f2;
+    box-shadow: 0 0 0 2px rgba(24, 119, 242, 0.2);
+  }
+  
+  .textarea {
+    overflow: hidden;
+  }
+  
+  @media (max-width: 768px) {
+    .formField {
+      margin-bottom: 10px;
+    }
+  
+    .label {
+      font-size: 0.9rem;
+    }
+  
+    .inputField input,
+    .textareaField textarea {
+      font-size: 0.9rem;
+    }
+  }
+  
