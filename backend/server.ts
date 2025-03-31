@@ -16,6 +16,7 @@ import admin_routes from "./routes/admin_routes";
 import chatgptRoutes from "./routes/chatgpt_route"; 
 import appointmentRoutes from "./routes/appointment_routes";
 import searchRoutes from "./routes/user_route";
+import scheduleRoutes from "./routes/schedule_routes";
 
 import './config/passport'; 
 import cookieParser from "cookie-parser";
@@ -79,6 +80,8 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use("/user", admin_routes);
 app.use("/api", appointmentRoutes);
 app.use("/api", searchRoutes);
+app.use("/api", scheduleRoutes);
+
 
 
 const server = http.createServer(app);

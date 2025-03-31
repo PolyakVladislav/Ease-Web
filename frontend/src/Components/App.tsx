@@ -11,7 +11,7 @@ import OAuthCallback from "./OAuthCallback";
 import ChatGPTPage from "./ChatGPTPage";
 //import UserProfile from "./UserProfile";
 import AppointmentsPage from "./Appointments/ManageAppointmentsPage";
-import UserProfileClean from "./UserProfileClean";
+import UserProfileClean from "./DoctorProfile/UserProfileClean";
 
 import Articles from "./MedicalNews";
 

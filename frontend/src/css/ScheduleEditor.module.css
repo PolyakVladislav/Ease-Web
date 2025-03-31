@@ -1,0 +1,159 @@
+.scheduleSection {
+  max-width: 1240px;
+  margin: 40px auto;
+  background-color: #fff;
+  margin-top: 20px;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+}
+
+.scheduleSection h2 {
+  margin-top: 0;
+  margin-bottom: 15px;
+  font-size: 1.3rem;
+  color: #333;
+  font-weight: 600;
+}
+
+.scheduleTable {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  overflow: hidden;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  margin-bottom: 15px;
+}
+
+.scheduleTable th,
+.scheduleTable td {
+  padding: 12px 15px;
+  border: 1px solid #ddd;
+  text-align: left;
+  font-size: 0.95rem;
+  color: #333;
+}
+
+.scheduleTable th {
+  background-color: #4a90e2;
+  color: #fff;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.scheduleTable tr:nth-child(even) {
+  background-color: #f9f9f9;
+}
+
+.scheduleTable tr:hover {
+  background-color: #e0f7fa;
+}
+
+.timeSelect {
+  padding: 6px 8px;
+  border: 1px solid #ccd0d5;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  background-color: #fff;
+  transition: border-color 0.2s;
+  cursor: pointer;
+}
+.timeSelect:focus {
+  outline: none;
+  border-color: #1877f2;
+  box-shadow: 0 0 0 2px rgba(24,119,242,0.2);
+}
+.timeSelect[disabled] {
+  background-color: #e9ecef;
+  color: #666;
+}
+
+.durationInput {
+  width: 60px;
+  padding: 6px 8px;
+  border: 1px solid #ccd0d5;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  background-color: #fff;
+  transition: border-color 0.2s;
+  text-align: center;
+}
+.durationInput:focus {
+  outline: none;
+  border-color: #1877f2;
+  box-shadow: 0 0 0 2px rgba(24,119,242,0.2);
+}
+.durationInput[disabled] {
+  background-color: #e9ecef;
+  color: #666;
+}
+
+.bottomButtons {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+.editButton,
+.saveButton,
+.cancelButton {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: background-color 0.3s, transform 0.2s;
+}
+
+.editButton {
+  background-color: #1877f2;
+  color: #fff;
+}
+.editButton:hover {
+  background-color: #1558b0;
+  transform: scale(1.05);
+}
+
+.saveButton {
+  background-color: #28a745;
+  color: #fff;
+}
+.saveButton:hover {
+  background-color: #218838;
+  transform: scale(1.05);
+}
+
+.cancelButton {
+  background-color: #6c757d;
+  color: #fff;
+}
+.cancelButton:hover {
+  background-color: #5a6268;
+  transform: scale(1.05);
+}
+
+.loadingWrapper {
+  height: 1px; 
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+}
+
+.loadingText {
+  font-size: 0.95rem;
+  color: #666;
+  font-style: italic;
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-2px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

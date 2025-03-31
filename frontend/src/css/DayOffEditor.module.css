@@ -1,0 +1,108 @@
+.dayOffSection {
+  max-width: 1240px;
+  margin: 40px auto;
+  background-color: #fff;
+  margin-top: 20px;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+}
+
+.dayOffSection h3 {
+  margin-top: 0;
+  font-size: 1.3rem;
+  color: #333;
+  margin-bottom: 15px;
+}
+
+.dayOffTable {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.dayOffTable th,
+.dayOffTable td {
+  padding: 12px 15px;
+  border: 1px solid #ddd;
+  text-align: left;
+  font-size: 0.95rem;
+  color: #333;
+}
+
+.dayOffTable th {
+  background-color: #4a90e2;
+  color: #fff;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.dayOffTable tr:nth-child(even) {
+  background-color: #f9f9f9;
+}
+
+.dayOffTable tr:hover {
+  background-color: #e0f7fa;
+}
+
+.deleteDayOffButton {
+  background-color: #dc3545;
+  color: #fff;
+  padding: 6px 14px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  transition: background-color 0.3s, transform 0.2s;
+}
+
+.deleteDayOffButton:hover {
+  background-color: #c82333;
+  transform: scale(1.05);
+}
+
+.addDayOffForm {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 15px;
+}
+
+.addDayOffForm label {
+  font-weight: 500;
+  color: #555;
+}
+
+.addDayOffInput {
+  padding: 6px 10px;
+  border: 1px solid #ccd0d5;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  background-color: #fff;
+  transition: border-color 0.2s;
+}
+
+.addDayOffInput:focus {
+  outline: none;
+  border-color: #1877f2;
+  box-shadow: 0 0 0 2px rgba(24,119,242,0.2);
+}
+
+.addDayOffButton {
+  background-color: #28a745;
+  color: #fff;
+  padding: 6px 14px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  transition: background-color 0.3s, transform 0.2s;
+}
+
+.addDayOffButton:hover {
+  background-color: #218838;
+  transform: scale(1.05);
+}

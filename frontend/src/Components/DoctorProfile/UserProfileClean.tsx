@@ -1,7 +1,10 @@
 import React, { useState, useEffect, ChangeEvent } from "react";
-import styles from "../css/ProfilePage.module.css";
-import { fetchUserProfile, updateUserProfileWithImage } from "../Services/userService";
-import { User } from "../types/user";
+import styles from "../../css/ProfilePage.module.css";
+import { fetchUserProfile, updateUserProfileWithImage } from "../../Services/userService";
+import { User } from "../../types/user";
+
+import ScheduleEditor from "./ScheduleEditor";
+import DayOffEditor from "./DayOffEditor";
 
 interface Patient {
   fullName: string;
@@ -264,6 +267,12 @@ const ProfilePage: React.FC = () => {
           </tbody>
         </table>
       </div>
+      {user && user.role === "doctor" && (
+        <div className={styles.scheduleSection}>
+          <ScheduleEditor doctorId={user._id} />
+          <DayOffEditor doctorId={user._id} />
+        </div>
+      )}
     </div>
   );
 };
