@@ -15,12 +15,9 @@ const TimeSelectionModal: React.FC<Props> = ({ onTimeSelect, onClose }) => {
   const handleConfirm = () => {
     if (!appointmentDateTime) {
       setError("Please select a date and time");
-      setTimeout(() => {
-        setError("");
-      }, 2000);
+      setTimeout(() => setError(""), 2000);
       return;
     }
-    setError("");
     onTimeSelect(appointmentDateTime, isEmergency, notes);
   };
 

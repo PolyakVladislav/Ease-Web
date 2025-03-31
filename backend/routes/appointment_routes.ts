@@ -1,20 +1,14 @@
-import express from "express";
+import { Router } from "express";
+import { createAppointment, updateAppointment, getAppointmentsByDoctor, getAppointmentDetails } from "../controllers/appointment_controller";
 import { authMiddleware } from "../controllers/auth_controller";
-import {
-  createAppointment,
-  getAppointmentsByDoctor,
-  updateAppointment,
-  getAppointmentDetails,
-} from "../controllers/appointment_controller";
+const router = Router();
 
-const router = express.Router();
+router.post("/appointments", authMiddleware, createAppointment);
 
-router.post("/appointments", createAppointment);
+router.put("/appointments/:appointmentId", authMiddleware, updateAppointment);
 
 router.get("/appointments", authMiddleware, getAppointmentsByDoctor);
 
-router.put("/appointments/:appointmentId", updateAppointment);
-
-router.get("/appointments/:appointmentId", getAppointmentDetails);
+router.get("/appointments/:appointmentId", authMiddleware, getAppointmentDetails);
 
 export default router;

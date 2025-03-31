@@ -22,18 +22,21 @@
   margin: 0;
 }
 
-.addButton {
-  background-color: #5b53f7; 
+.addButton,
+.header button {
+  margin-left: 10px;
+  padding: 10px 16px;
+  background-color: #5b53f7;
   color: #fff;
   border: none;
   border-radius: 8px;
-  padding: 10px 16px;
   cursor: pointer;
   font-size: 0.9rem;
   transition: background-color 0.3s, transform 0.2s;
 }
 
-.addButton:hover {
+.addButton:hover,
+.header button:hover {
   background-color: #483cc9;
   transform: translateY(-2px);
 }
@@ -71,7 +74,7 @@
 }
 
 .emergencyRow {
-  background-color: #fff4f4 !important; 
+  background-color: #fff4f4 !important;
 }
 
 .actionsContainer {
@@ -134,15 +137,16 @@
   font-size: 0.8rem;
   font-weight: 600;
   color: #fff;
+  background-color: #0056b3;
   text-transform: capitalize;
 }
 
 .statusPending {
-  background-color: #6c757d; 
+  background-color: #6c757d;
 }
 
 .statusConfirmed {
-  background-color: #28a745; 
+  background-color: #28a745;
 }
 
 .statusCanceled {
@@ -150,7 +154,7 @@
 }
 
 .statusCompleted {
-  background-color: #17a2b8; 
+  background-color: #0056b3;
 }
 
 .modalOverlay {
@@ -175,16 +179,46 @@
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
 }
 
-.formRow {
-  display: flex;
-  flex-direction: column;
-  margin-bottom: 15px;
+.modal p {
+  font-size: 1.2rem;
+  margin-bottom: 20px;
 }
 
-.formRow label {
-  margin-bottom: 5px;
-  font-weight: 500;
-  color: #555;
+.modalButtons,
+.modalActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.modalButtons button {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: background-color 0.3s, transform 0.2s;
+}
+
+.modalButtons button:first-child {
+  background-color: #dc3545;
+  color: #fff;
+}
+
+.modalButtons button:first-child:hover {
+  background-color: #c82333;
+  transform: translateY(-2px);
+}
+
+.modalButtons button:last-child {
+  background-color: #6c757d;
+  color: #fff;
+}
+
+.modalButtons button:last-child:hover {
+  background-color: #5a6268;
+  transform: translateY(-2px);
 }
 
 .input {
@@ -201,62 +235,54 @@
   box-shadow: 0 0 0 3px rgba(91, 83, 247, 0.2);
 }
 
-.modalActions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 10px;
-  margin-top: 20px;
-}
-
-.saveModalBtn {
-  background-color: #5b53f7;
-  color: #fff;
-  border: none;
-  border-radius: 6px;
-  padding: 8px 16px;
-  cursor: pointer;
-  font-size: 0.9rem;
-  transition: background-color 0.3s, transform 0.2s;
-}
-
-.saveModalBtn:hover {
-  background-color: #483cc9;
-  transform: translateY(-2px);
-}
-
-.cancelModalBtn {
-  background-color: #6c757d;
-  color: #fff;
-  border: none;
-  border-radius: 6px;
-  padding: 8px 16px;
-  cursor: pointer;
-  font-size: 0.9rem;
-  transition: background-color 0.3s, transform 0.2s;
-}
-
-.cancelModalBtn:hover {
-  background-color: #5a6268;
-  transform: translateY(-2px);
-}
-
-.tooltip {
-  position: absolute;
-  bottom: 100%;
-  right: 0;
-  transform: translateY(-8px);
-  background-color: #333;
-  color: #fff;
-  padding: 4px 8px;
-  font-size: 0.8rem;
-  border-radius: 4px;
-  white-space: nowrap;
-  z-index: 10;
-  opacity: 0.9;
-}
 .table th:last-child,
 .table td:last-child {
   min-width: 180px;
+}
+
+.historyContainer {
+  margin-top: 20px;
+  padding: 20px;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+}
+
+.historyContainer h3 {
+  font-size: 1.5rem;
+  color: #333;
+  margin-bottom: 10px;
+}
+
+.historyContainer .table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+}
+
+.historyContainer .table thead {
+  background-color: #e0e0e0;
+}
+
+.historyContainer .table th,
+.historyContainer .table td {
+  padding: 10px 12px;
+  border: 1px solid #ccc;
+  text-align: left;
+  font-size: 0.9rem;
+  color: #333;
+}
+
+.historyContainer .table tbody tr:nth-child(odd) {
+  background-color: #f7f7f7;
+}
+
+.historyContainer .table tbody tr:nth-child(even) {
+  background-color: #ffffff;
+}
+
+.historyContainer .table tbody tr:hover {
+  background-color: #e8e8e8;
 }
 
 @media (max-width: 768px) {

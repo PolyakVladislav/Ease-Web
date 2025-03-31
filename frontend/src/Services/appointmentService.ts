@@ -7,6 +7,7 @@ export const createAppointment = async (appointmentData: {
   appointmentDate: Date;
   isEmergency: boolean;
   notes?: string;
+  initiator: "doctor" | "patient";
 }) => {
   const response = await api.post(
     `${CONFIG.SERVER_URL}/api/appointments`,
@@ -23,14 +24,14 @@ export const fetchAppointments = async () => {
   const response = await api.get(`${CONFIG.SERVER_URL}/api/appointments`, {
     withCredentials: true,
   });
-  return response.data; 
+  return response.data;
 };
 
 export const updateAppointment = async (
   appointmentId: string,
   updatedData: {
     appointmentDate?: Date;
-    status?: "pending" | "confirmed" | "canceled" | "completed";
+    status?: "pending" | "confirmed" | "canceled" | "passed";
     notes?: string;
     isEmergency?: boolean;
   }

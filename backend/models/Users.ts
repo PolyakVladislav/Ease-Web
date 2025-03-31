@@ -11,9 +11,9 @@ export interface IUser {
   likedPosts?: mongoose.Schema.Types.ObjectId[];
   googleId?: string;
   role?: string;
-  phoneNumber?: string;  
-  dateOfBirth?: Date;         
-  gender?: 'male' | 'female' | 'other'; 
+  phoneNumber?: string;
+  dateOfBirth?: Date;
+  gender?: "male" | "female" | "other";
 }
 
 const userSchema = new mongoose.Schema<IUser>({
@@ -33,20 +33,24 @@ const userSchema = new mongoose.Schema<IUser>({
   },
   profilePicture: {
     type: String,
-    default: '',
+    default: "",
   },
-  posts: [{
-    type: mongoose.Types.ObjectId,
-    ref: 'Post'
-  }],
+  posts: [
+    {
+      type: mongoose.Types.ObjectId,
+      ref: "Post",
+    },
+  ],
   refreshToken: {
     type: [String],
     default: [],
   },
-  likedPosts: [{
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "Post",
-  }],
+  likedPosts: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Post",
+    },
+  ],
   googleId: {
     type: String,
     unique: true,
@@ -54,8 +58,8 @@ const userSchema = new mongoose.Schema<IUser>({
   },
   role: {
     type: String,
-    enum: ['patient', 'doctor', 'admin'],
-    default: 'patient',
+    enum: ["patient", "doctor", "admin"],
+    default: "patient",
   },
   phoneNumber: {
     type: String,
@@ -67,7 +71,7 @@ const userSchema = new mongoose.Schema<IUser>({
   },
   gender: {
     type: String,
-    enum: ['male', 'female', 'other'],
+    enum: ["male", "female", "other"],
     required: false,
   },
 });
