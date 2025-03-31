@@ -1,7 +1,7 @@
 import React, { useState } from "react";
-import styles from "../css/ManageAppointmentsPage.module.css";
-import { updateAppointment } from "../Services/appointmentService";
-import { Appointment } from "../types/appointment";
+import styles from "../../css/ManageAppointmentsPage.module.css";
+import { updateAppointment } from "../../Services/appointmentService";
+import { Appointment } from "../../types/appointment";
 
 interface CurrentAppointmentsProps {
   appointments: Appointment[];

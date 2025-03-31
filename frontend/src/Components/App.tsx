@@ -10,7 +10,7 @@ import PostDetails from "./PostDetails";
 import OAuthCallback from "./OAuthCallback"; 
 import ChatGPTPage from "./ChatGPTPage";
 //import UserProfile from "./UserProfile";
-import AppointmentsPage from "./ManageAppointmentsPage";
+import AppointmentsPage from "./Appointments/ManageAppointmentsPage";
 import UserProfileClean from "./UserProfileClean";
 
 import Articles from "./MedicalNews";

@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import styles from "../css/TimeSelectionModal.module.css";
+import styles from "../../css/ManageAppointmentsPage.module.css";
 
 interface Props {
   onTimeSelect: (dateTime: string, isEmergency: boolean, notes: string) => void;

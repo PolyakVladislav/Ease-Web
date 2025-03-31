@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from "react";
-import styles from "../css/ManageAppointmentsPage.module.css";
+import styles from "../../css/ManageAppointmentsPage.module.css";
 import {
   fetchAppointments,
   createAppointment,
-} from "../Services/appointmentService";
-import PatientSearchModal from "./PatientSearchModal";
+} from "../../Services/appointmentService";
+import PatientSearchModal from "../PatientSearchModal";
 import TimeSelectionModal from "./TimeSelectionModal";
-import CurrentAppointments from "./CurrentAppointments";
+import CurrentAppointments from "../Appointments/CurrentAppointments";
 import HistoryAppointments from "./HistoryAppointments";
-import { Appointment } from "../types/appointment";
+import { Appointment } from "../../types/appointment";
 
 const ManageAppointmentsPage: React.FC = () => {
   const [appointments, setAppointments] = useState<Appointment[]>([]);

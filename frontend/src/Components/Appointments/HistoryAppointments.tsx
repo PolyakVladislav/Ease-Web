@@ -1,6 +1,6 @@
 import React from "react";
-import styles from "../css/ManageAppointmentsPage.module.css";
-import { Appointment } from "../types/appointment";
+import styles from "../../css/ManageAppointmentsPage.module.css";
+import { Appointment } from "../../types/appointment";
 
 interface HistoryAppointmentsProps {
   appointments: Appointment[];
