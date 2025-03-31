@@ -3,20 +3,29 @@ import styles from "../css/ManageAppointmentsPage.module.css";
 import { Appointment } from "../types/appointment";
 import PatientSearchModal from "./PatientSearchModal";
 import TimeSelectionModal from "./TimeSelectionModal";
-import { fetchAppointments, createAppointment, updateAppointment } from "../Services/appointmentService";
+import {
+  fetchAppointments,
+  createAppointment,
+  updateAppointment,
+} from "../Services/appointmentService";
 
 const ManageAppointmentsPage: React.FC = () => {
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string>("");
-
   const [showPatientModal, setShowPatientModal] = useState(false);
   const [showTimeModal, setShowTimeModal] = useState(false);
-  const [selectedPatient, setSelectedPatient] = useState<{ _id: string; username: string } | null>(null);
+  const [selectedPatient, setSelectedPatient] = useState<{
+    _id: string;
+    username: string;
+  } | null>(null);
 
-  const [editingAppointment, setEditingAppointment] = useState<Appointment | null>(null);
+  const [editingAppointment, setEditingAppointment] =
+    useState<Appointment | null>(null);
   const [editDateTime, setEditDateTime] = useState("");
-  const [editStatus, setEditStatus] = useState<"pending" | "confirmed" | "canceled" | "completed">("pending");
+  const [editStatus, setEditStatus] = useState<
+    "pending" | "confirmed" | "canceled" | "completed"
+  >("pending");
 
   useEffect(() => {
     fetchAppointments()
@@ -32,18 +41,26 @@ const ManageAppointmentsPage: React.FC = () => {
     setShowPatientModal(true);
   };
 
-  const handlePatientSelect = (patient: { _id: string; username: string; email?: string }) => {
+  const handlePatientSelect = (patient: {
+    _id: string;
+    username: string;
+    email?: string;
+  }) => {
     setSelectedPatient({ _id: patient._id, username: patient.username });
     setShowPatientModal(false);
     setShowTimeModal(true);
   };
 
-  const handleTimeSelect = async (dateTime: string, isEmergency: boolean, notes: string) => {
+  const handleTimeSelect = async (
+    dateTime: string,
+    isEmergency: boolean,
+    notes: string
+  ) => {
     if (!selectedPatient) return;
     try {
       const doctorId = localStorage.getItem("userId");
       if (!doctorId) throw new Error("Doctor ID not found");
-  
+
       const res = await createAppointment({
         patientId: selectedPatient._id,
         doctorId,
@@ -51,13 +68,18 @@ const ManageAppointmentsPage: React.FC = () => {
         isEmergency,
         notes,
       });
-  
-      const newAppointments = [...appointments, res.appointment].sort((a, b) => {
-        if (a.isEmergency !== b.isEmergency) {
-          return b.isEmergency ? 1 : -1;
+
+      const newAppointments = [...appointments, res.appointment].sort(
+        (a, b) => {
+          if (a.isEmergency !== b.isEmergency) {
+            return b.isEmergency ? 1 : -1;
+          }
+          return (
+            new Date(a.appointmentDate).getTime() -
+            new Date(b.appointmentDate).getTime()
+          );
         }
-        return new Date(a.appointmentDate).getTime() - new Date(b.appointmentDate).getTime();
-      });
+      );
       setAppointments(newAppointments);
       setShowTimeModal(false);
       setSelectedPatient(null);
@@ -69,7 +91,7 @@ const ManageAppointmentsPage: React.FC = () => {
 
   const handleEditClick = (apt: Appointment) => {
     setEditingAppointment(apt);
-    setEditDateTime(new Date(apt.appointmentDate).toISOString().slice(0,16));
+    setEditDateTime(new Date(apt.appointmentDate).toISOString().slice(0, 16));
     setEditStatus(apt.status);
   };
 
@@ -80,7 +102,11 @@ const ManageAppointmentsPage: React.FC = () => {
         appointmentDate: new Date(editDateTime),
         status: editStatus,
       });
-      setAppointments(appointments.map((apt) => apt._id === res.appointment._id ? res.appointment : apt));
+      setAppointments(
+        appointments.map((apt) =>
+          apt._id === res.appointment._id ? res.appointment : apt
+        )
+      );
       setEditingAppointment(null);
     } catch (error) {
       console.error("Error updating appointment:", error);
@@ -90,13 +116,20 @@ const ManageAppointmentsPage: React.FC = () => {
 
   const handleCancelAppointment = async (appointmentId: string) => {
     try {
-      const res = await updateAppointment(appointmentId, { status: "canceled" });
-      setAppointments(appointments.map((apt) => apt._id === res.appointment._id ? res.appointment : apt));
+      const res = await updateAppointment(appointmentId, {
+        status: "canceled",
+      });
+      setAppointments(
+        appointments.map((apt) =>
+          apt._id === res.appointment._id ? res.appointment : apt
+        )
+      );
     } catch (error) {
       console.error("Error canceling appointment:", error);
       setError("Failed to cancel appointment.");
     }
   };
+
 
   return (
     <div className={styles.container}>
@@ -123,40 +156,85 @@ const ManageAppointmentsPage: React.FC = () => {
             </tr>
           </thead>
           <tbody>
-            {appointments.map((apt) => (
-              <tr key={apt._id} className={apt.isEmergency ? styles.emergencyRow : ""}>
-                <td>{apt.patientName || "Unknown"}</td>
-                <td>{apt.status}</td>
-                <td>{new Date(apt.appointmentDate).toLocaleString()}</td>
-                <td>{apt.notes || "-"}</td>
-                <td>
-                  <button className={styles.editBtn} onClick={() => handleEditClick(apt)}>
-                    Edit
-                  </button>
-                  <button className={styles.cancelBtn} onClick={() => handleCancelAppointment(apt._id)}>
-                    Cancel
-                  </button>
-                  <button className={styles.chatButton} onClick={() => console.log("Go to chat for", apt.patientName)}>
-                    Go to Chat
-                  </button>
-                </td>
-              </tr>
-            ))}
+            {appointments.map((apt) => {
+              return (
+                <tr
+                  key={apt._id}
+                  className={apt.isEmergency ? styles.emergencyRow : ""}
+                >
+                  <td>{apt.patientName || "Unknown"}</td>
+                  <td>
+                    <span
+                      className={`${styles.statusBadge} ${
+                        apt.status === "pending"
+                          ? styles.statusPending
+                          : apt.status === "confirmed"
+                          ? styles.statusConfirmed
+                          : apt.status === "canceled"
+                          ? styles.statusCanceled
+                          : styles.statusCompleted
+                      }`}
+                    >
+                      {apt.status}
+                    </span>
+                  </td>
+                  <td>{new Date(apt.appointmentDate).toLocaleString()}</td>
+                  <td>{apt.notes || "-"}</td>
+                  <td
+                    className={styles.actionsContainer}
+                    style={{ position: "relative" }}
+                  >
+                    <button
+                      className={styles.editBtn}
+                      onClick={() => handleEditClick(apt)}
+                    >
+                      Edit
+                    </button>
+                    <button
+                      className={styles.cancelBtn}
+                      onClick={() => handleCancelAppointment(apt._id)}
+                    >
+                      Cancel
+                    </button>
+                    {(() => {
+                      const appointmentTime = new Date(
+                        apt.appointmentDate
+                      ).getTime();
+                      const now = Date.now();
+                      const diff = appointmentTime - now;
+                      if (diff >= 0 && diff <= 10 * 60 * 1000) {
+                        return (
+                          <button
+                            className={styles.chatButton}
+                          >
+                            Go to Chat
+                          </button>
+                        );
+                      }
+                      return null;
+                    })()}
+                  </td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       )}
 
       {showPatientModal && (
-        <PatientSearchModal 
-          onPatientSelect={handlePatientSelect} 
-          onClose={() => setShowPatientModal(false)} 
+        <PatientSearchModal
+          onPatientSelect={handlePatientSelect}
+          onClose={() => setShowPatientModal(false)}
         />
       )}
 
       {showTimeModal && (
-        <TimeSelectionModal 
-          onTimeSelect={handleTimeSelect} 
-          onClose={() => { setShowTimeModal(false); setSelectedPatient(null); }} 
+        <TimeSelectionModal
+          onTimeSelect={handleTimeSelect}
+          onClose={() => {
+            setShowTimeModal(false);
+            setSelectedPatient(null);
+          }}
         />
       )}
 
@@ -177,7 +255,15 @@ const ManageAppointmentsPage: React.FC = () => {
               <label>Status</label>
               <select
                 value={editStatus}
-                onChange={(e) => setEditStatus(e.target.value as "pending" | "confirmed" | "canceled" | "completed")}
+                onChange={(e) =>
+                  setEditStatus(
+                    e.target.value as
+                      | "pending"
+                      | "confirmed"
+                      | "canceled"
+                      | "completed"
+                  )
+                }
                 className={styles.input}
               >
                 <option value="pending">Pending</option>
@@ -187,10 +273,16 @@ const ManageAppointmentsPage: React.FC = () => {
               </select>
             </div>
             <div className={styles.modalActions}>
-              <button className={styles.saveModalBtn} onClick={handleUpdateAppointment}>
+              <button
+                className={styles.saveModalBtn}
+                onClick={handleUpdateAppointment}
+              >
                 Save
               </button>
-              <button className={styles.cancelModalBtn} onClick={() => setEditingAppointment(null)}>
+              <button
+                className={styles.cancelModalBtn}
+                onClick={() => setEditingAppointment(null)}
+              >
                 Cancel
               </button>
             </div>
