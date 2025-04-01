@@ -1,6 +1,9 @@
 import React, { useState, useEffect, ChangeEvent } from "react";
 import styles from "../../css/ProfilePage.module.css";
-import { fetchUserProfile, updateUserProfileWithImage } from "../../Services/userService";
+import {
+  fetchUserProfile,
+  updateUserProfileWithImage,
+} from "../../Services/userService";
 import { User } from "../../types/user";
 
 import ScheduleEditor from "./ScheduleEditor";
@@ -15,21 +18,21 @@ interface Patient {
 }
 
 const staticPatients: Patient[] = [
-  { 
-    fullName: "Test Name 1", 
-    daysSinceLastConversation: 3, 
-    patientStatus: "Severe", 
-    lastSessionDate: "2023-10-01", 
-    nextAppointment: "2023-10-05" 
+  {
+    fullName: "Test Name 1",
+    daysSinceLastConversation: 3,
+    patientStatus: "Severe",
+    lastSessionDate: "2023-10-01",
+    nextAppointment: "2023-10-05",
   },
-  { 
-    fullName: "Test Name 2", 
-    daysSinceLastConversation: 1, 
-    patientStatus: "Critical", 
-    lastSessionDate: "2023-09-25", 
-    nextAppointment: "2023-10-11" 
+  {
+    fullName: "Test Name 2",
+    daysSinceLastConversation: 1,
+    patientStatus: "Critical",
+    lastSessionDate: "2023-09-25",
+    nextAppointment: "2023-10-11",
   },
-]; 
+];
 
 const ProfilePage: React.FC = () => {
   const [user, setUser] = useState<User | null>(null);
@@ -98,7 +101,11 @@ const ProfilePage: React.FC = () => {
         gender: gender as "male" | "female" | "other",
         dateOfBirth: dateOfBirth ? new Date(dateOfBirth) : undefined,
       };
-      const res = await updateUserProfileWithImage(userId, updatedData, selectedFile);
+      const res = await updateUserProfileWithImage(
+        userId,
+        updatedData,
+        selectedFile
+      );
       setUser(res.user);
       setFullName(res.user.username);
       setPhoneNumber(res.user.phoneNumber || "");
@@ -130,7 +137,11 @@ const ProfilePage: React.FC = () => {
             {previewUrl ? (
               <img src={previewUrl} alt="Preview" className={styles.avatar} />
             ) : user.profilePicture ? (
-              <img src={user.profilePicture} alt="Avatar" className={styles.avatar} />
+              <img
+                src={user.profilePicture}
+                alt="Avatar"
+                className={styles.avatar}
+              />
             ) : (
               <div className={styles.avatarPlaceholder} />
             )}
@@ -161,7 +172,10 @@ const ProfilePage: React.FC = () => {
               <button className={styles.saveButton} onClick={handleSaveClick}>
                 Save
               </button>
-              <button className={styles.cancelButton} onClick={handleCancelClick}>
+              <button
+                className={styles.cancelButton}
+                onClick={handleCancelClick}
+              >
                 Cancel
               </button>
             </div>
@@ -218,46 +232,49 @@ const ProfilePage: React.FC = () => {
           </div>
         </div>
       </div>
-      
 
-
-      <div className={styles.patientsTableContainer}>
-        <h3 className={styles.tableTitle}>My Patients</h3>
-        <table className={styles.patientsTable}>
-          <thead>
-            <tr>
-              <th>Full Name</th>
-              <th>Status</th>
-              {/* <th>Days Since Last Conversation</th> */}
-              <th>Last Session Date</th>
-              <th>Next Appointment</th>
-              <th>Patient Profile</th>
-            </tr>
-          </thead>
-          <tbody>
-            {staticPatients.map((patient, index) => (
-              <tr key={index}>
-                <td>{patient.fullName}</td>
-                <td>{patient.patientStatus}</td>
-               {/*  <td>{patient.daysSinceLastConversation}</td> */}
-                <td>{new Date(patient.lastSessionDate).toLocaleDateString()}</td>
-                <td>{new Date(patient.nextAppointment).toLocaleDateString()}</td>
-                <td>
-                  <button
-                    className={styles.chatButton}
-                    onClick={() => console.log("Go to profile for", patient.fullName)}
-                  >
-                    Go to Profile
-                  </button>
-                </td>
+      {user && user.role === "doctor" && (
+        <div className={styles.patientsTableContainer}>
+          <h3 className={styles.tableTitle}>My Patients</h3>
+          <table className={styles.patientsTable}>
+            <thead>
+              <tr>
+                <th>Full Name</th>
+                <th>Status</th>
+                {/* <th>Days Since Last Conversation</th> */}
+                <th>Last Session Date</th>
+                <th>Next Appointment</th>
+                <th>Patient Profile</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-      
-
-
+            </thead>
+            <tbody>
+              {staticPatients.map((patient, index) => (
+                <tr key={index}>
+                  <td>{patient.fullName}</td>
+                  <td>{patient.patientStatus}</td>
+                  {/*  <td>{patient.daysSinceLastConversation}</td> */}
+                  <td>
+                    {new Date(patient.lastSessionDate).toLocaleDateString()}
+                  </td>
+                  <td>
+                    {new Date(patient.nextAppointment).toLocaleDateString()}
+                  </td>
+                  <td>
+                    <button
+                      className={styles.chatButton}
+                      onClick={() =>
+                        console.log("Go to profile for", patient.fullName)
+                      }
+                    >
+                      Go to Profile
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
 
       {user && user.role === "doctor" && (
         <div className={styles.scheduleSection}>

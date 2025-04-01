@@ -15,7 +15,6 @@ export interface IUser {
   dateOfBirth?: Date;
   gender?: "male" | "female" | "other";
   isAdmin: boolean;
-
 }
 
 const userSchema = new mongoose.Schema<IUser>({
@@ -66,15 +65,19 @@ const userSchema = new mongoose.Schema<IUser>({
   phoneNumber: {
     type: String,
     required: false,
+    default: "",
   },
   dateOfBirth: {
     type: Date,
     required: false,
+    default: new Date("2000-01-01"),
   },
+
   gender: {
     type: String,
     enum: ["male", "female", "other"],
     required: false,
+    default: "other",
   },
   isAdmin: {
     type: Boolean,
