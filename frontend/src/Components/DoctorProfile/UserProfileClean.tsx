@@ -16,34 +16,20 @@ interface Patient {
 
 const staticPatients: Patient[] = [
   { 
-    fullName: "John Doe", 
+    fullName: "Test Name 1", 
     daysSinceLastConversation: 3, 
     patientStatus: "Severe", 
     lastSessionDate: "2023-10-01", 
     nextAppointment: "2023-10-05" 
   },
   { 
-    fullName: "Dor Matana", 
+    fullName: "Test Name 2", 
     daysSinceLastConversation: 1, 
     patientStatus: "Critical", 
     lastSessionDate: "2023-09-25", 
-    nextAppointment: "" 
+    nextAppointment: "2023-10-11" 
   },
-  { 
-    fullName: "Jane Smith", 
-    daysSinceLastConversation: 10, 
-    patientStatus: "Mild", 
-    lastSessionDate: "2023-09-25", 
-    nextAppointment: "2023-10-12" 
-  },
-  { 
-    fullName: "Jane Smith", 
-    daysSinceLastConversation: 10, 
-    patientStatus: "Mild", 
-    lastSessionDate: "2023-09-25", 
-    nextAppointment: "2023-10-12" 
-  },
-];
+]; 
 
 const ProfilePage: React.FC = () => {
   const [user, setUser] = useState<User | null>(null);
@@ -232,6 +218,8 @@ const ProfilePage: React.FC = () => {
           </div>
         </div>
       </div>
+      
+
 
       <div className={styles.patientsTableContainer}>
         <h3 className={styles.tableTitle}>My Patients</h3>
@@ -240,10 +228,10 @@ const ProfilePage: React.FC = () => {
             <tr>
               <th>Full Name</th>
               <th>Status</th>
-              <th>Days Since Last Conversation</th>
+              {/* <th>Days Since Last Conversation</th> */}
               <th>Last Session Date</th>
               <th>Next Appointment</th>
-              <th>Go to Chat</th>
+              <th>Patient Profile</th>
             </tr>
           </thead>
           <tbody>
@@ -251,15 +239,15 @@ const ProfilePage: React.FC = () => {
               <tr key={index}>
                 <td>{patient.fullName}</td>
                 <td>{patient.patientStatus}</td>
-                <td>{patient.daysSinceLastConversation}</td>
+               {/*  <td>{patient.daysSinceLastConversation}</td> */}
                 <td>{new Date(patient.lastSessionDate).toLocaleDateString()}</td>
                 <td>{new Date(patient.nextAppointment).toLocaleDateString()}</td>
                 <td>
                   <button
                     className={styles.chatButton}
-                    onClick={() => console.log("Go to chat for", patient.fullName)}
+                    onClick={() => console.log("Go to profile for", patient.fullName)}
                   >
-                    Go to Chat
+                    Go to Profile
                   </button>
                 </td>
               </tr>
@@ -267,6 +255,10 @@ const ProfilePage: React.FC = () => {
           </tbody>
         </table>
       </div>
+      
+
+
+
       {user && user.role === "doctor" && (
         <div className={styles.scheduleSection}>
           <ScheduleEditor doctorId={user._id} />
