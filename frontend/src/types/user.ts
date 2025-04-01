@@ -7,4 +7,5 @@ export interface User {
   phoneNumber?: string;
   dateOfBirth?: Date;     
   gender?: 'male' | 'female' | 'other';
+  isAdmin: boolean;
 }

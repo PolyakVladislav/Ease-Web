@@ -1,12 +1,12 @@
-import express from 'express';
-import { authMiddleware } from '../controllers/auth_controller';
-import { verifyRole } from '../Middlewares/verifyRole';
-import { updateUserRole } from '../controllers/user_controller';
+import { Router } from "express";
+import { getAllUsers, updateUserRole } from "../controllers/admin_controller";
+import { authMiddleware } from "../controllers/auth_controller";
+import { verifyRole } from "../Middlewares/verifyRole";
 
-const router = express.Router();
+const router = Router();
 
-router.put('/role', authMiddleware, verifyRole(['admin']), (req, res, next) => {
-  next();
-}, updateUserRole);
+router.get("/admin/users", authMiddleware, verifyRole(["admin"]), getAllUsers);
+
+router.put("/admin/users/:userId", authMiddleware, verifyRole(["admin"]), updateUserRole);
 
 export default router;

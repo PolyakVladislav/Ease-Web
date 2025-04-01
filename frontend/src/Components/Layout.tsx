@@ -96,6 +96,13 @@ const Layout: React.FC = () => {
               <FaRobot className={styles.icon} /> AI Assistant
             </Link>
           </li>
+          {user?.isAdmin === true && (
+            <li className={styles.sidebarItem}>
+              <Link to="/admin" className={styles.sidebarLink}>
+                Admin Panel
+              </Link>
+            </li>
+          )}
         </ul>
       </aside>
 
