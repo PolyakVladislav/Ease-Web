@@ -66,7 +66,7 @@ export const getAvailableSlots = async (req: Request, res: Response): Promise<vo
       return;
     }
 
-    const dayOfWeek = isoDate.getDay(); // 0..6
+    const dayOfWeek = isoDate.getDay(); 
     const schedule = await Schedule.findOne({ doctorId, dayOfWeek });
     if (!schedule) {
       res.status(200).json({ slots: [] });
@@ -74,13 +74,18 @@ export const getAvailableSlots = async (req: Request, res: Response): Promise<vo
     }
 
     const { startHour, endHour, slotDuration } = schedule;
+
     const slots: string[] = [];
-    let currentHour = startHour;
-    while (currentHour < endHour) {
+    const startTotalMin = startHour * 60;
+    const endTotalMin   = endHour   * 60;
+    let currentMin = startTotalMin;
+
+    while (currentMin + slotDuration <= endTotalMin) {
       const slotStart = new Date(isoDate);
-      slotStart.setHours(currentHour, 0, 0, 0);
+      slotStart.setHours(0, 0, 0, 0);
+      slotStart.setMinutes(currentMin);
       slots.push(slotStart.toISOString());
-      currentHour += slotDuration / 60; 
+      currentMin += slotDuration;
     }
 
     const appointments = await Appointment.find({
@@ -94,16 +99,12 @@ export const getAvailableSlots = async (req: Request, res: Response): Promise<vo
     const busySlotsSet = new Set(
       appointments.map((appt) => {
         const d = new Date(appt.appointmentDate);
-        d.setMinutes(0, 0, 0);
+        d.setSeconds(0, 0);
         return d.toISOString();
       })
     );
 
-    const freeSlots = slots.filter((slot) => {
-      const d = new Date(slot);
-      d.setMinutes(0, 0, 0);
-      return !busySlotsSet.has(d.toISOString());
-    });
+    const freeSlots = slots.filter((slot) => !busySlotsSet.has(slot));
 
     res.status(200).json({ slots: freeSlots });
     return;

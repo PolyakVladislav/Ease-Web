@@ -20,3 +20,13 @@ export async function deleteScheduleEntry(scheduleId: string) {
   const res = await api.delete(`/api/schedule/${scheduleId}`);
   return res.data;
 }
+
+export async function getFreeSlots(doctorId: string, dateString: string) {
+  const res = await api.get(
+    `/api/schedule/${doctorId}/free-slots?date=${dateString}`,
+    {
+      withCredentials: true,
+    }
+  );
+  return res.data;
+}

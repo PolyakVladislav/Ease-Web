@@ -12,8 +12,8 @@
 }
 
 .modal {
-  background: #fff;
-  width: 500px;
+  background-color: #fff;
+  width: 600px;
   max-width: 90%;
   border-radius: 12px;
   box-shadow: 0 8px 24px rgba(0,0,0,0.2);
@@ -23,7 +23,7 @@
 }
 
 .modalHeader {
-  background: linear-gradient(90deg, #6f8ab1 0%, #8fa7c9 100%);
+  background: linear-gradient(90deg, #4a90e2 0%, #1877f2 100%);
   padding: 16px 20px;
   color: #fff;
 }
@@ -35,85 +35,108 @@
 
 .modalBody {
   padding: 20px;
+  min-height: 440px;
   display: flex;
-  flex-direction: column;
-  gap: 15px;
-  position: relative;
+  flex-direction: column; 
 }
 
-.label {
-  font-weight: 500;
-  color: #333;
-  margin-bottom: 5px;
+.weekSelector {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 15px;
 }
 
-.dateTimeInput {
-  padding: 10px 14px;
-  border: 1px solid #ccd0d5;
+.weekSelector button {
+  padding: 8px 12px;
+  background-color: #1877f2;
+  color: #fff;
+  border: none;
   border-radius: 8px;
-  font-size: 1rem;
-  transition: border-color 0.2s, box-shadow 0.2s;
+  cursor: pointer;
+  font-size: 0.85rem;
+  transition: background-color 0.3s, transform 0.2s;
 }
 
-.dateTimeInput:focus {
-  outline: none;
-  border-color: #1877f2;
-  box-shadow: 0 0 0 3px rgba(24,119,242,0.2);
+.weekSelector button:hover {
+  background-color: #1558b0;
+  transform: translateY(-2px);
 }
 
-.emergencyRow {
+.daysRow {
   display: flex;
-  align-items: center;
   gap: 8px;
+  margin-bottom: 15px;
 }
 
-.emergencyCheckbox {
-  width: 18px;
-  height: 18px;
+.dayButton {
+  flex: 1;
+  padding: 10px;
+  border-radius: 8px;
+  border: none;
+  font-size: 0.85rem;
   cursor: pointer;
+  transition: background-color 0.3s, transform 0.2s;
+  background-color: #e0e0ff;
 }
 
-.emergencyLabel {
-  font-size: 1rem;
-  color: #333;
-  cursor: pointer;
-  transition: color 0.3s, transform 0.2s;
+.dayButton:hover {
+  background-color: #d0d0f5;
+  transform: translateY(-2px);
 }
 
-.emergencyLabelActive {
-  font-size: 1rem;
-  color: #e74c3c;
+.dayButton:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.slotList {
+  margin-top: 10px;
+  max-height: 250px;
+  flex: 1; 
+  display: flex;
+  gap: 8px;       
+  overflow-y: auto;
+  flex-direction: column;
+}
+
+.slotItem {
+  flex: 0 0 calc(50% - 8px);
+  background-color: #fff;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  padding: 6px 10px;
   cursor: pointer;
-  font-weight: 600;
-  transition: color 0.3s, transform 0.2s;
-  transform: scale(1.05);
+  transition: background-color 0.2s;
+}
+.slotItem:hover {
+  background-color: #f7f7f7;
+}
+.slotItem input[type="radio"] {
+  margin-right: 5px;
 }
 
 .notesInput {
   width: 100%;
-  padding: 10px 14px;
+  min-height: 60px;
+  padding: 8px;
+  margin-top: 10px;
   border: 1px solid #ccd0d5;
-  border-radius: 8px;
-  font-size: 1rem;
-  resize: vertical;
-  min-height: 80px;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  resize: none;
   transition: border-color 0.2s, box-shadow 0.2s;
 }
-
 .notesInput:focus {
   outline: none;
   border-color: #1877f2;
-  box-shadow: 0 0 0 3px rgba(24,119,242,0.2);
+  box-shadow: 0 0 0 2px rgba(24,119,242,0.2);
 }
 
-.error {
+.errorMessage {
   color: #e74c3c;
+  margin-bottom: 10px;
   font-size: 0.9rem;
-  position: absolute;
-  bottom: -20px;
-  left: 20px;
-  height: 20px;
-  margin: 0;
 }
 
 .modalFooter {
@@ -124,49 +147,31 @@
   border-top: 1px solid #eee;
 }
 
-.confirmButton {
-  background-color: #1877f2;
-  color: #fff;
+.confirmButton, .cancelButton {
+  padding: 8px 16px;
   border: none;
   border-radius: 8px;
-  padding: 10px 16px;
+  font-size: 0.9rem;
   cursor: pointer;
-  font-size: 0.95rem;
   transition: background-color 0.3s, transform 0.2s;
 }
 
+.confirmButton {
+  background-color: #28a745;
+  color: #fff;
+}
+
 .confirmButton:hover {
-  background-color: #1558b0;
-  transform: translateY(-2px);
+  background-color: #218838;
+  transform: scale(1.05);
 }
 
 .cancelButton {
   background-color: #6c757d;
   color: #fff;
-  border: none;
-  border-radius: 8px;
-  padding: 10px 16px;
-  cursor: pointer;
-  font-size: 0.95rem;
-  transition: background-color 0.3s, transform 0.2s;
 }
 
 .cancelButton:hover {
   background-color: #5a6268;
-  transform: translateY(-2px);
-}
-
-@media (max-width: 480px) {
-  .modal {
-    width: 90%;
-    border-radius: 8px;
-  }
-
-  .modalHeader h3 {
-    font-size: 1.1rem;
-  }
-  
-  .dateTimeInput, .notesInput {
-    font-size: 0.9rem;
-  }
+  transform: scale(1.05);
 }

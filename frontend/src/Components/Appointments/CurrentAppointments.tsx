@@ -6,17 +6,15 @@ import { Appointment } from "../../types/appointment";
 interface CurrentAppointmentsProps {
   appointments: Appointment[];
   setAppointments: React.Dispatch<React.SetStateAction<Appointment[]>>;
+
+  onEditClick?: (apt: Appointment) => void;
 }
 
 const CurrentAppointments: React.FC<CurrentAppointmentsProps> = ({
   appointments,
   setAppointments,
+  onEditClick,
 }) => {
-  const [editingAppointmentId, setEditingAppointmentId] = useState<
-    string | null
-  >(null);
-  const [editDateTime, setEditDateTime] = useState<string>("");
-  const [editNotes, setEditNotes] = useState<string>("");
   const [cancelConfirmId, setCancelConfirmId] = useState<string | null>(null);
   const [alertMessage, setAlertMessage] = useState<string>("");
 
@@ -36,25 +34,7 @@ const CurrentAppointments: React.FC<CurrentAppointmentsProps> = ({
       showAlert("Cannot edit an appointment created by the patient");
       return;
     }
-
-    setEditingAppointmentId(apt._id);
-    setEditDateTime(new Date(apt.appointmentDate).toISOString().slice(0, 16));
-    setEditNotes(apt.notes || "");
-  };
-
-  const handleSave = async (appointmentId: string) => {
-    try {
-      const res = await updateAppointment(appointmentId, {
-        appointmentDate: new Date(editDateTime),
-        notes: editNotes,
-      });
-      setAppointments((prev) =>
-        prev.map((apt) => (apt._id === appointmentId ? res.appointment : apt))
-      );
-      setEditingAppointmentId(null);
-    } catch (error) {
-      console.error("Error updating appointment:", error);
-    }
+    onEditClick?.(apt);
   };
 
   const handleCancel = (appointmentId: string) => {
@@ -113,6 +93,7 @@ const CurrentAppointments: React.FC<CurrentAppointmentsProps> = ({
               aptTime < now && apt.status.toLowerCase() !== "canceled"
                 ? "passed"
                 : apt.status.toLowerCase();
+
             const diff = aptTime - now;
 
             return (
@@ -135,78 +116,39 @@ const CurrentAppointments: React.FC<CurrentAppointmentsProps> = ({
                   </span>
                 </td>
 
-                <td>
-                  {editingAppointmentId === apt._id ? (
-                    <input
-                      type="datetime-local"
-                      value={editDateTime}
-                      onChange={(e) => setEditDateTime(e.target.value)}
-                      className={styles.input}
-                    />
-                  ) : (
-                    new Date(apt.appointmentDate).toLocaleString()
-                  )}
-                </td>
-
-                <td>
-                  {editingAppointmentId === apt._id ? (
-                    <input
-                      type="text"
-                      value={editNotes}
-                      onChange={(e) => setEditNotes(e.target.value)}
-                      maxLength={15}
-                      className={styles.input}
-                    />
-                  ) : (
-                    apt.notes || "-"
-                  )}
-                </td>
+                <td>{new Date(apt.appointmentDate).toLocaleString()}</td>
+                <td>{apt.notes || "-"}</td>
 
                 <td
                   style={{ position: "relative" }}
                   className={styles.actionsContainer}
                 >
-                  {editingAppointmentId === apt._id ? (
-                    <>
-                      <button
-                        onClick={() => handleSave(apt._id)}
-                        className={styles.editBtn}
-                      >
-                        Save
+                  <>
+                    <button
+                      onClick={() => handleEditClick(apt)}
+                      className={styles.editBtn}
+                    >
+                      Edit
+                    </button>
+                    <button
+                      onClick={() => handleCancel(apt._id)}
+                      className={styles.cancelBtn}
+                    >
+                      Cancel
+                    </button>
+
+                    {diff >= 0 && diff <= 10 * 60 * 1000 ? (
+                      <button className={styles.chatButton}>
+                        Go to Chat
                       </button>
-                      <button
-                        onClick={() => setEditingAppointmentId(null)}
-                        className={styles.cancelBtn}
-                      >
-                        Cancel
-                      </button>
-                    </>
-                  ) : (
-                    <>
-                      <button
-                        onClick={() => handleEditClick(apt)}
-                        className={styles.editBtn}
-                      >
-                        Edit
-                      </button>
-                      <button
-                        onClick={() => handleCancel(apt._id)}
-                        className={styles.cancelBtn}
-                      >
-                        Cancel
-                      </button>
-                      {diff >= 0 && diff <= 10 * 60 * 1000 ? (
-                        <button className={styles.chatButton}>
-                          Go to Chat
-                        </button>
-                      ) : (
-                        <span style={{ fontSize: "0.85rem", color: "#666" }}>
-                          Chat will be available 10 minutes <br />
-                          before the appointment
-                        </span>
-                      )}
-                    </>
-                  )}
+                    ) : (
+                      <span style={{ fontSize: "0.85rem", color: "#666" }}>
+                        Chat will be available 10 minutes <br />
+                        before the appointment
+                      </span>
+                    )}
+                  </>
+
                   {cancelConfirmId === apt._id && (
                     <div className={styles.modalOverlay}>
                       <div className={styles.modal}>
