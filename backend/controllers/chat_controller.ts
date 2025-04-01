@@ -1,53 +1,78 @@
-import { Request, Response, NextFunction } from "express";
 import { Message } from "../models/Message";
+import { ConsultationSummary } from "../models/ConsultationSummary";
 
-export const startChat = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-    try {
-        const { userId, otherUserId } = req.body;
-
-        if (userId === otherUserId) {
-            res.status(400).json({ error: "You cannot start a chat with yourself." });
-        } else {
-            res.status(200).json({ message: "Chat started successfully" });
-        }
-    } catch (error) {
-        next(error);
-    }
-};
-
-export const getMessages = async (req: Request, res: Response) => {
-  const { userId, otherUserId } = req.params;
+/**
+ * Save a message to the database.
+ * @param meetingId - Appointment ID.
+ * @param userId - Sender's ID.
+ * @param to - Recipient's ID.
+ * @param message - Message text.
+ * @param timestamp - Time of sending (defaults to now).
+ */
+export async function saveMessage(
+  meetingId: string,
+  userId: string,
+  to: string,
+  message: string,
+  timestamp: Date = new Date()
+): Promise<void> {
   try {
-    const messages = await Message.find({
-      $or: [
-        { from: userId, to: otherUserId },
-        { from: otherUserId, to: userId }
-      ]
-    }).sort({ timestamp: 1 });
-
-    if (messages.length === 0) {
-      res.status(200).json([]);
-      return;
-    }
-
-    const transformed = messages.map(doc => ({
-      from: doc.from,
-      to: doc.to,
-      content: doc.message,
-      timestamp: doc.timestamp,
-    }));
-
-    res.status(200).json(transformed);
+    await Message.create({
+      meetingId,
+      from: userId,
+      to,
+      message,
+      timestamp,
+    });
+    console.log(`Message saved for meeting ${meetingId}`);
   } catch (error) {
-    res.status(500).send("Server error");
+    console.error("Error saving message:", error);
+    throw error;
   }
-};
+}
 
+/**
+ * Get chat history for a specific meeting.
+ * @param meetingId - Meeting ID.
+ * @returns A string representation of the chat history.
+ */
+export async function getChatHistory(meetingId: string): Promise<string> {
+  try {
+    const messages = await Message.find({ meetingId }).sort({ timestamp: 1 });
+    const history = messages
+      .map(
+        (msg) =>
+          `[${msg.timestamp.toISOString()}] ${msg.from} -> ${msg.to}: ${msg.message}`
+      )
+      .join("\n");
+    console.log(`History for meeting ${meetingId} retrieved`);
+    return history;
+  } catch (error) {
+    console.error("Error retrieving chat history:", error);
+    throw error;
+  }
+}
 
-
-
-
-export default {
-    getMessages,
-    startChat,
-  };
+/**
+ * Save the consultation summary.
+ * @param meetingId - Appointment ID.
+ * @param doctorId - Doctor's ID.
+ * @param summary - Summary received from AI.
+ */
+export async function saveConsultationSummary(
+  meetingId: string,
+  doctorId: string,
+  summary: string
+): Promise<void> {
+  try {
+    await ConsultationSummary.create({
+      appointmentId: meetingId,
+      doctorId,
+      summary,
+    });
+    console.log(`Consultation summary saved for meeting ${meetingId}`);
+  } catch (error) {
+    console.error("Error saving consultation summary:", error);
+    throw error;
+  }
+}
