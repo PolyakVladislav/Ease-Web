@@ -1,21 +1,18 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Login from "./Login";
 import Register from "./Register";
-import Chat from "./Chat";
-import CreatePost from "./CreatePost";
 import PrivateRoute from "./PrivateRoute";
 import Layout from "./Layout";
 import AllPosts from "./AllPosts";
+import CreatePost from "./CreatePost";
 import PostDetails from "./PostDetails";
 import OAuthCallback from "./OAuthCallback";
 import ChatGPTPage from "./ChatGPTPage";
 import AdminPanel from "./AdminPanel";
-
-//import UserProfile from "./UserProfile";
 import AppointmentsPage from "./Appointments/ManageAppointmentsPage";
 import UserProfileClean from "./DoctorProfile/UserProfileClean";
-
 import Articles from "./MedicalNews";
+import ChatContainer from "./Chat/ChatContainer";
 
 function App() {
   return (
@@ -33,14 +30,14 @@ function App() {
           }
         >
           <Route path="/profile" element={<UserProfileClean />} />
-          <Route path="/chat" element={<Chat />} />
-          <Route path="all-posts" element={<AllPosts />} />
-          <Route path="create-post" element={<CreatePost />} />
-          <Route path="post/:postId" element={<PostDetails />} />
-          <Route path="chatgpt" element={<ChatGPTPage />} />
-          <Route path="articles" element={<Articles />} />
-          <Route path="appointmens" element={<AppointmentsPage />} />
-          <Route path="admin" element={<AdminPanel />} />
+          <Route path="/all-posts" element={<AllPosts />} />
+          <Route path="/create-post" element={<CreatePost />} />
+          <Route path="/post/:postId" element={<PostDetails />} />
+          <Route path="/chatgpt" element={<ChatGPTPage />} />
+          <Route path="/articles" element={<Articles />} />
+          <Route path="/appointmens" element={<AppointmentsPage />} />
+          <Route path="/admin" element={<AdminPanel />} />
+          <Route path="/meetings/:meetingId/chat" element={<ChatContainer />} />
         </Route>
       </Routes>
     </Router>

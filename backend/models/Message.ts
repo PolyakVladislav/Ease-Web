@@ -1,15 +1,17 @@
-import mongoose from "mongoose";
+import mongoose, { Document, Schema } from "mongoose";
 
-export interface IMessage {
-  from: string;  
-  to: string;    
+export interface IMessage extends Document {
+  meetingId: string;   
+  from: string;       
+  to: string;         
   message: string;
   timestamp: Date;
 }
 
-const messageSchema = new mongoose.Schema<IMessage>({
-  from: { type: String, required: true },  
-  to: { type: String, required: true },   
+const messageSchema = new Schema<IMessage>({
+  meetingId: { type: String, required: true },
+  from: { type: String, required: true },
+  to: { type: String, required: true },
   message: { type: String, required: true },
   timestamp: { type: Date, default: Date.now },
 });
