@@ -1,4 +1,5 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
 import styles from "../../css/ManageAppointmentsPage.module.css";
 import { Appointment } from "../../types/appointment";
 
@@ -6,14 +7,18 @@ interface HistoryAppointmentsProps {
   appointments: Appointment[];
 }
 
-const HistoryAppointments: React.FC<HistoryAppointmentsProps> = ({
-  appointments,
-}) => {
+const HistoryAppointments: React.FC<HistoryAppointmentsProps> = ({ appointments }) => {
+  const navigate = useNavigate();
   const historyAppointments = (appointments || []).filter((apt) => {
     const aptTime = new Date(apt.appointmentDate).getTime();
     const now = Date.now();
     return aptTime < now || apt.status.toLowerCase() === "canceled";
   });
+
+  // Функция для перехода в историю чата
+  const goToChatHistory = (appointmentId: string) => {
+    navigate(`/meetings/${appointmentId}/chat`);
+  };
 
   return (
     <div className={styles.historyContainer}>
@@ -36,10 +41,7 @@ const HistoryAppointments: React.FC<HistoryAppointmentsProps> = ({
                 ? "passed"
                 : apt.status.toLowerCase();
             return (
-              <tr
-                key={apt._id}
-                className={apt.isEmergency ? styles.emergencyRow : ""}
-              >
+              <tr key={apt._id} className={apt.isEmergency ? styles.emergencyRow : ""}>
                 <td>{apt.patientId && apt.patientId.username}</td>
                 <td>
                   <span
@@ -57,7 +59,9 @@ const HistoryAppointments: React.FC<HistoryAppointmentsProps> = ({
                 <td>{new Date(apt.appointmentDate).toLocaleString()}</td>
                 <td>
                   {displayStatus === "passed" ? (
-                    <button className={styles.chatButton}>Chat History</button>
+                    <button className={styles.chatButton} onClick={() => goToChatHistory(apt._id)}>
+                      Chat History
+                    </button>
                   ) : (
                     <span>Appointment was canceled</span>
                   )}

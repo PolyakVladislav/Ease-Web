@@ -1,0 +1,101 @@
+.chatContainer {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    max-width: 800px;
+    margin: 0 auto;
+    border: 1px solid #ddd;
+    background-color: #fff;
+  }
+  
+  .chatHeader {
+    background-color: #f7f7f7;
+    padding: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #ddd;
+  }
+  
+  .readOnlyLabel {
+    color: red;
+    font-weight: bold;
+  }
+  
+  .messagesContainer {
+    flex: 1;
+    padding: 10px;
+    overflow-y: auto;
+  }
+  
+  .message {
+    margin-bottom: 10px;
+    max-width: 70%;
+    padding: 8px;
+    border-radius: 5px;
+    word-wrap: break-word;
+  }
+  
+  .sent {
+    align-self: flex-end;
+    background-color: #dcf8c6;
+  }
+  
+  .received {
+    align-self: flex-start;
+    background-color: #f1f0f0;
+  }
+  
+  .system {
+    align-self: center;
+    background-color: #e0e0e0;
+    font-style: italic;
+  }
+  
+  .messageContent {
+    margin-bottom: 4px;
+  }
+  
+  .messageTimestamp {
+    font-size: 0.75rem;
+    color: #888;
+    text-align: right;
+  }
+  
+  .inputArea {
+    display: flex;
+    padding: 10px;
+    border-top: 1px solid #ddd;
+    background-color: #f7f7f7;
+  }
+  
+  .messageInput {
+    flex: 1;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+  }
+  
+  .sendButton {
+    margin-left: 8px;
+    padding: 8px 12px;
+    background-color: #4caf50;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  
+  .toastNotification {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #323232;
+    color: #fff;
+    padding: 12px 20px;
+    border-radius: 4px;
+    z-index: 1000;
+    opacity: 0.9;
+  }
+  

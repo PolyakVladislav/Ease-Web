@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import styles from "../../css/ManageAppointmentsPage.module.css";
 import { updateAppointment } from "../../Services/appointmentService";
 import { Appointment } from "../../types/appointment";
@@ -6,7 +7,6 @@ import { Appointment } from "../../types/appointment";
 interface CurrentAppointmentsProps {
   appointments: Appointment[];
   setAppointments: React.Dispatch<React.SetStateAction<Appointment[]>>;
-
   onEditClick?: (apt: Appointment) => void;
 }
 
@@ -17,6 +17,7 @@ const CurrentAppointments: React.FC<CurrentAppointmentsProps> = ({
 }) => {
   const [cancelConfirmId, setCancelConfirmId] = useState<string | null>(null);
   const [alertMessage, setAlertMessage] = useState<string>("");
+  const navigate = useNavigate();
 
   const activeAppointments = (appointments || []).filter((apt) => {
     const aptTime = new Date(apt.appointmentDate).getTime();
@@ -53,6 +54,11 @@ const CurrentAppointments: React.FC<CurrentAppointmentsProps> = ({
     } catch (error) {
       console.error("Error canceling appointment:", error);
     }
+  };
+
+  // Функция для перехода в чат
+  const goToChat = (appointmentId: string) => {
+    navigate(`/meetings/${appointmentId}/chat`);
   };
 
   return (
@@ -115,30 +121,18 @@ const CurrentAppointments: React.FC<CurrentAppointmentsProps> = ({
                     {displayStatus}
                   </span>
                 </td>
-
                 <td>{new Date(apt.appointmentDate).toLocaleString()}</td>
                 <td>{apt.notes || "-"}</td>
-
-                <td
-                  style={{ position: "relative" }}
-                  className={styles.actionsContainer}
-                >
+                <td style={{ position: "relative" }} className={styles.actionsContainer}>
                   <>
-                    <button
-                      onClick={() => handleEditClick(apt)}
-                      className={styles.editBtn}
-                    >
+                    <button onClick={() => handleEditClick(apt)} className={styles.editBtn}>
                       Edit
                     </button>
-                    <button
-                      onClick={() => handleCancel(apt._id)}
-                      className={styles.cancelBtn}
-                    >
+                    <button onClick={() => handleCancel(apt._id)} className={styles.cancelBtn}>
                       Cancel
                     </button>
-
                     {diff >= 0 && diff <= 10 * 60 * 1000 ? (
-                      <button className={styles.chatButton}>
+                      <button className={styles.chatButton} onClick={() => goToChat(apt._id)}>
                         Go to Chat
                       </button>
                     ) : (
@@ -148,7 +142,6 @@ const CurrentAppointments: React.FC<CurrentAppointmentsProps> = ({
                       </span>
                     )}
                   </>
-
                   {cancelConfirmId === apt._id && (
                     <div className={styles.modalOverlay}>
                       <div className={styles.modal}>
