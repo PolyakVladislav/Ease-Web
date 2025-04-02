@@ -8,6 +8,7 @@ export interface IAppointment extends Document {
   notes: string;
   isEmergency: boolean;
   initiator: "doctor" | "patient";
+  aiMessages?: string[]; 
   createdAt: Date;
   updatedAt: Date;
 }
@@ -21,6 +22,7 @@ const AppointmentSchema = new Schema<IAppointment>(
     notes: { type: String, default: "" },
     isEmergency: { type: Boolean, default: false },
     initiator: { type: String, enum: ["doctor", "patient"], required: true },
+    aiMessages: { type: [String], default: [] }, 
   },
   { timestamps: true }
 );

@@ -9,9 +9,7 @@ interface ToastNotificationProps {
 const ToastNotification: React.FC<ToastNotificationProps> = ({ message, onClose }) => {
   useEffect(() => {
     if (message) {
-      const timer = setTimeout(() => {
-        onClose();
-      }, 5000); // Уведомление исчезает через 5 секунд
+      const timer = setTimeout(onClose, 5000);
       return () => clearTimeout(timer);
     }
   }, [message, onClose]);

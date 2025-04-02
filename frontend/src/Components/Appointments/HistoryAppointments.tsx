@@ -9,10 +9,9 @@ interface HistoryAppointmentsProps {
 
 const HistoryAppointments: React.FC<HistoryAppointmentsProps> = ({ appointments }) => {
   const navigate = useNavigate();
+  // В историю попадают встречи со статусом "passed" или "canceled"
   const historyAppointments = (appointments || []).filter((apt) => {
-    const aptTime = new Date(apt.appointmentDate).getTime();
-    const now = Date.now();
-    return aptTime < now || apt.status.toLowerCase() === "canceled";
+    return apt.status.toLowerCase() === "passed" || apt.status.toLowerCase() === "canceled";
   });
 
   // Функция для перехода в историю чата
@@ -33,42 +32,26 @@ const HistoryAppointments: React.FC<HistoryAppointmentsProps> = ({ appointments 
           </tr>
         </thead>
         <tbody>
-          {historyAppointments.map((apt) => {
-            const now = Date.now();
-            const aptTime = new Date(apt.appointmentDate).getTime();
-            const displayStatus =
-              aptTime < now && apt.status.toLowerCase() !== "canceled"
-                ? "passed"
-                : apt.status.toLowerCase();
-            return (
-              <tr key={apt._id} className={apt.isEmergency ? styles.emergencyRow : ""}>
-                <td>{apt.patientId && apt.patientId.username}</td>
-                <td>
-                  <span
-                    className={`${styles.statusBadge} ${
-                      styles[
-                        "status" +
-                          displayStatus.charAt(0).toUpperCase() +
-                          displayStatus.slice(1)
-                      ]
-                    }`}
-                  >
-                    {displayStatus}
-                  </span>
-                </td>
-                <td>{new Date(apt.appointmentDate).toLocaleString()}</td>
-                <td>
-                  {displayStatus === "passed" ? (
-                    <button className={styles.chatButton} onClick={() => goToChatHistory(apt._id)}>
-                      Chat History
-                    </button>
-                  ) : (
-                    <span>Appointment was canceled</span>
-                  )}
-                </td>
-              </tr>
-            );
-          })}
+          {historyAppointments.map((apt) => (
+            <tr key={apt._id} className={apt.isEmergency ? styles.emergencyRow : ""}>
+              <td>{apt.patientId && apt.patientId.username}</td>
+              <td>
+                <span
+                  className={`${styles.statusBadge} ${
+                    styles["status" + apt.status.charAt(0).toUpperCase() + apt.status.slice(1)]
+                  }`}
+                >
+                  {apt.status}
+                </span>
+              </td>
+              <td>{new Date(apt.appointmentDate).toLocaleString()}</td>
+              <td>
+                <button className={styles.chatButton} onClick={() => goToChatHistory(apt._id)}>
+                  Chat History
+                </button>
+              </td>
+            </tr>
+          ))}
         </tbody>
       </table>
     </div>

@@ -21,7 +21,7 @@ const MessageList: React.FC<MessageListProps> = ({ messages }) => {
               : styles.received
           }`}
         >
-          <div className={styles.messageContent}>{msg.content}</div>
+          <div className={styles.messageContent}>{msg.message}</div>
           <div className={styles.messageTimestamp}>
             {new Date(msg.timestamp).toLocaleTimeString()}
           </div>

@@ -1,19 +1,24 @@
-import { io, Socket } from "socket.io-client";
-import CONFIG from "../../config"; // Предполагаем, что SERVER_URL указан в конфиге
+import io from "socket.io-client";
+import type { Socket } from "socket.io-client";
+import CONFIG from "../../config"; 
 
 export const createSocket = (userId: string): typeof Socket => {
   return io(CONFIG.SERVER_URL, {
     query: { userId },
-    withCredentials: true,
+    transportOptions: {
+      polling: {
+        withCredentials: true
+      }
+    }
   });
 };
-
 export const startChat = (socket: typeof Socket, meetingId: string, userId: string): void => {
   const role = localStorage.getItem("userRole") || "";
   socket.emit("joinRoom", { meetingId, userId, role });
 };
 
-export const sendMessage = (socket: typeof Socket, meetingId: string, message: object): void => {
+export const sendMessage = (socket: typeof Socket, meetingId: string, message: ChatMessage): void => {
+  console.log("Sending message:", { meetingId, ...message });
   socket.emit("sendMessage", { meetingId, ...message });
 };
 
@@ -30,6 +35,8 @@ export const endConsultation = (socket: typeof Socket, meetingId: string, doctor
   socket.emit("endConsultation", { meetingId, doctorId });
 };
 
-export const disconnectSocket = (socket: Socket): void => {
+export const disconnectSocket = (socket: typeof Socket): void => {
   socket.disconnect();
 };
+
+import { ChatMessage } from "../../types/ChatMessage";

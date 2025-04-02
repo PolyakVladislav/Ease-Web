@@ -9,4 +9,5 @@ export interface Appointment {
   initiator: "doctor" | "patient";
   createdAt?: string;
   updatedAt?: string;
+  aiMessages?: string[];
 }

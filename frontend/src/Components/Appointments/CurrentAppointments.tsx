@@ -19,10 +19,9 @@ const CurrentAppointments: React.FC<CurrentAppointmentsProps> = ({
   const [alertMessage, setAlertMessage] = useState<string>("");
   const navigate = useNavigate();
 
+  // Активные встречи определяются по статусу (не passed и не canceled)
   const activeAppointments = (appointments || []).filter((apt) => {
-    const aptTime = new Date(apt.appointmentDate).getTime();
-    const now = Date.now();
-    return aptTime >= now && apt.status.toLowerCase() !== "canceled";
+    return apt.status.toLowerCase() !== "passed" && apt.status.toLowerCase() !== "canceled";
   });
 
   const showAlert = (message: string) => {
@@ -56,7 +55,7 @@ const CurrentAppointments: React.FC<CurrentAppointmentsProps> = ({
     }
   };
 
-  // Функция для перехода в чат
+  // Функция для перехода в чат (доступна только если встреча активна)
   const goToChat = (appointmentId: string) => {
     navigate(`/meetings/${appointmentId}/chat`);
   };
@@ -92,75 +91,49 @@ const CurrentAppointments: React.FC<CurrentAppointmentsProps> = ({
           </tr>
         </thead>
         <tbody>
-          {activeAppointments.map((apt) => {
-            const now = Date.now();
-            const aptTime = new Date(apt.appointmentDate).getTime();
-            const displayStatus =
-              aptTime < now && apt.status.toLowerCase() !== "canceled"
-                ? "passed"
-                : apt.status.toLowerCase();
-
-            const diff = aptTime - now;
-
-            return (
-              <tr
-                key={apt._id}
-                className={apt.isEmergency ? styles.emergencyRow : ""}
-              >
-                <td>{apt.patientId && apt.patientId.username}</td>
-                <td>
-                  <span
-                    className={`${styles.statusBadge} ${
-                      styles[
-                        "status" +
-                          displayStatus.charAt(0).toUpperCase() +
-                          displayStatus.slice(1)
-                      ]
-                    }`}
-                  >
-                    {displayStatus}
-                  </span>
-                </td>
-                <td>{new Date(apt.appointmentDate).toLocaleString()}</td>
-                <td>{apt.notes || "-"}</td>
-                <td style={{ position: "relative" }} className={styles.actionsContainer}>
-                  <>
-                    <button onClick={() => handleEditClick(apt)} className={styles.editBtn}>
-                      Edit
+          {activeAppointments.map((apt) => (
+            <tr key={apt._id} className={apt.isEmergency ? styles.emergencyRow : ""}>
+              <td>{apt.patientId && apt.patientId.username}</td>
+              <td>
+                <span
+                  className={`${styles.statusBadge} ${
+                    styles["status" + apt.status.charAt(0).toUpperCase() + apt.status.slice(1)]
+                  }`}
+                >
+                  {apt.status}
+                </span>
+              </td>
+              <td>{new Date(apt.appointmentDate).toLocaleString()}</td>
+              <td>{apt.notes || "-"}</td>
+              <td style={{ position: "relative" }} className={styles.actionsContainer}>
+                <>
+                  <button onClick={() => handleEditClick(apt)} className={styles.editBtn}>
+                    Edit
+                  </button>
+                  <button onClick={() => handleCancel(apt._id)} className={styles.cancelBtn}>
+                    Cancel
+                  </button>
+                  {/* Кнопка перехода в чат отображается только для активных встреч */}
+                  {apt.status.toLowerCase() !== "passed" && (
+                    <button className={styles.chatButton} onClick={() => goToChat(apt._id)}>
+                      Go to Chat
                     </button>
-                    <button onClick={() => handleCancel(apt._id)} className={styles.cancelBtn}>
-                      Cancel
-                    </button>
-                    {diff >= 0 && diff <= 10 * 60 * 1000 ? (
-                      <button className={styles.chatButton} onClick={() => goToChat(apt._id)}>
-                        Go to Chat
-                      </button>
-                    ) : (
-                      <span style={{ fontSize: "0.85rem", color: "#666" }}>
-                        Chat will be available 10 minutes <br />
-                        before the appointment
-                      </span>
-                    )}
-                  </>
-                  {cancelConfirmId === apt._id && (
-                    <div className={styles.modalOverlay}>
-                      <div className={styles.modal}>
-                        <p>Are you sure you want to cancel the appointment?</p>
-                        <div className={styles.modalButtons}>
-                          <button onClick={() => confirmCancel(apt._id)}>
-                            Yes
-                          </button>
-                          <button onClick={() => setCancelConfirmId(null)}>
-                            No
-                          </button>
-                        </div>
+                  )}
+                </>
+                {cancelConfirmId === apt._id && (
+                  <div className={styles.modalOverlay}>
+                    <div className={styles.modal}>
+                      <p>Are you sure you want to cancel the appointment?</p>
+                      <div className={styles.modalButtons}>
+                        <button onClick={() => confirmCancel(apt._id)}>Yes</button>
+                        <button onClick={() => setCancelConfirmId(null)}>No</button>
                       </div>
                     </div>
-                  )}
-                </td>
-              </tr>
-            );
-          })}
+                  </div>
+                )}
+              </td>
+            </tr>
+          ))}
         </tbody>
       </table>
     </>

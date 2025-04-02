@@ -144,6 +144,11 @@ const login = async (req: Request, res: Response): Promise<void> => {
       role: user.role,
       isAuthenticated: true,
       likedPosts: user.likedPosts,
+      gender: user.gender,
+      dateOfBirth: user.dateOfBirth,
+      phoneNumber: user.phoneNumber,
+      profilePicture: user.profilePicture,
+      email: user.email
     });
   } catch (err) {
     res.status(500).json({ message: 'Internal server error' });

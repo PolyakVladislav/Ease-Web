@@ -1,14 +1,7 @@
 import { Message } from "../models/Message";
 import { ConsultationSummary } from "../models/ConsultationSummary";
 
-/**
- * Save a message to the database.
- * @param meetingId - Appointment ID.
- * @param userId - Sender's ID.
- * @param to - Recipient's ID.
- * @param message - Message text.
- * @param timestamp - Time of sending (defaults to now).
- */
+
 export async function saveMessage(
   meetingId: string,
   userId: string,
@@ -16,6 +9,7 @@ export async function saveMessage(
   message: string,
   timestamp: Date = new Date()
 ): Promise<void> {
+  console.log("Received message for saving:", { meetingId, userId, to, message, timestamp });
   try {
     await Message.create({
       meetingId,
@@ -31,11 +25,6 @@ export async function saveMessage(
   }
 }
 
-/**
- * Get chat history for a specific meeting.
- * @param meetingId - Meeting ID.
- * @returns A string representation of the chat history.
- */
 export async function getChatHistory(meetingId: string): Promise<string> {
   try {
     const messages = await Message.find({ meetingId }).sort({ timestamp: 1 });
@@ -53,12 +42,6 @@ export async function getChatHistory(meetingId: string): Promise<string> {
   }
 }
 
-/**
- * Save the consultation summary.
- * @param meetingId - Appointment ID.
- * @param doctorId - Doctor's ID.
- * @param summary - Summary received from AI.
- */
 export async function saveConsultationSummary(
   meetingId: string,
   doctorId: string,

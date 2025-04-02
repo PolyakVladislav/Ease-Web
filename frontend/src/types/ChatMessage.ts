@@ -1,7 +1,7 @@
 export interface ChatMessage {
     from: string;
     to: string;
-    content: string;
+    message: string;
     timestamp: Date;
   }
   
