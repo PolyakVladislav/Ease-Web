@@ -1,13 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { useParams } from "react-router-dom";
 import { Socket } from "socket.io-client";
-import {
-  createSocket,
-  startChat,
-  requestAISuggestion,
-  endConsultation,
-  disconnectSocket,
-} from "../../Services/Chat/socketService";
+import { createSocket, startChat, requestAISuggestion, endConsultation, disconnectSocket } from "../../Services/Chat/socketService";
 import { fetchChatHistory, fetchMeetingDetails } from "../../Services/Chat/chatService";
 import MessageList from "./MessageList";
 import ChatInput from "./ChatInput";
@@ -62,52 +56,61 @@ const ChatContainer: React.FC = () => {
       });
   }, [meetingId]);
 
+  const lastAISuggestionRef = useRef<string>("");
+
   useEffect(() => {
     if (!userId || !meetingId) return;
     const newSocket: typeof Socket = createSocket(userId);
     setSocket(newSocket);
     startChat(newSocket, meetingId, userId);
-
+  
     newSocket.on("newMessage", (msg: ChatMessage) => {
-      setMessages((prev) => [...prev, msg]);
-      if (msg.from !== userId) {
-        const chatContext = [...messages, msg].map(m => m.message).join("\n");
-        requestAISuggestion(newSocket, meetingId, chatContext, msg.message);
-      }
+      setMessages((prev) => {
+        const updatedMessages = [...prev, msg];
+        if (msg.from !== userId && lastAISuggestionRef.current !== msg.message) {
+          lastAISuggestionRef.current = msg.message;
+          const chatContext = updatedMessages.map((m) => m.message).join("\n");
+          requestAISuggestion(newSocket, meetingId, chatContext, msg.message);
+        }
+        return updatedMessages;
+      });
     });
-
+  
     newSocket.on("aiSuggestion", (data: { suggestion: string }) => {
       setAiMessages((prev) => [...prev, data.suggestion]);
     });
-
-    newSocket.on("consultationEnded", (data: { meetingId: string; summary: string }) => {
+  
+    newSocket.on("consultationEnded", () => {
       setReadOnly(true);
-      setToastMessage(`Consultation ended: ${data.summary}`);
+      setToastMessage("Consultation ended: AI summary is available in your profile");
     });
-
+  
     return () => {
       disconnectSocket(newSocket);
     };
-  }, [userId, meetingId, messages]);
+  }, [userId, meetingId]);
+  
+  
+  
 
   useEffect(() => {
     scrollToBottom();
   }, [messages, scrollToBottom]);
 
-  // Добавляем проверку: до получения meetingData отображаем индикатор загрузки
   if (!meetingData) {
     return (
       <div className={styles.chatContainer}>
         <header className={styles.chatHeader}>
           <h2>Meeting Chat</h2>
         </header>
-        <div className={styles.chatContent}>
-          <p>Loading meeting details...</p>
+        <div className={styles.loadingContainer}>
+          <div className={styles.spinner}></div>
+          <p className={styles.loadingText}>Loading meeting details...</p>
         </div>
       </div>
     );
   }
-
+  
   const otherUserId = meetingData && typeof meetingData.patientId === "string" ? meetingData.patientId : "";
 
   const handleManualAISuggestion = (): void => {

@@ -18,7 +18,7 @@ const AISuggestionsContainer: React.FC<AISuggestionsProps> = ({ suggestions, onR
         ))}
       </div>
       <button className={styles.aiButton} onClick={onRequestSuggestion}>
-        Request AI Suggestion
+        Request Another AI Suggestion
       </button>
     </div>
   );
