@@ -1,24 +1,44 @@
-import React, { useState, ChangeEvent } from "react";
+import React, { useState, ChangeEvent, useEffect } from "react";
 import styles from "../css/PatientSearchModal.module.css";
-import { searchPatients } from "../Services/userService";
+import { searchPatients, getRecentPatients } from "../Services/userService"; // ⬅️ you'll need to create this API
 import { User } from "../types/user";
 
 interface PatientSearchModalProps {
   onPatientSelect: (patient: User) => void;
   onClose: () => void;
+  doctorId: string; 
 }
 
-const PatientSearchModal: React.FC<PatientSearchModalProps> = ({ onPatientSelect, onClose }) => {
+const PatientSearchModal: React.FC<PatientSearchModalProps> = ({
+  onPatientSelect,
+  onClose,
+  doctorId,
+}) => {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<User[]>([]);
+  const [recentPatients, setRecentPatients] = useState<User[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string>("");
+
+  useEffect(() => {
+    // ⬅️ Fetch recent patients on mount
+    const fetchRecent = async () => {
+      try {
+        const data = await getRecentPatients(doctorId);
+        setRecentPatients(data.patients);
+      } catch (err) {
+        console.error("Error fetching recent patients:", err);
+      }
+    };
+    fetchRecent();
+  }, [doctorId]);
 
   const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
     setQuery(e.target.value);
   };
 
   const handleSearch = async () => {
+    if (query.trim().length === 0) return;
     setLoading(true);
     setError("");
     try {
@@ -31,6 +51,17 @@ const PatientSearchModal: React.FC<PatientSearchModalProps> = ({ onPatientSelect
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    const delayDebounce = setTimeout(() => {
+      if (query.trim().length > 0) {
+        handleSearch();
+      } else {
+        setResults([]);
+      }
+    }, 300);
+    return () => clearTimeout(delayDebounce);
+  }, [query]);
 
   return (
     <div className={styles.modalOverlay}>
@@ -54,17 +85,36 @@ const PatientSearchModal: React.FC<PatientSearchModalProps> = ({ onPatientSelect
 
           {error && <p className={styles.error}>{error}</p>}
 
-          <ul className={styles.resultsList}>
-            {results.map((patient) => (
-              <li
-                key={patient._id}
-                onClick={() => onPatientSelect(patient)}
-                className={styles.resultItem}
-              >
-                {patient.username} ({patient.email})
-              </li>
-            ))}
-          </ul>
+          {query.trim() === "" && recentPatients.length > 0 && (
+            <div className={styles.recentPatients}>
+              <h4>Recent Patients (Last 30 Days)</h4>
+              <ul className={styles.recentList}>
+                {recentPatients.map((patient) => (
+                  <li
+                    key={patient._id}
+                    onClick={() => onPatientSelect(patient)}
+                    className={styles.resultItem}
+                  >
+                    {patient.username} ({patient.email})
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          {results.length > 0 && (
+            <ul className={styles.resultsList}>
+              {results.map((patient) => (
+                <li
+                  key={patient._id}
+                  onClick={() => onPatientSelect(patient)}
+                  className={styles.resultItem}
+                >
+                  {patient.username} ({patient.email})
+                </li>
+              ))}
+            </ul>
+          )}
         </div>
         <div className={styles.modalFooter}>
           <button onClick={onClose} className={styles.closeButton}>

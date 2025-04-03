@@ -43,3 +43,18 @@ export const searchPatients = async (query: string) => {
   });
   return response.data;
 };
+
+
+export const getRecentPatients = async (doctorId: string) => {
+  const token = localStorage.getItem("accessToken");
+
+  const response = await api.get(`/api/doctors/${doctorId}/recent-patients`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+    withCredentials: true,
+  });
+
+  return response.data;
+};
+
