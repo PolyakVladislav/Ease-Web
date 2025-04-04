@@ -83,40 +83,45 @@ export const getClosestAppointmentByDoctor = async (req: Request, res: Response)
       return;
     }
 
-    const schedules: ISchedule[] = await Schedule.find({ doctorId });
+    const schedules = (await Schedule.find({ doctorId })) as ISchedule[];
     if (!schedules || schedules.length === 0) {
       res.status(404).json({ message: "No schedule found for this doctor" });
       return;
     }
 
-    const now = new Date();
-    now.setDate(now.getDate() + 1);
-    now.setHours(0, 0, 0, 0);
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    tomorrow.setHours(0, 0, 0, 0);
+    const endDate = new Date(tomorrow);
+    endDate.setDate(tomorrow.getDate() + 7);
+
+    const dayOffs = await DayOff.find({
+      doctorId,
+      date: { $gte: tomorrow, $lte: endDate },
+    });
+
+    const appointments = await Appointment.find({
+      doctorId,
+      appointmentDate: { $gte: tomorrow, $lte: endDate },
+    });
 
     let closestDate: Date | null = null;
 
     for (let i = 0; i < 7; i++) {
-      const candidateDate = new Date(now);
-      candidateDate.setDate(now.getDate() + i);
+      const candidateDate = new Date(tomorrow);
+      candidateDate.setDate(tomorrow.getDate() + i);
+      candidateDate.setHours(0, 0, 0, 0);
 
       const dayOfWeek = candidateDate.getDay();
+      const schedule = schedules.find((sch) => sch.dayOfWeek === dayOfWeek);
+      if (!schedule) continue;
 
-      const schedule = schedules.find(sch => sch.dayOfWeek === dayOfWeek);
-      if (!schedule) {
-        continue;
-      }
-
-      const startOfDay = new Date(candidateDate);
-      const endOfDay = new Date(candidateDate);
-      endOfDay.setHours(23, 59, 59, 999);
-
-      const dayOffEntry = await DayOff.findOne({
-        doctorId,
-        date: { $gte: startOfDay, $lte: endOfDay }
+      const isDayOff = dayOffs.some((d) => {
+        const dDate = new Date(d.date);
+        dDate.setHours(0, 0, 0, 0);
+        return dDate.getTime() === candidateDate.getTime();
       });
-      if (dayOffEntry) {
-        continue;
-      }
+      if (isDayOff) continue;
 
       const { startHour, endHour, slotDuration } = schedule;
       const slots: string[] = [];
@@ -130,18 +135,20 @@ export const getClosestAppointmentByDoctor = async (req: Request, res: Response)
         currentMin += slotDuration;
       }
 
-      const appointments = await Appointment.find({
-        doctorId,
-        appointmentDate: { $gte: startOfDay, $lte: endOfDay },
+      const appointmentsForDay = appointments.filter((appt) => {
+        const apptDate = new Date(appt.appointmentDate);
+        apptDate.setHours(0, 0, 0, 0);
+        return apptDate.getTime() === candidateDate.getTime();
       });
       const busySlotsSet = new Set(
-        appointments.map(appt => {
+        appointmentsForDay.map((appt) => {
           const d = new Date(appt.appointmentDate);
           d.setSeconds(0, 0);
           return d.toISOString();
         })
       );
-      const freeSlots = slots.filter(slot => !busySlotsSet.has(slot));
+
+      const freeSlots = slots.filter((slot) => !busySlotsSet.has(slot));
 
       if (freeSlots.length > 0) {
         closestDate = candidateDate;
