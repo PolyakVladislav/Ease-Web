@@ -1,5 +1,9 @@
 import { Request, Response } from "express";
-import Schedule from "../models/Schedule";
+import Schedule, { ISchedule } from "../models/Schedule";
+import DayOff from "../models/DayOff"; 
+import Appointment from "../models/Appointment";
+
+
 
 export const createOrUpdateSchedule = async (req: Request, res: Response): Promise<void> => {
   try {
@@ -79,31 +83,82 @@ export const getClosestAppointmentByDoctor = async (req: Request, res: Response)
       return;
     }
 
-    const schedule = await Schedule.findOne({ doctorId }).sort({ dayOfWeek: 1 });
-    if (!schedule) {
-      res.status(404).json({ message: "Schedule not found" });
+    const schedules: ISchedule[] = await Schedule.find({ doctorId });
+    if (!schedules || schedules.length === 0) {
+      res.status(404).json({ message: "No schedule found for this doctor" });
       return;
     }
 
     const now = new Date();
-    const today = now.getDay();
-    const targetDay = schedule.dayOfWeek; 
+    now.setDate(now.getDate() + 1);
+    now.setHours(0, 0, 0, 0);
 
-    const daysToAdd = (targetDay - today + 7) % 7; 
+    let closestDate: Date | null = null;
 
-    const closestDate = new Date(now);
-    closestDate.setDate(now.getDate() + daysToAdd);
-    closestDate.setHours(0, 0, 0, 0);
+    for (let i = 0; i < 7; i++) {
+      const candidateDate = new Date(now);
+      candidateDate.setDate(now.getDate() + i);
 
-    const closestAppointment = {
-      doctorId: schedule.doctorId,
-      dayOfWeek: schedule.dayOfWeek,
-      appointmentDate: closestDate,
-    };
+      const dayOfWeek = candidateDate.getDay();
 
-    res.status(200).json({ closestAppointment });
+      const schedule = schedules.find(sch => sch.dayOfWeek === dayOfWeek);
+      if (!schedule) {
+        continue;
+      }
+
+      const startOfDay = new Date(candidateDate);
+      const endOfDay = new Date(candidateDate);
+      endOfDay.setHours(23, 59, 59, 999);
+
+      const dayOffEntry = await DayOff.findOne({
+        doctorId,
+        date: { $gte: startOfDay, $lte: endOfDay }
+      });
+      if (dayOffEntry) {
+        continue;
+      }
+
+      const { startHour, endHour, slotDuration } = schedule;
+      const slots: string[] = [];
+      const startTotalMin = startHour * 60;
+      const endTotalMin = endHour * 60;
+      let currentMin = startTotalMin;
+      while (currentMin + slotDuration <= endTotalMin) {
+        const slotStart = new Date(candidateDate);
+        slotStart.setHours(0, currentMin, 0, 0);
+        slots.push(slotStart.toISOString());
+        currentMin += slotDuration;
+      }
+
+      const appointments = await Appointment.find({
+        doctorId,
+        appointmentDate: { $gte: startOfDay, $lte: endOfDay },
+      });
+      const busySlotsSet = new Set(
+        appointments.map(appt => {
+          const d = new Date(appt.appointmentDate);
+          d.setSeconds(0, 0);
+          return d.toISOString();
+        })
+      );
+      const freeSlots = slots.filter(slot => !busySlotsSet.has(slot));
+
+      if (freeSlots.length > 0) {
+        closestDate = candidateDate;
+        break;
+      }
+    }
+
+    if (!closestDate) {
+      res.status(404).json({ message: "No available appointment found in the next week" });
+      return;
+    }
+
+    res.status(200).json({ closestAppointmentDate: closestDate });
   } catch (error) {
     console.error("Error getClosestAppointmentByDoctor:", error);
     res.status(500).json({ message: "Internal server error" });
   }
 };
+
+
