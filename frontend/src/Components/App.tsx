@@ -11,8 +11,8 @@ import ChatGPTPage from "./ChatGPTPage";
 import AdminPanel from "./AdminPanel";
 import AppointmentsPage from "./Appointments/ManageAppointmentsPage";
 import UserProfileClean from "./DoctorProfile/UserProfileClean";
-import Articles from "./MedicalNews";
 import ChatContainer from "./Chat/ChatContainer";
+import NotAllowedPage from "./NotAllowedPage";
 
 function App() {
   return (
@@ -21,20 +21,13 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/oauth/callback" element={<OAuthCallback />} />
-        <Route
-          path="/"
-          element={
-            <PrivateRoute>
-              <Layout />
-            </PrivateRoute>
-          }
-        >
+        <Route path="/not-allowed" element={<NotAllowedPage />} />
+        <Route path="/"element={<PrivateRoute><Layout /></PrivateRoute>} >
           <Route path="/profile" element={<UserProfileClean />} />
           <Route path="/all-posts" element={<AllPosts />} />
           <Route path="/create-post" element={<CreatePost />} />
           <Route path="/post/:postId" element={<PostDetails />} />
           <Route path="/chatgpt" element={<ChatGPTPage />} />
-          <Route path="/articles" element={<Articles />} />
           <Route path="/appointmens" element={<AppointmentsPage />} />
           <Route path="/admin" element={<AdminPanel />} />
           <Route path="/meetings/:meetingId/chat" element={<ChatContainer />} />

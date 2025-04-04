@@ -1,5 +1,7 @@
 import React, { useState, useEffect, ChangeEvent } from "react";
 import styles from "../../css/ProfilePage.module.css";
+import stylesLoading from "../../css/Loading.module.css";
+
 import {
   fetchUserProfile,
   updateUserProfileWithImage,
@@ -107,12 +109,16 @@ const UserProfileClean: React.FC = () => {
   };
 
   if (!user) {
-    return <div className={styles.loading}>Loading...</div>;
+    return (
+      <div className={stylesLoading.loadingContainer}>
+        <div className={stylesLoading.spinner}></div>
+        <p className={stylesLoading.loadingText}>Loading, please wait...</p>
+      </div>
+    );
   }
 
   return (
     <div className={styles.profilePage}>
-      {/* Секция редактирования профиля */}
       <div className={styles.heroSection}>
         <div className={styles.heroContent}>
           <div className={styles.avatarWrapper}>
