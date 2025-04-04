@@ -7,7 +7,7 @@ import styles from "../css/Loading.module.css";
 function PrivateRoute({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [isDoctor, setIsDoctor] = useState(false);
+  //const [isDoctor, setIsDoctor] = useState(false);
 
   useEffect(() => {
     const checkAuthAndRole = async () => {      const res = await fetchProtectedData();
@@ -18,7 +18,7 @@ function PrivateRoute({ children }: { children: React.ReactNode }) {
           try {
             const data = await fetchUserProfile(userId);
             if (data.user.role === "doctor") {
-              setIsDoctor(true);
+            //  setIsDoctor(true);
             }
           } catch (err) {
             console.error("Error fetching user profile:", err);
@@ -44,9 +44,9 @@ function PrivateRoute({ children }: { children: React.ReactNode }) {
     return <Navigate to="/login" replace />;
   }
 
-  if (!isDoctor) {
-    return <Navigate to="/not-allowed" replace />;
-  }
+  // if (!isDoctor) {
+  //   return <Navigate to="/not-allowed" replace />;
+  // }
 
   return <>{children}</>;
 }
