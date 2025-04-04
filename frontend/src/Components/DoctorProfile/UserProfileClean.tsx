@@ -4,47 +4,23 @@ import {
   fetchUserProfile,
   updateUserProfileWithImage,
 } from "../../Services/userService";
+import { fetchAppointments } from "../../Services/appointmentService";
 import { User } from "../../types/user";
-
+import { Appointment } from "../../types/appointment";
+import PatientsTable from "./PatientsTable";
 import ScheduleEditor from "./ScheduleEditor";
 import DayOffEditor from "./DayOffEditor";
 
-interface Patient {
-  fullName: string;
-  daysSinceLastConversation: number;
-  patientStatus: string;
-  lastSessionDate: string;
-  nextAppointment: string;
-}
-
-const staticPatients: Patient[] = [
-  {
-    fullName: "Test Name 1",
-    daysSinceLastConversation: 3,
-    patientStatus: "Severe",
-    lastSessionDate: "2023-10-01",
-    nextAppointment: "2023-10-05",
-  },
-  {
-    fullName: "Test Name 2",
-    daysSinceLastConversation: 1,
-    patientStatus: "Critical",
-    lastSessionDate: "2023-09-25",
-    nextAppointment: "2023-10-11",
-  },
-];
-
-const ProfilePage: React.FC = () => {
+const UserProfileClean: React.FC = () => {
   const [user, setUser] = useState<User | null>(null);
   const [editing, setEditing] = useState(false);
-
   const [fullName, setFullName] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
   const [dateOfBirth, setDateOfBirth] = useState("");
   const [gender, setGender] = useState("");
-
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [appointments, setAppointments] = useState<Appointment[]>([]);
 
   useEffect(() => {
     const userId = localStorage.getItem("userId");
@@ -62,6 +38,11 @@ const ProfilePage: React.FC = () => {
           }
         })
         .catch((err) => console.error("Error fetching user profile", err));
+
+      // Получаем встречи для формирования списка пациентов
+      fetchAppointments()
+        .then((data) => setAppointments(data.appointments))
+        .catch((err) => console.error("Error fetching appointments", err));
     }
   }, []);
 
@@ -131,6 +112,7 @@ const ProfilePage: React.FC = () => {
 
   return (
     <div className={styles.profilePage}>
+      {/* Секция редактирования профиля */}
       <div className={styles.heroSection}>
         <div className={styles.heroContent}>
           <div className={styles.avatarWrapper}>
@@ -232,52 +214,9 @@ const ProfilePage: React.FC = () => {
           </div>
         </div>
       </div>
-
-      {user && user.role === "doctor" && (
-        <div className={styles.patientsTableContainer}>
-          <h3 className={styles.tableTitle}>My Patients</h3>
-          <table className={styles.patientsTable}>
-            <thead>
-              <tr>
-                <th>Full Name</th>
-                <th>Status</th>
-                {/* <th>Days Since Last Conversation</th> */}
-                <th>Last Session Date</th>
-                <th>Next Appointment</th>
-                <th>Patient Profile</th>
-              </tr>
-            </thead>
-            <tbody>
-              {staticPatients.map((patient, index) => (
-                <tr key={index}>
-                  <td>{patient.fullName}</td>
-                  <td>{patient.patientStatus}</td>
-                  {/*  <td>{patient.daysSinceLastConversation}</td> */}
-                  <td>
-                    {new Date(patient.lastSessionDate).toLocaleDateString()}
-                  </td>
-                  <td>
-                    {new Date(patient.nextAppointment).toLocaleDateString()}
-                  </td>
-                  <td>
-                    <button
-                      className={styles.chatButton}
-                      onClick={() =>
-                        console.log("Go to profile for", patient.fullName)
-                      }
-                    >
-                      Go to Profile
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
-
       {user && user.role === "doctor" && (
         <div className={styles.scheduleSection}>
+          <PatientsTable appointments={appointments} />
           <ScheduleEditor doctorId={user._id} />
           <DayOffEditor doctorId={user._id} />
         </div>
@@ -286,4 +225,4 @@ const ProfilePage: React.FC = () => {
   );
 };
 
-export default ProfilePage;
+export default UserProfileClean;

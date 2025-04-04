@@ -1,10 +1,6 @@
 import React, { useEffect, useState } from "react";
 import styles from "../../css/ManageAppointmentsPage.module.css";
-import {
-  fetchAppointments,
-  createAppointment,
-  updateAppointment,
-} from "../../Services/appointmentService";
+import {fetchAppointments, createAppointment, updateAppointment, } from "../../Services/appointmentService";
 import PatientSearchModal from "../PatientSearchModal";
 import TimeSelectionModal from "./TimeSelectionModal"; 
 import CurrentAppointments from "./CurrentAppointments";

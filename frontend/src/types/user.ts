@@ -9,3 +9,11 @@ export interface User {
   gender?: 'male' | 'female' | 'other';
   isAdmin: boolean;
 }
+
+export interface Patient {
+  _id: string;
+  fullName: string;
+  lastSessionDate?: string;
+  nextAppointment?: string;
+  patientStatus?: string;
+}
