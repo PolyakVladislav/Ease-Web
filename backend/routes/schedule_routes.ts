@@ -3,6 +3,7 @@ import {
   createOrUpdateSchedule,
   getScheduleByDoctor,
   deleteScheduleEntry,
+  getClosestAppointmentByDoctor,
 } from "../controllers/schedule_controller";
 import {
   addDayOff,
@@ -24,5 +25,6 @@ router.delete("/schedule/dayoff/:dayOffId", authMiddleware, deleteDayOff);
 router.get("/schedule/:doctorId/dayoffs", authMiddleware, getDayOffList);
 
 router.get("/schedule/:doctorId/free-slots", authMiddleware, getAvailableSlots);
+router.get("/schedule/:doctorId/closest-slot", getClosestAppointmentByDoctor);
 
 export default router;

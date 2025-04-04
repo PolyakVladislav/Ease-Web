@@ -70,3 +70,40 @@ export const deleteScheduleEntry = async (req: Request, res: Response): Promise<
     res.status(500).json({ message: "Internal server error" });
   }
 };
+
+export const getClosestAppointmentByDoctor = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { doctorId } = req.params;
+    if (!doctorId) {
+      res.status(400).json({ message: "Doctor ID is required" });
+      return;
+    }
+
+    const schedule = await Schedule.findOne({ doctorId }).sort({ dayOfWeek: 1 });
+    if (!schedule) {
+      res.status(404).json({ message: "Schedule not found" });
+      return;
+    }
+
+    const now = new Date();
+    const today = now.getDay();
+    const targetDay = schedule.dayOfWeek; 
+
+    const daysToAdd = (targetDay - today + 7) % 7; 
+
+    const closestDate = new Date(now);
+    closestDate.setDate(now.getDate() + daysToAdd);
+    closestDate.setHours(0, 0, 0, 0);
+
+    const closestAppointment = {
+      doctorId: schedule.doctorId,
+      dayOfWeek: schedule.dayOfWeek,
+      appointmentDate: closestDate,
+    };
+
+    res.status(200).json({ closestAppointment });
+  } catch (error) {
+    console.error("Error getClosestAppointmentByDoctor:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
