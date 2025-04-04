@@ -147,12 +147,21 @@ const ManageAppointmentsPage: React.FC = () => {
         <HistoryAppointments appointments={appointments} />
       )}
 
-      {showPatientModal && (
+      {/* {showPatientModal && (
         <PatientSearchModal
           onPatientSelect={handlePatientSelect}
           onClose={() => setShowPatientModal(false)}
         />
-      )}
+      )} */}
+
+{showPatientModal && (
+  <PatientSearchModal
+    doctorId={localStorage.getItem("userId") || ""} // ⬅️ this is how you're storing doctor ID elsewhere
+    onPatientSelect={handlePatientSelect}
+    onClose={() => setShowPatientModal(false)}
+  />
+)}
+
 
       {showTimeModal && (
         <TimeSelectionModal

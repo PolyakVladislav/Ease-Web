@@ -16,7 +16,7 @@ export const createAppointment = async (
       isEmergency,
       initiator,
     } = req.body;
-    if (!patientId || !doctorId || !appointmentDate || !initiator) {
+    if (!patientId || !doctorId ||  !appointmentDate || !initiator) {
       res.status(400).json({ message: "Missing required fields" });
       return;
     }
@@ -202,6 +202,35 @@ export const getAppointmentDetails = async (
     res.status(200).json({ appointment });
   } catch (error) {
     console.error("Error fetching appointment details:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+export const getRecentPatients = async (req: Request, res: Response) => {
+  const doctorId = req.params.doctorId;
+
+  try {
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+    // 🛠 FIXED: use "appointmentDate" instead of "date"
+    const appointments = await Appointment.find({
+      doctorId: doctorId,
+      appointmentDate: { $gte: thirtyDaysAgo },
+    }).select("patientId");
+
+    // 🔁 Remove duplicates
+    const patientIds = Array.from(
+      new Set(appointments.map((appt) => appt.patientId.toString()))
+    );
+
+    const recentPatients = await User.find({
+      _id: { $in: patientIds },
+    }).select("_id username email");
+
+    res.status(200).json({ patients: recentPatients });
+  } catch (error) {
+    console.error("Failed to fetch recent patients:", error);
     res.status(500).json({ message: "Internal server error" });
   }
 };
