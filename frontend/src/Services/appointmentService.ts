@@ -46,3 +46,15 @@ export const updateAppointment = async (
   );
   return response.data;
 };
+
+export const getSummaryByAppointmentId = async (appointmentId: string) => {
+  try {
+    const response = await api.get(`/api/summary/${appointmentId}`);
+    return response.data.summary;
+  } catch (error: any) {
+    const message =
+      error?.response?.data?.message || "Unknown error fetching summary";
+    throw new Error(message);
+  }
+};
+
