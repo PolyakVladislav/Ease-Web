@@ -8,6 +8,8 @@ import Appointment, { IAppointment } from "../models/Appointment";
 export const verifyMeetingAccess = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const meetingId = req.params.meetingId;
+    //const meetingId = req.params.appointmentId;
+
     if (!meetingId) {
       res.status(400).json({ message: "meetingId not provided" });
       return;

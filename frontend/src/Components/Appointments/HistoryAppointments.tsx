@@ -82,9 +82,17 @@ const HistoryAppointments: React.FC<HistoryAppointmentsProps> = ({ appointments 
                 <button className={styles.chatButton} onClick={() => goToChatHistory(apt._id)}>
                   Chat History
                 </button>
-                <button className={styles.summaryButton} onClick={() => handleOpenSummaryModal(apt._id)}>
-                  AI Summary
-                </button>
+                <button className={styles.chatButton} onClick={() => navigate(`/summary/${apt._id}`, {
+              state: {
+              patientName: apt.patientId?.username || "Unknown",
+              date: apt.appointmentDate,
+              },
+             })
+        }>   
+             AI Summary
+          </button>
+
+
               </td>
             </tr>
           ))}

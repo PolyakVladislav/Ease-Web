@@ -6,6 +6,7 @@ import TimeSelectionModal from "./TimeSelectionModal";
 import CurrentAppointments from "./CurrentAppointments";
 import HistoryAppointments from "./HistoryAppointments";
 import { Appointment } from "../../types/appointment";
+import { useLocation } from "react-router-dom";
 
 type ModalMode = "create" | "edit";
 
@@ -22,7 +23,10 @@ const ManageAppointmentsPage: React.FC = () => {
   const [editingAppointment, setEditingAppointment] = useState<Appointment | null>(null);
 
   const [selectedPatient, setSelectedPatient] = useState<{ _id: string; username: string } | null>(null);
-  const [viewMode, setViewMode] = useState<"active" | "history">("active");
+  const location = useLocation();
+const defaultTab = location.state?.defaultTab === "history" ? "history" : "active";
+const [viewMode, setViewMode] = useState<"active" | "history">(defaultTab);
+
 
   useEffect(() => {
     fetchAppointments()
