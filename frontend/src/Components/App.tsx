@@ -13,6 +13,8 @@ import AppointmentsPage from "./Appointments/ManageAppointmentsPage";
 import UserProfileClean from "./DoctorProfile/UserProfileClean";
 import ChatContainer from "./Chat/ChatContainer";
 import NotAllowedPage from "./NotAllowedPage";
+import SessionSummaryPage from "./SessionSummary"; 
+
 
 function App() {
   return (
@@ -31,6 +33,7 @@ function App() {
           <Route path="/appointmens" element={<AppointmentsPage />} />
           <Route path="/admin" element={<AdminPanel />} />
           <Route path="/meetings/:meetingId/chat" element={<ChatContainer />} />
+          <Route path="/summary/:meetingId" element={<SessionSummaryPage />} />
         </Route>
       </Routes>
     </Router>

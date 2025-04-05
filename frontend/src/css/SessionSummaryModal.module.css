@@ -66,4 +66,35 @@
     background-color: #5a6268;
     transform: translateY(-2px);
   }
+
+
+  .metaBlock {
+    margin-bottom: 20px;
+    font-size: 1rem;
+    color: #333;
+    line-height: 1.6;
+  }
+
+  .backButtonWrapper {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 30px;
+  }
+  
+  .chatButton {
+    background-color: #6c5ce7;
+    color: white;
+    padding: 8px 16px;
+    border: none;
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+  }
+  
+  .chatButton:hover {
+    background-color: #5a4fcf;
+  }
+  
+  
   

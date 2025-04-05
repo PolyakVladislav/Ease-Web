@@ -10,8 +10,8 @@ router.get("/meetings/:meetingId", authMiddleware, verifyMeetingAccess, getMeeti
 router.get("/meetings/:meetingId/history", authMiddleware, verifyMeetingAccess, getMeetingHistory);
 router.post("/meetings/:meetingId/end", authMiddleware, verifyMeetingAccess, endMeeting);
 router.post("/consultation/save-summary", authMiddleware, verifyMeetingAccess, saveConsultationSummaryAPI);
-//router.get( "/summary/:appointmentId", authMiddleware, verifyMeetingAccess, getSummaryByAppointmentId );
-router.get( "/summary/:appointmentId", getSummaryByAppointmentId );
+router.get( "/summary/:appointmentId", authMiddleware, verifyMeetingAccess, getSummaryByAppointmentId );
+//router.get( "/summary/:appointmentId", getSummaryByAppointmentId );
 
 
 export default router;

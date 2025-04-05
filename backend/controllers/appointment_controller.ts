@@ -2,6 +2,8 @@ import "../models/Users";
 import { Request, Response } from "express";
 import Appointment from "../models/Appointment";
 import User from "../models/Users";
+import mongoose from "mongoose"; 
+
 
 export const createAppointment = async (
   req: Request,
@@ -234,3 +236,76 @@ export const getRecentPatients = async (req: Request, res: Response) => {
     res.status(500).json({ message: "Internal server error" });
   }
 };
+
+
+
+
+export const getTherapistPatientSessions = async (req: Request, res: Response) => {
+  try {
+    console.log("Fetching therapist sessions...");
+
+    const sessions = await Appointment.aggregate([
+      {
+        $match: {
+          status: { $in: ["completed", "passed"] }
+        }
+      },
+      {
+        $group: {
+          _id: {
+            therapist: "$doctorId",
+            patient: "$patientId"
+          },
+          count: { $sum: 1 }
+        }
+      },
+      {
+        $group: {
+          _id: "$_id.therapist",
+          patients: {
+            $push: {
+              patient: "$_id.patient",
+              sessionCount: "$count"
+            }
+          }
+        }
+      }
+    ]);
+
+    console.log("Aggregated sessions:", sessions);
+
+    const populated = await Promise.all(
+      sessions.map(async (t) => {
+        const therapistUser = mongoose.Types.ObjectId.isValid(t._id)
+        ? await User.findById(t._id)
+        : null;
+        console.log("Therapist:", therapistUser?.username);
+
+        const patients = await Promise.all(
+          t.patients.map(async (p: { patient: string; sessionCount: number }) => {
+            const patientUser = mongoose.Types.ObjectId.isValid(p.patient)
+            ? await User.findById(p.patient)
+            : null;
+            console.log(`  - Patient: ${patientUser?.username || "Unknown"} (${p.sessionCount})`);
+            return {
+              name: patientUser?.username || "Unknown",
+              count: p.sessionCount,
+            };
+          })
+        );
+
+        return {
+          therapist: therapistUser?.username || "Unknown Therapist",
+          patients,
+        };
+      })
+    );
+
+    res.status(200).json({ data: populated });
+  } catch (err) {
+    console.error("🔥 Failed to fetch therapist-patient sessions", err);
+    res.status(500).json({ message: "Internal server error", error: err });
+  }
+};
+
+

@@ -7,7 +7,14 @@ import Appointment, { IAppointment } from "../models/Appointment";
  */
 export const verifyMeetingAccess = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
-    const meetingId = req.params.meetingId;
+    //const meetingId = req.params.meetingId;
+    //const meetingId = req.params.appointmentId;
+    const meetingId = req.params.meetingId || req.params.appointmentId;
+
+  
+
+
+
     if (!meetingId) {
       res.status(400).json({ message: "meetingId not provided" });
       return;
@@ -18,6 +25,8 @@ export const verifyMeetingAccess = async (req: Request, res: Response, next: Nex
       res.status(401).json({ message: "User not authenticated" });
       return;
     }
+
+    console.log("🔍 Verifying access to meeting:", meetingId, "for user:", user._id);
 
     const appointment: IAppointment | null = await Appointment.findById(meetingId).lean();
     if (!appointment) {
