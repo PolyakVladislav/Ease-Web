@@ -2,6 +2,15 @@ import React, { useEffect, useState } from "react";
 import styles from "../css/AdminPanel.module.css";
 import { getAllUsers, updateUserRole } from "../Services/adminService";
 import { User } from "../types/user";
+import api from "../Services/axiosInstance"; // Token-safe instance
+
+type TherapistSession = {
+  therapist: string;
+  patients: {
+    name: string;
+    count: number;
+  }[];
+};
 
 const AdminPanel: React.FC = () => {
   const [users, setUsers] = useState<User[]>([]);
@@ -10,6 +19,7 @@ const AdminPanel: React.FC = () => {
   const [editingUser, setEditingUser] = useState<User | null>(null);
   const [newRole, setNewRole] = useState<"doctor" | "patient">("patient");
   const [newIsAdmin, setNewIsAdmin] = useState<boolean>(false);
+  const [therapistSessions, setTherapistSessions] = useState<TherapistSession[]>([]);
 
   useEffect(() => {
     setLoading(true);
@@ -20,6 +30,15 @@ const AdminPanel: React.FC = () => {
         setError("Failed to fetch users.");
       })
       .finally(() => setLoading(false));
+
+    api
+      .get("/api/analytics/therapist-patient-sessions")
+      .then((res) => {
+        setTherapistSessions(res.data.data);
+      })
+      .catch((err) => {
+        console.error("Error fetching therapist sessions:", err);
+      });
   }, []);
 
   const handleRoleChange = (
@@ -52,7 +71,7 @@ const AdminPanel: React.FC = () => {
   };
 
   const handleCancel = () => {
-    setEditingUser(null); 
+    setEditingUser(null);
   };
 
   return (
@@ -63,28 +82,60 @@ const AdminPanel: React.FC = () => {
       ) : error ? (
         <p>{error}</p>
       ) : (
-        <table className={styles.userTable}>
-          <thead>
-            <tr>
-              <th>Username</th>
-              <th>Email</th>
-              <th>Role</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {users.map((user) => (
-              <tr key={user._id}>
-                <td>{user.username}</td>
-                <td>{user.email}</td>
-                <td>{user.role}{user.isAdmin ? " (admin)" : ""}</td>
-                <td>
-                  <button onClick={() => handleEditClick(user)}>Edit</button>
-                </td>
+        <div className={styles.userTableContainer}>
+          <table className={styles.userTable}>
+            <thead>
+              <tr>
+                <th>Username</th>
+                <th>Email</th>
+                <th>Role</th>
+                <th>Actions</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {users.map((user) => (
+                <tr key={user._id}>
+                  <td>{user.username}</td>
+                  <td>{user.email}</td>
+                  <td>{user.role}{user.isAdmin ? " (admin)" : ""}</td>
+                  <td>
+                    <button onClick={() => handleEditClick(user)}>Edit</button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      {/* Therapist session section */}
+      <h3 className={styles.therapistTitle}>Therapist Session History</h3>
+      {therapistSessions.length === 0 ? (
+        <p>No session data found.</p>
+      ) : (
+        <div className={styles.therapistTableContainer}>
+          {therapistSessions.map((t, i) => (
+            <div key={i} className={styles.therapistCard}>
+             <h4>Dr' {t.therapist}</h4>
+              <table className={styles.sessionTable}>
+                <thead>
+                  <tr>
+                    <th>Patient</th>
+                    <th>Session Count</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {t.patients.map((p, j) => (
+                    <tr key={j}>
+                      <td>{p.name}</td>
+                      <td>{p.count}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          ))}
+        </div>
       )}
 
       {editingUser && (
