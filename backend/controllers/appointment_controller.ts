@@ -4,7 +4,6 @@ import Appointment from "../models/Appointment";
 import User from "../models/Users";
 import mongoose from "mongoose"; 
 
-
 export const createAppointment = async (
   req: Request,
   res: Response
@@ -18,7 +17,7 @@ export const createAppointment = async (
       isEmergency,
       initiator,
     } = req.body;
-    if (!patientId || !doctorId ||  !appointmentDate || !initiator) {
+    if (!patientId || !doctorId || !appointmentDate || !initiator) {
       res.status(400).json({ message: "Missing required fields" });
       return;
     }
@@ -120,7 +119,7 @@ export const updateAppointment = async (
       appointmentId,
       updateData,
       { new: true }
-    ).populate({ path: "patientId", model: "Users", select: "username" })
+    ).populate({ path: "patientId", model: "Users", select: "username" });
 
     if (!updatedAppointment) {
       res.status(404).json({ message: "Appointment not found" });
@@ -176,8 +175,8 @@ export const getAppointmentsByDoctor = async (
     }
 
     const appointments = await Appointment.find(filter)
-    .populate({ path: "patientId", model: "Users", select: "username" })
-    .sort({ isEmergency: -1, appointmentDate: 1 });
+      .populate({ path: "patientId", model: "Users", select: "username" })
+      .sort({ isEmergency: -1, appointmentDate: 1 });
 
     res.status(200).json({ appointments });
   } catch (error) {
@@ -215,13 +214,11 @@ export const getRecentPatients = async (req: Request, res: Response) => {
     const thirtyDaysAgo = new Date();
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
-    // 🛠 FIXED: use "appointmentDate" instead of "date"
     const appointments = await Appointment.find({
       doctorId: doctorId,
       appointmentDate: { $gte: thirtyDaysAgo },
     }).select("patientId");
 
-    // 🔁 Remove duplicates
     const patientIds = Array.from(
       new Set(appointments.map((appt) => appt.patientId.toString()))
     );
@@ -237,27 +234,27 @@ export const getRecentPatients = async (req: Request, res: Response) => {
   }
 };
 
-
-
-
-export const getTherapistPatientSessions = async (req: Request, res: Response) => {
+export const getTherapistPatientSessions = async (
+  req: Request,
+  res: Response
+) => {
   try {
     console.log("Fetching therapist sessions...");
 
     const sessions = await Appointment.aggregate([
       {
         $match: {
-          status: { $in: ["completed", "passed"] }
-        }
+          status: { $in: ["completed", "passed"] },
+        },
       },
       {
         $group: {
           _id: {
             therapist: "$doctorId",
-            patient: "$patientId"
+            patient: "$patientId",
           },
-          count: { $sum: 1 }
-        }
+          count: { $sum: 1 },
+        },
       },
       {
         $group: {
@@ -265,11 +262,11 @@ export const getTherapistPatientSessions = async (req: Request, res: Response) =
           patients: {
             $push: {
               patient: "$_id.patient",
-              sessionCount: "$count"
-            }
-          }
-        }
-      }
+              sessionCount: "$count",
+            },
+          },
+        },
+      },
     ]);
 
     console.log("Aggregated sessions:", sessions);
@@ -277,16 +274,14 @@ export const getTherapistPatientSessions = async (req: Request, res: Response) =
     const populated = await Promise.all(
       sessions.map(async (t) => {
         const therapistUser = mongoose.Types.ObjectId.isValid(t._id)
-        ? await User.findById(t._id)
-        : null;
-        console.log("Therapist:", therapistUser?.username);
+          ? await User.findById(t._id)
+          : null;
 
         const patients = await Promise.all(
           t.patients.map(async (p: { patient: string; sessionCount: number }) => {
             const patientUser = mongoose.Types.ObjectId.isValid(p.patient)
-            ? await User.findById(p.patient)
-            : null;
-            console.log(`  - Patient: ${patientUser?.username || "Unknown"} (${p.sessionCount})`);
+              ? await User.findById(p.patient)
+              : null;
             return {
               name: patientUser?.username || "Unknown",
               count: p.sessionCount,
@@ -308,4 +303,30 @@ export const getTherapistPatientSessions = async (req: Request, res: Response) =
   }
 };
 
+// ✅ New function: Get sessions by patient ID
+export const getSessionsByPatientId = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  try {
+    const { patientId } = req.params;
 
+    const patient = await User.findById(patientId).select("username");
+    if (!patient) {
+      res.status(404).json({ error: "Patient not found" });
+      return;
+    }
+
+    const sessions = await Appointment.find({ patientId }).sort({
+      appointmentDate: -1,
+    });
+
+    res.json({
+      patientName: patient.username,
+      sessions,
+    });
+  } catch (err) {
+    console.error("Error fetching patient sessions:", err);
+    res.status(500).json({ error: "Server error" });
+  }
+};

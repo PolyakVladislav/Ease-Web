@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { createAppointment, updateAppointment, getAppointmentsByDoctor, getAppointmentDetails,getTherapistPatientSessions } from "../controllers/appointment_controller";
+import { createAppointment, updateAppointment, getAppointmentsByDoctor, getAppointmentDetails,getTherapistPatientSessions,getSessionsByPatientId } from "../controllers/appointment_controller";
 import { authMiddleware } from "../controllers/auth_controller";
 import { getRecentPatients } from "../controllers/appointment_controller";
 
@@ -16,6 +16,9 @@ router.get("/appointments", authMiddleware, getAppointmentsByDoctor);
 router.get("/appointments/:appointmentId", authMiddleware, getAppointmentDetails);
 
 router.get("/doctors/:doctorId/recent-patients", authMiddleware, getRecentPatients);
+
+router.get("/patients/:patientId/sessions", authMiddleware, getSessionsByPatientId);
+
 
 
 
