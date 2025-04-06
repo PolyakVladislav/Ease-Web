@@ -1,17 +1,29 @@
 import React, { useState, useEffect, ChangeEvent } from "react";
 import styles from "../../css/ProfilePage.module.css";
 import stylesLoading from "../../css/Loading.module.css";
+import patientsStyles from "../../css/DoctorPatientsTable.module.css";
 
 import {
   fetchUserProfile,
   updateUserProfileWithImage,
 } from "../../Services/userService";
-import { fetchAppointments } from "../../Services/appointmentService";
+import {
+  fetchAppointments,
+  fetchPatientsWithSessions,
+} from "../../Services/appointmentService";
 import { User } from "../../types/user";
 import { Appointment } from "../../types/appointment";
-import PatientsTable from "./PatientsTable";
 import ScheduleEditor from "./ScheduleEditor";
 import DayOffEditor from "./DayOffEditor";
+import { useNavigate } from "react-router-dom";
+import SessionSummaryModal from "../SessionSummaryModal";
+
+interface PatientSession {
+  appointmentId: string;
+  appointmentDate: string;
+  status: string;
+  summary?: string;
+}
 
 const UserProfileClean: React.FC = () => {
   const [user, setUser] = useState<User | null>(null);
@@ -23,6 +35,10 @@ const UserProfileClean: React.FC = () => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [appointments, setAppointments] = useState<Appointment[]>([]);
+  const [patientsWithSessions, setPatientsWithSessions] = useState<any[]>([]);
+  const [activeSummaryId, setActiveSummaryId] = useState<string | null>(null);
+
+  const navigate = useNavigate();
 
   useEffect(() => {
     const userId = localStorage.getItem("userId");
@@ -38,10 +54,13 @@ const UserProfileClean: React.FC = () => {
             const dob = new Date(fetchedUser.dateOfBirth);
             setDateOfBirth(dob.toISOString().split("T")[0]);
           }
+
+          fetchPatientsWithSessions(userId)
+            .then(setPatientsWithSessions)
+            .catch((err) => console.error("Error fetching patients:", err));
         })
         .catch((err) => console.error("Error fetching user profile", err));
 
-      // Получаем встречи для формирования списка пациентов
       fetchAppointments()
         .then((data) => setAppointments(data.appointments))
         .catch((err) => console.error("Error fetching appointments", err));
@@ -160,10 +179,7 @@ const UserProfileClean: React.FC = () => {
               <button className={styles.saveButton} onClick={handleSaveClick}>
                 Save
               </button>
-              <button
-                className={styles.cancelButton}
-                onClick={handleCancelClick}
-              >
+              <button className={styles.cancelButton} onClick={handleCancelClick}>
                 Cancel
               </button>
             </div>
@@ -180,7 +196,6 @@ const UserProfileClean: React.FC = () => {
               value={fullName}
               onChange={(e) => setFullName(e.target.value)}
               disabled={!editing}
-              placeholder="Your Full Name"
             />
           </div>
           <div className={styles.formField}>
@@ -190,7 +205,6 @@ const UserProfileClean: React.FC = () => {
               value={phoneNumber}
               onChange={(e) => setPhoneNumber(e.target.value)}
               disabled={!editing}
-              placeholder="Your Phone Number"
             />
           </div>
         </div>
@@ -202,7 +216,6 @@ const UserProfileClean: React.FC = () => {
               value={dateOfBirth}
               onChange={(e) => setDateOfBirth(e.target.value)}
               disabled={!editing}
-              placeholder="Your Date of Birth"
             />
           </div>
           <div className={styles.formField}>
@@ -220,12 +233,82 @@ const UserProfileClean: React.FC = () => {
           </div>
         </div>
       </div>
+
       {user && user.role === "doctor" && (
         <div className={styles.scheduleSection}>
-          <PatientsTable appointments={appointments} />
+          <h3 style={{ marginBottom: "1rem", textAlign: "center" }}>My Patients</h3>
+          <div className={`${patientsStyles.patientContainer} ${styles.patientsTableContainer}`}>
+          {patientsWithSessions.map((entry) => (
+              <div key={entry.patient._id} className={patientsStyles.patientBlock}>
+                <h4 className={patientsStyles.patientName}>{entry.patient.username}</h4>
+                <table className={patientsStyles.table}>
+                  <thead>
+                    <tr>
+                      <th>Date</th>
+                      <th>Status</th>
+                      <th>Chat</th>
+                      <th>AI Summary</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {entry.sessions.map((s: PatientSession) => (
+                      <tr key={s.appointmentId}>
+                        <td>{new Date(s.appointmentDate).toLocaleString()}</td>
+                        <td>{s.status}</td>
+                        <td>
+                          <button
+                          className={patientsStyles.actionButton}
+                           onClick={() => navigate(`/meetings/${s.appointmentId}/chat`)} // ✅ correct path
+                                     >    
+                                Chat History
+                          </button>
+                        </td>
+                        <td>
+                          <button
+                            className={patientsStyles.actionButton}
+                            onClick={() => setActiveSummaryId(s.appointmentId)}
+                          >
+                            AI Summary
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                    <tr>
+                      <td colSpan={4} style={{ textAlign: "center" }}>
+                        <button
+                          className={patientsStyles.scheduleButton}
+                          onClick={() =>
+                            navigate("/appointments", {
+                              state: { prefillPatientId: entry.patient._id },
+                            })
+                          }
+                        >
+                          Schedule Appointment
+                        </button>
+                        <button
+                          className={patientsStyles.disabledButton}
+                          disabled
+                          title="Coming Soon"
+                        >
+                          AI Full Summary
+                        </button>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            ))}
+          </div>
           <ScheduleEditor doctorId={user._id} />
           <DayOffEditor doctorId={user._id} />
         </div>
+      )}
+
+      {activeSummaryId && (
+        <SessionSummaryModal
+          appointmentId={activeSummaryId}
+          onClose={() => setActiveSummaryId(null)}
+        />
       )}
     </div>
   );

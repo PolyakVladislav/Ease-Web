@@ -2,6 +2,10 @@ import { Request, Response } from "express";
 import userModel from "../models/Users";
 import postModel from "../models/Post";
 import multer from "multer";
+import Appointment from "../models/Appointment";
+import { ConsultationSummary } from "../models/ConsultationSummary";
+
+
 
 const SERVER_CONNECT = process.env.SERVER_CONNECT;
 
@@ -177,4 +181,58 @@ export const searchPatients = async (
   }
 };
 
+
+
+export const getPatientsWithSessions = async (req: Request, res: Response) => {
+  try {
+    const doctorId = req.params.doctorId;
+
+    const appointments = await Appointment.find({ doctorId })
+      .populate("patientId", "username") // ensures we get patient.username
+      .lean();
+
+    const summaries = await ConsultationSummary.find({ doctorId }).lean();
+
+    const summaryMap = new Map<string, string>();
+    summaries.forEach((sum) => {
+      summaryMap.set(sum.appointmentId.toString(), sum.summary);
+    });
+
+    const grouped = new Map<string, { patient: any; sessions: any[] }>();
+
+    appointments.forEach((apt) => {
+      const patient = apt.patientId as any; // ✅ Safe cast (already populated)
+      const patientId = patient._id.toString();
+
+      if (!grouped.has(patientId)) {
+        grouped.set(patientId, {
+          patient: {
+            _id: patientId,
+            username: patient.username,
+          },
+          sessions: [],
+        });
+      }
+
+      grouped.get(patientId)!.sessions.push({
+        appointmentId: apt._id,
+        appointmentDate: apt.appointmentDate,
+        status: apt.status,
+        summary: summaryMap.get(apt._id.toString()) || null,
+      });
+    });
+
+    res.json(Array.from(grouped.values()));
+  } catch (err) {
+    console.error("Error in getPatientsWithSessions:", err);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+
+
+
+
 export { upload };
+
+
