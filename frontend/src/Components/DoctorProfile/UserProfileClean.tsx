@@ -237,68 +237,45 @@ const UserProfileClean: React.FC = () => {
       {user && user.role === "doctor" && (
         <div className={styles.scheduleSection}>
           <h3 style={{ marginBottom: "1rem", textAlign: "center" }}>My Patients</h3>
-          <div className={`${patientsStyles.patientContainer} ${styles.patientsTableContainer}`}>
-          {patientsWithSessions.map((entry) => (
-              <div key={entry.patient._id} className={patientsStyles.patientBlock}>
-                <h4 className={patientsStyles.patientName}>{entry.patient.username}</h4>
-                <table className={patientsStyles.table}>
-                  <thead>
-                    <tr>
-                      <th>Date</th>
-                      <th>Status</th>
-                      <th>Chat</th>
-                      <th>AI Summary</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {entry.sessions.map((s: PatientSession) => (
-                      <tr key={s.appointmentId}>
-                        <td>{new Date(s.appointmentDate).toLocaleString()}</td>
-                        <td>{s.status}</td>
-                        <td>
-                          <button
-                          className={patientsStyles.actionButton}
-                           onClick={() => navigate(`/meetings/${s.appointmentId}/chat`)} // ✅ correct path
-                                     >    
-                                Chat History
-                          </button>
-                        </td>
-                        <td>
-                          <button
-                            className={patientsStyles.actionButton}
-                            onClick={() => setActiveSummaryId(s.appointmentId)}
-                          >
-                            AI Summary
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
-                    <tr>
-                      <td colSpan={4} style={{ textAlign: "center" }}>
-                        <button
-                          className={patientsStyles.scheduleButton}
-                          onClick={() =>
-                            navigate("/appointments", {
-                              state: { prefillPatientId: entry.patient._id },
-                            })
-                          }
-                        >
-                          Schedule Appointment
-                        </button>
-                        <button
-                          className={patientsStyles.disabledButton}
-                          disabled
-                          title="Coming Soon"
-                        >
-                          AI Full Summary
-                        </button>
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-            ))}
-          </div>
+          <div className={styles.patientsTableContainer}>
+  <h3 className={styles.tableTitle}>My Patients</h3>
+  <table className={styles.patientsTable}>
+    <thead>
+      <tr>
+        <th>Full Name</th>
+        <th>Last Session</th>
+        <th>Next Appointment</th>
+        <th>Patient Record</th>
+      </tr>
+    </thead>
+    <tbody>
+      {patientsWithSessions.map((entry) => {
+        const sessions = entry.sessions || [];
+        const sorted = [...sessions].sort(
+          (a, b) => new Date(b.appointmentDate).getTime() - new Date(a.appointmentDate).getTime()
+        );
+        const last = sorted.find(s => new Date(s.appointmentDate) < new Date());
+        const next = sorted.find(s => new Date(s.appointmentDate) > new Date());
+        return (
+          <tr key={entry.patient._id}>
+            <td>{entry.patient.username}</td>
+            <td>{last ? new Date(last.appointmentDate).toLocaleString() : "N/A"}</td>
+            <td>{next ? new Date(next.appointmentDate).toLocaleString() : "N/A"}</td>
+            <td>
+              <button
+                className={styles.chatButton}
+                onClick={() => navigate(`/patients/${entry.patient._id}/record`)}
+              >
+                Patient Record
+              </button>
+            </td>
+          </tr>
+        );
+      })}
+    </tbody>
+  </table>
+</div>
+
           <ScheduleEditor doctorId={user._id} />
           <DayOffEditor doctorId={user._id} />
         </div>

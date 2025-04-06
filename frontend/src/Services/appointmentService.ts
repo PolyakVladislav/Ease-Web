@@ -60,7 +60,12 @@ export const getSummaryByAppointmentId = async (appointmentId: string) => {
 };
 
 export const fetchPatientsWithSessions = async (doctorId: string) => {
-  const res = await axiosInstance.get(`/api/users/${doctorId}/patient-sessions`);
+  const res = await api.get(`/api/users/${doctorId}/patient-sessions`);
+  return res.data;
+};
+
+export const getPatientSessions = async (patientId: string) => {
+  const res = await api.get(`/api/patients/${patientId}/sessions`);
   return res.data;
 };
 
