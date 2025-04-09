@@ -3,6 +3,7 @@ import styles from "../css/AdminPanel.module.css";
 import { getAllUsers, updateUserRole } from "../Services/adminService";
 import { User } from "../types/user";
 import api from "../Services/axiosInstance"; // Token-safe instance
+import AdminCharts from "../Components/AdminCharts";
 
 type TherapistSession = {
   therapist: string;
@@ -116,7 +117,7 @@ const AdminPanel: React.FC = () => {
         <div className={styles.therapistTableContainer}>
           {therapistSessions.map((t, i) => (
             <div key={i} className={styles.therapistCard}>
-             <h4>Dr' {t.therapist}</h4>
+              <h4>Dr' {t.therapist}</h4>
               <table className={styles.sessionTable}>
                 <thead>
                   <tr>
@@ -137,6 +138,9 @@ const AdminPanel: React.FC = () => {
           ))}
         </div>
       )}
+
+      {/* 🔥 Added charts rendering section here */}
+      <AdminCharts />
 
       {editingUser && (
         <div className={styles.modalOverlay}>
