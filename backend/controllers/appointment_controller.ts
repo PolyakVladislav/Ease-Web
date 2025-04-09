@@ -329,4 +329,33 @@ export const getSessionsByPatientId = async (
     console.error("Error fetching patient sessions:", err);
     res.status(500).json({ error: "Server error" });
   }
+  
 };
+export const deleteAppointment = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  try {
+    const { appointmentId } = req.params;
+
+    if (!appointmentId) {
+      res.status(400).json({ message: "Appointment ID is required" });
+      return;
+    }
+
+    const appointment = await Appointment.findById(appointmentId);
+
+    if (!appointment) {
+      res.status(404).json({ message: "Appointment not found" });
+      return;
+    }
+
+    await Appointment.findByIdAndDelete(appointmentId);
+
+    res.status(200).json({ message: "Appointment deleted successfully" });
+  } catch (error) {
+    console.error("Error deleting appointment:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
