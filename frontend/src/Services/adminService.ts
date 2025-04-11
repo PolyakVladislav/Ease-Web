@@ -22,3 +22,15 @@ export const updateUserRole = async (
   );
   return response.data; 
 };
+
+// 1. Sessions per Doctor
+export const fetchSessionsPerDoctor = async () => {
+  const res = await api.get("/api/analytics/sessions-per-doctor");
+  return res.data; // format: [{ doctor: "Aviv", count: 12 }]
+};
+
+// 2. Sessions per Month (last 12 months)
+export const fetchSessionsPerMonth = async () => {
+  const res = await api.get("/api/analytics/sessions-per-month");
+  return res.data; // format: [{ month: "2024-03", count: 5 }]
+};

@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { getAllUsers, getUserProfile, updateUserProfile, upload, searchPatients } from "../controllers/user_controller";
+import { getAllUsers, getUserProfile, updateUserProfile, upload, searchPatients,getPatientsWithSessions } from "../controllers/user_controller";
 import { authMiddleware } from "../controllers/auth_controller";
 
 
@@ -184,5 +184,7 @@ router.get("/profile", authMiddleware, getUserProfile);
  */
 router.put("/profile", authMiddleware, upload.single('profilePicture'), updateUserProfile);
 router.get("/users/search", searchPatients);
+router.get("/:doctorId/patient-sessions", getPatientsWithSessions);
+
 
 export default router;

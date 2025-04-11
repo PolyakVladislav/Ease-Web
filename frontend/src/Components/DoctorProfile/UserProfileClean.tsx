@@ -1,17 +1,29 @@
 import React, { useState, useEffect, ChangeEvent } from "react";
 import styles from "../../css/ProfilePage.module.css";
 import stylesLoading from "../../css/Loading.module.css";
+import patientsStyles from "../../css/DoctorPatientsTable.module.css";
 
 import {
   fetchUserProfile,
   updateUserProfileWithImage,
 } from "../../Services/userService";
-import { fetchAppointments } from "../../Services/appointmentService";
+import {
+  fetchAppointments,
+  fetchPatientsWithSessions,
+} from "../../Services/appointmentService";
 import { User } from "../../types/user";
 import { Appointment } from "../../types/appointment";
-import PatientsTable from "./PatientsTable";
 import ScheduleEditor from "./ScheduleEditor";
 import DayOffEditor from "./DayOffEditor";
+import { useNavigate } from "react-router-dom";
+import SessionSummaryModal from "../SessionSummaryModal";
+
+interface PatientSession {
+  appointmentId: string;
+  appointmentDate: string;
+  status: string;
+  summary?: string;
+}
 
 const UserProfileClean: React.FC = () => {
   const [user, setUser] = useState<User | null>(null);
@@ -23,6 +35,10 @@ const UserProfileClean: React.FC = () => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [appointments, setAppointments] = useState<Appointment[]>([]);
+  const [patientsWithSessions, setPatientsWithSessions] = useState<any[]>([]);
+  const [activeSummaryId, setActiveSummaryId] = useState<string | null>(null);
+
+  const navigate = useNavigate();
 
   useEffect(() => {
     const userId = localStorage.getItem("userId");
@@ -38,10 +54,13 @@ const UserProfileClean: React.FC = () => {
             const dob = new Date(fetchedUser.dateOfBirth);
             setDateOfBirth(dob.toISOString().split("T")[0]);
           }
+
+          fetchPatientsWithSessions(userId)
+            .then(setPatientsWithSessions)
+            .catch((err) => console.error("Error fetching patients:", err));
         })
         .catch((err) => console.error("Error fetching user profile", err));
 
-      // Получаем встречи для формирования списка пациентов
       fetchAppointments()
         .then((data) => setAppointments(data.appointments))
         .catch((err) => console.error("Error fetching appointments", err));
@@ -160,10 +179,7 @@ const UserProfileClean: React.FC = () => {
               <button className={styles.saveButton} onClick={handleSaveClick}>
                 Save
               </button>
-              <button
-                className={styles.cancelButton}
-                onClick={handleCancelClick}
-              >
+              <button className={styles.cancelButton} onClick={handleCancelClick}>
                 Cancel
               </button>
             </div>
@@ -180,7 +196,6 @@ const UserProfileClean: React.FC = () => {
               value={fullName}
               onChange={(e) => setFullName(e.target.value)}
               disabled={!editing}
-              placeholder="Your Full Name"
             />
           </div>
           <div className={styles.formField}>
@@ -190,7 +205,6 @@ const UserProfileClean: React.FC = () => {
               value={phoneNumber}
               onChange={(e) => setPhoneNumber(e.target.value)}
               disabled={!editing}
-              placeholder="Your Phone Number"
             />
           </div>
         </div>
@@ -202,7 +216,6 @@ const UserProfileClean: React.FC = () => {
               value={dateOfBirth}
               onChange={(e) => setDateOfBirth(e.target.value)}
               disabled={!editing}
-              placeholder="Your Date of Birth"
             />
           </div>
           <div className={styles.formField}>
@@ -220,12 +233,59 @@ const UserProfileClean: React.FC = () => {
           </div>
         </div>
       </div>
+
       {user && user.role === "doctor" && (
         <div className={styles.scheduleSection}>
-          <PatientsTable appointments={appointments} />
+          <h3 style={{ marginBottom: "1rem", textAlign: "center" }}>My Patients</h3>
+          <div className={styles.patientsTableContainer}>
+  <h3 className={styles.tableTitle}>My Patients</h3>
+  <table className={styles.patientsTable}>
+    <thead>
+      <tr>
+        <th>Full Name</th>
+        <th>Last Session</th>
+        <th>Next Appointment</th>
+        <th>Patient Record</th>
+      </tr>
+    </thead>
+    <tbody>
+      {patientsWithSessions.map((entry) => {
+        const sessions = entry.sessions || [];
+        const sorted = [...sessions].sort(
+          (a, b) => new Date(b.appointmentDate).getTime() - new Date(a.appointmentDate).getTime()
+        );
+        const last = sorted.find(s => new Date(s.appointmentDate) < new Date());
+        const next = sorted.find(s => new Date(s.appointmentDate) > new Date());
+        return (
+          <tr key={entry.patient._id}>
+            <td>{entry.patient.username}</td>
+            <td>{last ? new Date(last.appointmentDate).toLocaleString() : "N/A"}</td>
+            <td>{next ? new Date(next.appointmentDate).toLocaleString() : "N/A"}</td>
+            <td>
+              <button
+                className={styles.chatButton}
+                onClick={() => navigate(`/patients/${entry.patient._id}/record`)}
+              >
+                Patient Record
+              </button>
+            </td>
+          </tr>
+        );
+      })}
+    </tbody>
+  </table>
+</div>
+
           <ScheduleEditor doctorId={user._id} />
           <DayOffEditor doctorId={user._id} />
         </div>
+      )}
+
+      {activeSummaryId && (
+        <SessionSummaryModal
+          appointmentId={activeSummaryId}
+          onClose={() => setActiveSummaryId(null)}
+        />
       )}
     </div>
   );
