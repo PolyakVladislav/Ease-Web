@@ -18,7 +18,7 @@ import appointmentRoutes from "./routes/appointment_routes";
 import searchRoutes from "./routes/user_route";
 import scheduleRoutes from "./routes/schedule_routes";
 import meetingRoutes from "./routes/meetingRoutes";
-
+import Diary from "./routes/diary_route";
 import './config/passport'; 
 import cookieParser from "cookie-parser";
 import path from 'path';
@@ -83,7 +83,7 @@ app.use("/api", appointmentRoutes);
 app.use("/api", searchRoutes);
 app.use("/api", scheduleRoutes);
 app.use("/api", meetingRoutes);
-
+app.use("/api", Diary);
 
 
 

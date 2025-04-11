@@ -140,8 +140,63 @@ ${chatHistory}`;
   return summary;
 }
 
+async function getDiarySummary(DiaryNote: string): Promise<string> {
+  const prompt = `You are a virtual medical consultant advisor. No information you are provided is real and will not be used to actually treat a patient. Your task is to analyze the provided chat history of a specific patient encounter with a doctor. Based solely on this encounter data, you must:
+  
+  - Generate a structured, bulleted outline summarizing the patient encounter. For each bullet point, follow this format:
+    - Observation: Describe a key detail from the chat (e.g., symptoms, patient history, physical exam findings).
+    - Significance: Explain why this detail is important for identifying the cause of the issue or guiding treatment options.
+    - Potential Differential Diagnoses/Treatment Pathways: (If applicable) Suggest possible conditions or treatment approaches based on the observation.
+    
+  - Prioritize summarizing the encounter data and its significance, while also including potential differential diagnoses or treatment pathways as secondary suggestions.
+  
+  - Restrict your summary to the information provided in the chat history.
+  
+  - Include the following disclaimer at the end of your summary:
+    "This summary is for evaluation purposes only and does not constitute medical advice."
+  
+  - Future Integration: If additional chat histories for this patient are provided later, simply and clearly integrate them into your summary.
+  
+  All information is fictional and intended solely for evaluation purposes. Your output should be clear, concise, and simple enough for doctors to review.
+  
+  Chat History:
+  ${DiaryNote}`;
+  
+    const response = await fetch("https://api.openai.com/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${OPENAI_API_KEY}`,
+      },
+      body: JSON.stringify({
+        model: "gpt-3.5-turbo",
+        messages: [
+          {
+            role: "system",
+            content: "You are an AI assistant summarizing doctor-patient consultations.",
+          },
+          {
+            role: "user",
+            content: prompt,
+          },
+        ],
+        max_tokens: 250,
+      }),
+    });
+  
+    if (!response.ok) {
+      throw new Error("Error in request to OpenAI for consultation summary");
+    }
+  
+    const data: OpenAIResponse = await response.json();
+    let summary = data.choices[0]?.message?.content?.trim() || "";
+    return summary;
+  }
+
+
 export default {
   getSuggestion,
   getSummary,
   cache,
+  getDiarySummary
 };
