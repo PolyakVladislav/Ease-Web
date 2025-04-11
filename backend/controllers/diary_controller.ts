@@ -36,6 +36,29 @@ export const deleteDiaryEntry = async (req: Request, res: Response): Promise<voi
     res.status(500).json({ message: "Internal server error" });
   }
 };
+
+export const updateDiaryEntry = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { id } = req.params;
+    const { context,date } = req.body;
+    if (!id) {
+      res.status(400).json({ message: "Diary entry ID is required" });
+      return;
+    }
+    const diaryEntry = await Diary.findById(id);
+    if (!diaryEntry) {
+      res.status(404).json({ message: "Diary entry not found" });
+      return;
+    }
+    diaryEntry.context = context || diaryEntry.context;
+    diaryEntry.date = date || diaryEntry.date;
+    await diaryEntry.save();
+    res.status(200).json({ message: "Diary entry updated successfully" });
+  }
+  catch (error) { 
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
 export const createDiaryEntry = async (req: Request, res: Response): Promise<void> => {
     try {
       
