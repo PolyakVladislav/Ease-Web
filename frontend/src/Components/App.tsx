@@ -14,6 +14,8 @@ import UserProfileClean from "./DoctorProfile/UserProfileClean";
 import ChatContainer from "./Chat/ChatContainer";
 import NotAllowedPage from "./NotAllowedPage";
 import SessionSummaryPage from "./SessionSummary"; 
+import PatientRecord from "./PatientRecord";
+
 
 
 function App() {
@@ -34,6 +36,8 @@ function App() {
           <Route path="/admin" element={<AdminPanel />} />
           <Route path="/meetings/:meetingId/chat" element={<ChatContainer />} />
           <Route path="/summary/:meetingId" element={<SessionSummaryPage />} />
+          <Route path="/patients/:patientId/record" element={<PatientRecord />} />
+
         </Route>
       </Routes>
     </Router>

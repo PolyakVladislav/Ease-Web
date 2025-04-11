@@ -1,5 +1,6 @@
 import api from "./axiosInstance";
 import CONFIG from "../config";
+import axiosInstance from "./axiosInstance"
 
 export const createAppointment = async (appointmentData: {
   patientId: string;
@@ -56,5 +57,15 @@ export const getSummaryByAppointmentId = async (appointmentId: string) => {
       error?.response?.data?.message || "Unknown error fetching summary";
     throw new Error(message);
   }
+};
+
+export const fetchPatientsWithSessions = async (doctorId: string) => {
+  const res = await api.get(`/api/users/${doctorId}/patient-sessions`);
+  return res.data;
+};
+
+export const getPatientSessions = async (patientId: string) => {
+  const res = await api.get(`/api/patients/${patientId}/sessions`);
+  return res.data;
 };
 

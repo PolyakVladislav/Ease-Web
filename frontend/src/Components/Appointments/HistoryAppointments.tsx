@@ -100,12 +100,12 @@ const HistoryAppointments: React.FC<HistoryAppointmentsProps> = ({ appointments 
       </table>
 
 
-{showSummaryModal && (
+{/* {showSummaryModal && (
   <SessionSummaryModal
     summary={loadingSummary ? "Loading summary..." : errorSummary || summaryText}
     onClose={handleCloseSummaryModal}
   />
-)}
+)} */}
 
     </div>
   );
