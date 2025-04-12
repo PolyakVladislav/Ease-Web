@@ -32,7 +32,7 @@ export function initSocketServer(io: Server) {
       const { meetingId, from, to, message, timestamp } = data;
       try {
         await saveMessage(meetingId, from, to, message, timestamp);
-        socket.to(meetingId).emit('newMessage', { from, message, timestamp });
+        io.to(meetingId).emit('newMessage', { from, message, timestamp });
       } catch (err) {
         socket.emit('error', { message: 'Error saving message.' });
       }
