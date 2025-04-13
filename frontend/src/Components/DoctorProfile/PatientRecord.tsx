@@ -3,7 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import styles from "../../css/ProfilePage.module.css";
 import patientsStyles from "../../css/DoctorPatientsTable.module.css";
 
-import { getPatientSessions } from "../../Services/appointmentService";
+import { getPatientSessions, fetchStoredOverallSummary } from "../../Services/appointmentService";
 import { formatDateShortFancy, formatSlot } from "../../utiles/dateUtils";
 
 interface Session {
@@ -16,19 +16,30 @@ interface Session {
 const PatientRecord: React.FC = () => {
   const { patientId } = useParams();
   const navigate = useNavigate();
+  
   const [sessions, setSessions] = useState<Session[]>([]);
   const [patientName, setPatientName] = useState("");
 
+  const [overallSummary, setOverallSummary] = useState<string>("");
+
   useEffect(() => {
     if (!patientId) return;
+    const docId = localStorage.getItem("userId") || "";
 
-    const docId = localStorage.getItem("userId") || undefined;
     getPatientSessions(patientId, docId)
       .then((res) => {
         setSessions(res.sessions);
         setPatientName(res.patientName);
       })
       .catch((err) => console.error("Error fetching patient sessions:", err));
+
+    fetchStoredOverallSummary(patientId, docId)
+      .then((data) => {
+        if (data.success) {
+          setOverallSummary(data.overallSummary || "");
+        }
+      })
+      .catch((err) => console.error("Error fetching overall summary:", err));
   }, [patientId]);
 
   const passedSessions = sessions.filter((s) => s.status === "passed");
@@ -47,8 +58,8 @@ const PatientRecord: React.FC = () => {
         </thead>
         <tbody>
           {passedSessions.map((s) => {
-            const fancyDate = formatDateShortFancy(s.appointmentDate); 
-            const fancyTime = formatSlot(s.appointmentDate); 
+            const fancyDate = formatDateShortFancy(s.appointmentDate);
+            const fancyTime = formatSlot(s.appointmentDate);
             return (
               <tr key={s._id}>
                 <td>
@@ -82,6 +93,23 @@ const PatientRecord: React.FC = () => {
           })}
         </tbody>
       </table>
+
+      <div style={{ marginTop: "30px" }}>
+        <h3>Overall AI Summary</h3>
+        {overallSummary ? (
+          <div
+            style={{
+              border: "1px solid #ccc",
+              padding: "10px",
+              whiteSpace: "pre-wrap",
+            }}
+          >
+            {overallSummary}
+          </div>
+        ) : (
+          <p>No overall summary available yet.</p>
+        )}
+      </div>
     </div>
   );
 };

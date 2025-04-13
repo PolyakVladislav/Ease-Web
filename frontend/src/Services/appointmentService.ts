@@ -1,4 +1,5 @@
 import api from "./axiosInstance";
+import { AxiosError } from "axios";
 import CONFIG from "../config";
 
 export const createAppointment = async (appointmentData: {
@@ -51,10 +52,14 @@ export const getSummaryByAppointmentId = async (appointmentId: string) => {
   try {
     const response = await api.get(`/api/summary/${appointmentId}`);
     return response.data.summary;
-  } catch (error: any) {
-    const message =
-      error?.response?.data?.message || "Unknown error fetching summary";
-    throw new Error(message);
+  } catch (error: unknown) {
+    if (error instanceof AxiosError) {
+      const message =
+        error?.response?.data?.message || "Unknown error fetching summary";
+      throw new Error(message);
+    } else {
+      throw new Error("Unknown error fetching summary");
+    }
   }
 };
 
@@ -93,4 +98,10 @@ export const claimUrgentAppointment = async (appointmentId: string) => {
     }
   );
   return response.data.appointment; 
+};
+
+
+export const fetchStoredOverallSummary = async (patientId: string, doctorId: string) => {
+  const response = await api.get(`/api/patients/${patientId}/doctor/${doctorId}/overall-summary`);
+  return response.data;
 };

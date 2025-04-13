@@ -2,6 +2,8 @@ import { Request, Response } from "express";
 import Appointment from "../models/Appointment";
 import { getChatHistory, saveConsultationSummary } from "./chat_controller";
 import aiService from "./aiService";
+import { generateAndSaveOverallSummary } from "./overall_summary_controller";
+
 
 export const getMeeting = async (
   req: Request,
@@ -43,6 +45,7 @@ export const endMeeting = async (
 ): Promise<void> => {
   const { meetingId } = req.params;
   const user = (req as any).user;
+
   try {
     const appointment = await Appointment.findById(meetingId);
     if (!appointment) {
@@ -53,7 +56,6 @@ export const endMeeting = async (
     const doctorIdStr = appointment.doctorId
       ? appointment.doctorId.toString()
       : null;
-
     if (doctorIdStr !== user._id.toString()) {
       res
         .status(403)
@@ -74,6 +76,15 @@ export const endMeeting = async (
     await appointment.save();
 
     await saveConsultationSummary(meetingId, user._id.toString(), summary);
+
+    try {
+      await generateAndSaveOverallSummary(
+        String(appointment.patientId),
+        String(appointment.doctorId)
+      );
+    } catch (err) {
+      console.error("Failed to generate overall summary automatically:", err);
+    }
 
     res.json({ meetingId, summary, status: appointment.status });
   } catch (error) {

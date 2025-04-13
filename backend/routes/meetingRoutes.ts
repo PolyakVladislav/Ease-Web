@@ -3,6 +3,8 @@ import { getMeeting, getMeetingHistory, endMeeting } from "../controllers/meetin
 import { saveConsultationSummaryAPI,getSummaryByAppointmentId } from "../controllers/consultation_controller";
 import { authMiddleware } from "../controllers/auth_controller"; 
 import { verifyMeetingAccess } from "../Middlewares/verifyMeetingAccess";
+import { getStoredOverallSummary } from "../controllers/overall_summary_controller";
+
 
 const router = Router();
 
@@ -11,6 +13,7 @@ router.get("/meetings/:meetingId/history", authMiddleware, verifyMeetingAccess, 
 router.post("/meetings/:meetingId/end", authMiddleware, verifyMeetingAccess, endMeeting);
 router.post("/consultation/save-summary", authMiddleware, verifyMeetingAccess, saveConsultationSummaryAPI);
 router.get( "/summary/:appointmentId", authMiddleware, verifyMeetingAccess, getSummaryByAppointmentId );
+router.get("/patients/:patientId/doctor/:doctorId/overall-summary",authMiddleware,getStoredOverallSummary);
 //router.get( "/summary/:appointmentId", getSummaryByAppointmentId );
 
 
