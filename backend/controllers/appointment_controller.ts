@@ -247,7 +247,6 @@ export const getTherapistPatientSessions = async (
   res: Response
 ) => {
   try {
-    console.log("Fetching therapist sessions...");
 
     const sessions = await Appointment.aggregate([
       {
@@ -277,7 +276,6 @@ export const getTherapistPatientSessions = async (
       },
     ]);
 
-    console.log("Aggregated sessions:", sessions);
 
     const populated = await Promise.all(
       sessions.map(async (t) => {

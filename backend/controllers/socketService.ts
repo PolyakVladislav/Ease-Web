@@ -7,7 +7,6 @@ import Appointment from '../models/Appointment';
 
 export function initSocketServer(io: Server) {
   io.on('connection', (socket: Socket) => {
-    console.log(`User connected: ${socket.id}`);
 
     socket.on('joinRoom', async (data) => {
       const { meetingId, userId, role } = data;
@@ -18,7 +17,6 @@ export function initSocketServer(io: Server) {
       }
       
       socket.join(meetingId);
-      console.log(`User ${userId} (${role}) joined room ${meetingId}`);
       socket.to(meetingId).emit('userJoined', { userId, role });
 
       const clients = await io.in(meetingId).allSockets();
@@ -96,13 +94,11 @@ export function initSocketServer(io: Server) {
               console.error("Failed to generate overall summary automatically:", err);
             }
     
-            console.log("Background AI summary generation complete.");
           } catch (error) {
             console.error("Error in background endConsultation logic:", error);
           }
         });
     
-        console.log(`Consultation ended for meeting ${meetingId}. Summary in background...`);
       } catch (err) {
         console.error("Error ending consultation via socket:", err);
         socket.emit("error", { message: "Error ending consultation." });
@@ -111,7 +107,6 @@ export function initSocketServer(io: Server) {
     
 
     socket.on('disconnect', () => {
-      console.log(`User disconnected: ${socket.id}`);
     });
   });
 }

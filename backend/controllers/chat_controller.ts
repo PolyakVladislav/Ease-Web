@@ -9,7 +9,6 @@ export async function saveMessage(
   message: string,
   timestamp: Date = new Date()
 ): Promise<void> {
-  console.log("Received message for saving:", { meetingId, userId, to, message, timestamp });
   try {
     await Message.create({
       meetingId,
@@ -18,7 +17,6 @@ export async function saveMessage(
       message,
       timestamp,
     });
-    console.log(`Message saved for meeting ${meetingId}`);
   } catch (error) {
     console.error("Error saving message:", error);
     throw error;
@@ -34,7 +32,6 @@ export async function getChatHistory(meetingId: string): Promise<string> {
           `[${msg.timestamp.toISOString()}] ${msg.from} -> ${msg.to}: ${msg.message}`
       )
       .join("\n");
-    console.log(`History for meeting ${meetingId} retrieved`);
     return history;
   } catch (error) {
     console.error("Error retrieving chat history:", error);
