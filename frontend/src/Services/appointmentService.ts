@@ -1,6 +1,5 @@
 import api from "./axiosInstance";
 import CONFIG from "../config";
-import axiosInstance from "./axiosInstance"
 
 export const createAppointment = async (appointmentData: {
   patientId: string;
@@ -69,3 +68,22 @@ export const getPatientSessions = async (patientId: string) => {
   return res.data;
 };
 
+
+export const fetchUnassignedUrgentAppointments = async () => {
+  const response = await api.get(`${CONFIG.SERVER_URL}/api/appointments/urgent?status=pending`, {
+    withCredentials: true,
+  });
+  return response.data.appointments; 
+};
+
+export const claimUrgentAppointment = async (appointmentId: string) => {
+
+  const response = await api.patch(
+    `${CONFIG.SERVER_URL}/api/appointments/${appointmentId}/claim`,
+    null, 
+    {
+      withCredentials: true,
+    }
+  );
+  return response.data.appointment; 
+};

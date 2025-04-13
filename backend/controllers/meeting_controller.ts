@@ -1,11 +1,12 @@
 import { Request, Response } from "express";
-import axios from "axios";
 import Appointment from "../models/Appointment";
 import { getChatHistory, saveConsultationSummary } from "./chat_controller";
 import aiService from "./aiService";
 
-// Получение данных встречи (appointment)
-export const getMeeting = async (req: Request, res: Response): Promise<void> => {
+export const getMeeting = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
   const { meetingId } = req.params;
   try {
     const appointment = await Appointment.findById(meetingId).lean();
@@ -20,8 +21,10 @@ export const getMeeting = async (req: Request, res: Response): Promise<void> => 
   }
 };
 
-// Получение истории сообщений для встречи
-export const getMeetingHistory = async (req: Request, res: Response): Promise<void> => {
+export const getMeetingHistory = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
   const { meetingId } = req.params;
   try {
     const history = await getChatHistory(meetingId);
@@ -34,18 +37,27 @@ export const getMeetingHistory = async (req: Request, res: Response): Promise<vo
   }
 };
 
-
-export const endMeeting = async (req: Request, res: Response): Promise<void> => {
+export const endMeeting = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
   const { meetingId } = req.params;
-  const user = (req as any).user; 
+  const user = (req as any).user;
   try {
     const appointment = await Appointment.findById(meetingId);
     if (!appointment) {
       res.status(404).json({ message: "Meeting not found" });
       return;
     }
-    if (user._id.toString() !== appointment.doctorId.toString()) {
-      res.status(403).json({ message: "Only the doctor can end the consultation" });
+
+    const doctorIdStr = appointment.doctorId
+      ? appointment.doctorId.toString()
+      : null;
+
+    if (doctorIdStr !== user._id.toString()) {
+      res
+        .status(403)
+        .json({ message: "Only the doctor can end the consultation" });
       return;
     }
 
@@ -69,4 +81,3 @@ export const endMeeting = async (req: Request, res: Response): Promise<void> => 
     res.status(500).json({ message: "Error ending consultation" });
   }
 };
-

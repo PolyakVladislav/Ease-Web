@@ -15,6 +15,7 @@ import ChatContainer from "./Chat/ChatContainer";
 import NotAllowedPage from "./NotAllowedPage";
 import SessionSummaryPage from "./SessionSummary"; 
 import PatientRecord from "./PatientRecord";
+import DoctorDashboard from "./DoctorDashboard/DoctorDashboard";
 
 
 
@@ -27,6 +28,7 @@ function App() {
         <Route path="/oauth/callback" element={<OAuthCallback />} />
         <Route path="/not-allowed" element={<NotAllowedPage />} />
         <Route path="/"element={<PrivateRoute><Layout /></PrivateRoute>} >
+        <Route path="/doctor/dashboard" element={<DoctorDashboard />} />
           <Route path="/profile" element={<UserProfileClean />} />
           <Route path="/all-posts" element={<AllPosts />} />
           <Route path="/create-post" element={<CreatePost />} />

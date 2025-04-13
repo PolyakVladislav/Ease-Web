@@ -2,12 +2,10 @@ import "../models/Users";
 import { Request, Response } from "express";
 import Appointment from "../models/Appointment";
 import User from "../models/Users";
-import mongoose from "mongoose"; 
+import mongoose from "mongoose";
 
-export const createAppointment = async (
-  req: Request,
-  res: Response
-): Promise<void> => {
+
+export const createAppointment = async (req: Request, res: Response): Promise<void> => {
   try {
     const {
       patientId,
@@ -17,19 +15,31 @@ export const createAppointment = async (
       isEmergency,
       initiator,
     } = req.body;
-    if (!patientId || !doctorId || !appointmentDate || !initiator) {
-      res.status(400).json({ message: "Missing required fields" });
+
+
+    if (!patientId || !appointmentDate || !initiator) {
+      res.status(400).json({ message: "Missing required fields (patientId, appointmentDate, initiator)" });
       return;
     }
 
-    const status = initiator === "patient" ? "confirmed" : "pending";
+    if (!isEmergency && !doctorId) {
+      res.status(400).json({ message: "doctorId is required for non-emergency appointment" });
+      return;
+    }
+
+    let status: "pending" | "confirmed" | "canceled" | "passed" = "pending";
+    if (isEmergency) {
+      status = "pending";
+    } else {
+      status = initiator === "patient" ? "confirmed" : "pending";
+    }
 
     const appointment = await Appointment.create({
       patientId,
-      doctorId,
+      doctorId: doctorId || null,
       appointmentDate: new Date(appointmentDate),
       notes: notes || "",
-      isEmergency: isEmergency || false,
+      isEmergency: !!isEmergency,
       initiator,
       status,
     });
@@ -39,7 +49,7 @@ export const createAppointment = async (
       .exec();
 
     if (!populatedAppointment) {
-      res.status(404).json({ message: "Appointment not found" });
+      res.status(404).json({ message: "Appointment not found after creation" });
       return;
     }
 
@@ -51,7 +61,7 @@ export const createAppointment = async (
         (populatedAppointment.patientId as any).username
           ? (populatedAppointment.patientId as any).username
           : "Unknown",
-      doctorId: populatedAppointment.doctorId,
+      doctorId: populatedAppointment.doctorId, 
       appointmentDate: populatedAppointment.appointmentDate,
       status: populatedAppointment.status,
       notes: populatedAppointment.notes,
@@ -89,13 +99,11 @@ export const updateAppointment = async (
       return;
     }
 
+
     if (appointment.initiator === "doctor" && status === "confirmed") {
-      res
-        .status(403)
-        .json({ message: "Doctor cannot change status to confirmed" });
+      res.status(403).json({ message: "Doctor cannot set status to confirmed in this flow" });
       return;
     }
-
     const updateData: any = {};
     if (status) {
       const validStatuses = ["pending", "confirmed", "canceled", "passed"];
@@ -122,7 +130,7 @@ export const updateAppointment = async (
     ).populate({ path: "patientId", model: "Users", select: "username" });
 
     if (!updatedAppointment) {
-      res.status(404).json({ message: "Appointment not found" });
+      res.status(404).json({ message: "Appointment not found after update" });
       return;
     }
 
@@ -303,7 +311,7 @@ export const getTherapistPatientSessions = async (
   }
 };
 
-// ✅ New function: Get sessions by patient ID
+
 export const getSessionsByPatientId = async (
   req: Request,
   res: Response
@@ -329,8 +337,8 @@ export const getSessionsByPatientId = async (
     console.error("Error fetching patient sessions:", err);
     res.status(500).json({ error: "Server error" });
   }
-  
 };
+
 export const deleteAppointment = async (
   req: Request,
   res: Response
@@ -359,3 +367,76 @@ export const deleteAppointment = async (
   }
 };
 
+export const claimUrgentAppointment = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  try {
+    const { appointmentId } = req.params;
+    const doctorId = (req as any).user._id;
+
+    if (!appointmentId) {
+      res.status(400).json({ message: "Appointment ID is required" });
+      return;
+    }
+
+    const appointment = await Appointment.findById(appointmentId);
+    if (!appointment) {
+      res.status(404).json({ message: "Appointment not found" });
+      return;
+    }
+
+    if (!appointment.isEmergency) {
+      res.status(400).json({ message: "Not an emergency appointment" });
+      return;
+    }
+
+    if (appointment.doctorId) {
+      res.status(409).json({ message: "Already taken by another doctor" });
+      return;
+    }
+
+    appointment.doctorId = doctorId;
+    appointment.status = "confirmed";
+    appointment.appointmentDate = new Date();
+
+    await appointment.save();
+
+    res.status(200).json({
+      message: "Appointment claimed successfully",
+      appointment,
+    });
+    return;
+  } catch (err) {
+    console.error("Error claiming urgent appointment:", err);
+    res.status(500).json({ message: "Internal server error" });
+    return;
+  }
+};
+
+export const getUnassignedUrgentAppointments = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  try {
+    const { status } = req.query;
+
+    const filter: any = {
+      isEmergency: true,
+      doctorId: null,
+    };
+
+    if (status) {
+      filter.status = status;
+    }
+
+    const appointments = await Appointment.find(filter)
+      .populate({ path: "patientId", model: "Users", select: "username email" })
+      .sort({ createdAt: 1 }); 
+
+    res.status(200).json({ appointments });
+  } catch (error) {
+    console.error("Error fetching unassigned urgent appointments:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};

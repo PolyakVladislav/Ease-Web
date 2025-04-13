@@ -1,19 +1,14 @@
 import { Request, Response, NextFunction } from "express";
 import Appointment, { IAppointment } from "../models/Appointment";
 
-/**
- * Middleware to verify user access to a meeting.
- * Expects meetingId in req.params and user in req.user.
- */
-export const verifyMeetingAccess = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+
+export const verifyMeetingAccess = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
   try {
-    //const meetingId = req.params.meetingId;
-    //const meetingId = req.params.appointmentId;
     const meetingId = req.params.meetingId || req.params.appointmentId;
-
-  
-
-
 
     if (!meetingId) {
       res.status(400).json({ message: "meetingId not provided" });
@@ -26,7 +21,12 @@ export const verifyMeetingAccess = async (req: Request, res: Response, next: Nex
       return;
     }
 
-    console.log("🔍 Verifying access to meeting:", meetingId, "for user:", user._id);
+    console.log(
+      "Verifying access to meeting:",
+      meetingId,
+      "for user:",
+      user._id
+    );
 
     const appointment: IAppointment | null = await Appointment.findById(meetingId).lean();
     if (!appointment) {
@@ -34,9 +34,12 @@ export const verifyMeetingAccess = async (req: Request, res: Response, next: Nex
       return;
     }
 
+    const doctorIdStr = appointment.doctorId ? appointment.doctorId.toString() : null;
+    const patientIdStr = appointment.patientId.toString();
+
     if (
-      user._id.toString() !== appointment.doctorId.toString() &&
-      user._id.toString() !== appointment.patientId.toString()
+      user._id.toString() !== doctorIdStr &&
+      user._id.toString() !== patientIdStr
     ) {
       res.status(403).json({ message: "Access denied: you are not a participant in this meeting" });
       return;
@@ -49,19 +52,22 @@ export const verifyMeetingAccess = async (req: Request, res: Response, next: Nex
   }
 };
 
-/**
- * Utility function for verifying access, used in socketService.
- * @param meetingId - Meeting ID.
- * @param userId - User ID.
- * @returns Promise<boolean> indicating access.
- */
-export const checkMeetingAccess = async (meetingId: string, userId: string): Promise<boolean> => {
+export const checkMeetingAccess = async (
+  meetingId: string,
+  userId: string
+): Promise<boolean> => {
   try {
     const appointment: IAppointment | null = await Appointment.findById(meetingId).lean();
     if (!appointment) {
       return false;
     }
-    return userId === appointment.doctorId.toString() || userId === appointment.patientId.toString();
+
+    const doctorIdStr = appointment.doctorId ? appointment.doctorId.toString() : null;
+    const patientIdStr = appointment.patientId.toString();
+
+    return (
+      userId === doctorIdStr || userId === patientIdStr
+    );
   } catch (error) {
     console.error("Error in checkMeetingAccess:", error);
     return false;

@@ -67,8 +67,8 @@ const Layout: React.FC = () => {
 
         <ul className={styles.sidebarList}>
           <li className={styles.sidebarItem}>
-            <Link to="/all-posts" className={styles.sidebarLink}>
-              <FaClipboard className={styles.icon} /> Feed
+            <Link to="/doctor/dashboard" className={styles.sidebarLink}>
+              <FaClipboard className={styles.icon} /> Doctor Dashboard
             </Link>
           </li>
           <li className={styles.sidebarItem}>
