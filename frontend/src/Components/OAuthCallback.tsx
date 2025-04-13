@@ -26,7 +26,7 @@ const OAuthCallback: React.FC = () => {
           if (data.user.role !== "doctor") {
             navigate("/not-allowed", { replace: true });
           } else {
-            navigate("/all-posts", { replace: true });
+            navigate("/doctor/dashboard", { replace: true });
           }
         })
         .catch((err) => {

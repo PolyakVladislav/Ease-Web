@@ -6,8 +6,6 @@ import bodyParser from "body-parser";
 import socketIo from "socket.io";
 import { initSocketServer } from "./controllers/socketService"; // Обновлённый импорт
 import authRoutes from "./routes/auth_route";
-import postsRoutes from "./routes/posts";
-import commentsRoutes from "./routes/comments";
 import swaggerUi from "swagger-ui-express";
 import swaggerJsDoc from "swagger-jsdoc";
 // import chatRoutes from "./routes/chat_route";
@@ -71,9 +69,6 @@ const swaggerDocs = swaggerJsDoc(swaggerOptions);
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 app.use("/auth", authRoutes);
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
-app.use("/posts", postsRoutes);
-app.use("/comments", commentsRoutes);
-// app.use("/api/chat", chatRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api", chatgptRoutes);
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));

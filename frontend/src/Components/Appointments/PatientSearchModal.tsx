@@ -1,12 +1,12 @@
 import React, { useState, ChangeEvent, useEffect } from "react";
-import styles from "../css/PatientSearchModal.module.css";
-import { searchPatients, getRecentPatients } from "../Services/userService"; // ⬅️ you'll need to create this API
-import { User } from "../types/user";
+import styles from "../../css/PatientSearchModal.module.css";
+import { searchPatients, getRecentPatients } from "../../Services/userService";
+import { User } from "../../types/user";
 
 interface PatientSearchModalProps {
   onPatientSelect: (patient: User) => void;
   onClose: () => void;
-  doctorId: string; 
+  doctorId: string;
 }
 
 const PatientSearchModal: React.FC<PatientSearchModalProps> = ({
@@ -21,7 +21,6 @@ const PatientSearchModal: React.FC<PatientSearchModalProps> = ({
   const [error, setError] = useState<string>("");
 
   useEffect(() => {
-    // ⬅️ Fetch recent patients on mount
     const fetchRecent = async () => {
       try {
         const data = await getRecentPatients(doctorId);
@@ -37,7 +36,7 @@ const PatientSearchModal: React.FC<PatientSearchModalProps> = ({
     setQuery(e.target.value);
   };
 
-  const handleSearch = async () => {
+  const handleSearch = React.useCallback(async () => {
     if (query.trim().length === 0) return;
     setLoading(true);
     setError("");
@@ -50,7 +49,7 @@ const PatientSearchModal: React.FC<PatientSearchModalProps> = ({
     } finally {
       setLoading(false);
     }
-  };
+  }, [query]);
 
   useEffect(() => {
     const delayDebounce = setTimeout(() => {
@@ -61,7 +60,7 @@ const PatientSearchModal: React.FC<PatientSearchModalProps> = ({
       }
     }, 300);
     return () => clearTimeout(delayDebounce);
-  }, [query]);
+  }, [query, handleSearch]);
 
   return (
     <div className={styles.modalOverlay}>

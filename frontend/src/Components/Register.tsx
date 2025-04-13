@@ -6,7 +6,7 @@ import CONFIG from "../config";
 const Register = () => {
   const navigate = useNavigate();
 
-  const [selectedFile, setSelectedFile] = useState<File | null>(null); // <-- state для файла
+  const [selectedFile, setSelectedFile] = useState<File | null>(null); 
 
   const [formData, setFormData] = useState({
     username: "",
