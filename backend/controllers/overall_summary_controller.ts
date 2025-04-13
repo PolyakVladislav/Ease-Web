@@ -1,4 +1,3 @@
-// controllers/overall_summary_controller.ts
 import { Request, Response } from "express";
 import  Appointment  from "../models/Appointment";
 import { ConsultationSummary } from "../models/ConsultationSummary";
@@ -9,7 +8,6 @@ export async function generateAndSaveOverallSummary(
   patientId: string,
   doctorId: string
 ): Promise<void> {
-  // 1) Собираем все relevant summaries
   const allSummaries = await ConsultationSummary.find({
     doctorId,
   }).lean();
@@ -28,7 +26,6 @@ export async function generateAndSaveOverallSummary(
     }
   }
 
-  // Если нет никаких summary, то можно сохранить пустую строку
   if (!relevant.length) {
     await OverallSummary.findOneAndUpdate(
       { patientId, doctorId },
@@ -41,10 +38,8 @@ export async function generateAndSaveOverallSummary(
     return;
   }
 
-  // 2) Генерируем общий summary (1 раз)
   const overallSummary = await aiService.getOverallSummary(relevant);
 
-  // 3) Сохраняем/обновляем в OverallSummary
   await OverallSummary.findOneAndUpdate(
     { patientId, doctorId },
     {

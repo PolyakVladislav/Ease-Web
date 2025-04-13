@@ -53,7 +53,6 @@ export async function saveConsultationSummary(
       doctorId,
       summary,
     });
-    console.log(`Consultation summary saved for meeting ${meetingId}`);
   } catch (error) {
     console.error("Error saving consultation summary:", error);
     throw error;

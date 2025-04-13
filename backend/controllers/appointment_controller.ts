@@ -306,7 +306,7 @@ export const getTherapistPatientSessions = async (
 
     res.status(200).json({ data: populated });
   } catch (err) {
-    console.error("🔥 Failed to fetch therapist-patient sessions", err);
+    console.error("Failed to fetch therapist-patient sessions", err);
     res.status(500).json({ message: "Internal server error", error: err });
   }
 };

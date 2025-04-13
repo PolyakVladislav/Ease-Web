@@ -21,13 +21,6 @@ export const verifyMeetingAccess = async (
       return;
     }
 
-    console.log(
-      "Verifying access to meeting:",
-      meetingId,
-      "for user:",
-      user._id
-    );
-
     const appointment: IAppointment | null = await Appointment.findById(meetingId).lean();
     if (!appointment) {
       res.status(404).json({ message: "Meeting not found" });

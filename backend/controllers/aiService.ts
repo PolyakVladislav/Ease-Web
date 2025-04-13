@@ -31,12 +31,7 @@ if (!OPENAI_API_KEY) {
 
 const cache = new NodeCache({ stdTTL: 3600 });
 
-/**
- * Get AI suggestion for chat reply.
- * @param chatContext - Current chat context.
- * @param newMessage - Message for which a suggestion is needed.
- * @returns AI recommendation.
- */
+
 async function getSuggestion(chatContext: any, newMessage: string): Promise<string> {
   const prompt = `
   Chat context:
@@ -197,10 +192,8 @@ async function getDiarySummary(DiaryNote: string): Promise<string> {
       return "";
     }
   
-    // Склеиваем в единый текст
     const combinedText = allSummaries.join("\n\n---\n\n");
   
-    // Формируем промпт
     const prompt = `
   You are an AI assistant analyzing multiple session summaries for the same patient-doctor relationship.
   
@@ -234,7 +227,7 @@ async function getDiarySummary(DiaryNote: string): Promise<string> {
             content: prompt,
           },
         ],
-        max_tokens: 700, // Можно увеличить
+        max_tokens: 700, 
       }),
     });
   
