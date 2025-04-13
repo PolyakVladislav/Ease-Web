@@ -1,8 +1,12 @@
 import React, { useEffect, useState } from "react";
 import styles from "../../css/ManageAppointmentsPage.module.css";
-import {fetchAppointments, createAppointment, updateAppointment, } from "../../Services/appointmentService";
-import PatientSearchModal from "../PatientSearchModal";
-import TimeSelectionModal from "./TimeSelectionModal"; 
+import {
+  fetchAppointments,
+  createAppointment,
+  updateAppointment,
+} from "../../Services/appointmentService";
+import PatientSearchModal from "./PatientSearchModal";
+import TimeSelectionModal from "./TimeSelectionModal";
 import CurrentAppointments from "./CurrentAppointments";
 import HistoryAppointments from "./HistoryAppointments";
 import { Appointment } from "../../types/appointment";
@@ -20,13 +24,17 @@ const ManageAppointmentsPage: React.FC = () => {
 
   const [timeModalMode, setTimeModalMode] = useState<ModalMode>("create");
 
-  const [editingAppointment, setEditingAppointment] = useState<Appointment | null>(null);
+  const [editingAppointment, setEditingAppointment] =
+    useState<Appointment | null>(null);
 
-  const [selectedPatient, setSelectedPatient] = useState<{ _id: string; username: string } | null>(null);
+  const [selectedPatient, setSelectedPatient] = useState<{
+    _id: string;
+    username: string;
+  } | null>(null);
   const location = useLocation();
-const defaultTab = location.state?.defaultTab === "history" ? "history" : "active";
-const [viewMode, setViewMode] = useState<"active" | "history">(defaultTab);
-
+  const defaultTab =
+    location.state?.defaultTab === "history" ? "history" : "active";
+  const [viewMode, setViewMode] = useState<"active" | "history">(defaultTab);
 
   useEffect(() => {
     fetchAppointments()
@@ -39,7 +47,6 @@ const [viewMode, setViewMode] = useState<"active" | "history">(defaultTab);
       })
       .finally(() => setLoading(false));
   }, []);
-
 
   const handleAssignAppointment = () => {
     setSelectedPatient(null);
@@ -55,7 +62,11 @@ const [viewMode, setViewMode] = useState<"active" | "history">(defaultTab);
     setShowTimeModal(true);
   };
 
-  const handleTimeSelectCreate = async (dateTime: string, isEmergency: boolean, notes: string) => {
+  const handleTimeSelectCreate = async (
+    dateTime: string,
+    isEmergency: boolean,
+    notes: string
+  ) => {
     if (!selectedPatient) return;
     try {
       const doctorId = localStorage.getItem("userId");
@@ -72,7 +83,7 @@ const [viewMode, setViewMode] = useState<"active" | "history">(defaultTab);
       });
 
       setAppointments((prev) => [...prev, res.appointment]);
-      setShowTimeModal(false);  
+      setShowTimeModal(false);
       setSelectedPatient(null);
     } catch (error) {
       console.error("Error creating appointment:", error);
@@ -80,14 +91,17 @@ const [viewMode, setViewMode] = useState<"active" | "history">(defaultTab);
     }
   };
 
-
   const handleEditClick = (apt: Appointment) => {
     setEditingAppointment(apt);
     setTimeModalMode("edit");
     setShowTimeModal(true);
   };
 
-  const handleTimeSelectEdit = async (dateTime: string, isEmergency: boolean, notes: string) => {
+  const handleTimeSelectEdit = async (
+    dateTime: string,
+    isEmergency: boolean,
+    notes: string
+  ) => {
     if (!editingAppointment) return;
 
     try {
@@ -97,7 +111,9 @@ const [viewMode, setViewMode] = useState<"active" | "history">(defaultTab);
         notes,
       });
       setAppointments((prev) =>
-        prev.map((apt) => (apt._id === editingAppointment._id ? res.appointment : apt))
+        prev.map((apt) =>
+          apt._id === editingAppointment._id ? res.appointment : apt
+        )
       );
       setShowTimeModal(false);
       setEditingAppointment(null);
@@ -107,8 +123,11 @@ const [viewMode, setViewMode] = useState<"active" | "history">(defaultTab);
     }
   };
 
-
-  const handleTimeSelect = (dateTime: string, isEmergency: boolean, notes: string) => {
+  const handleTimeSelect = (
+    dateTime: string,
+    isEmergency: boolean,
+    notes: string
+  ) => {
     if (timeModalMode === "create") {
       handleTimeSelectCreate(dateTime, isEmergency, notes);
     } else {
@@ -121,13 +140,22 @@ const [viewMode, setViewMode] = useState<"active" | "history">(defaultTab);
       <div className={styles.header}>
         <h2>Manage Appointments</h2>
         <div>
-          <button onClick={handleAssignAppointment} className={styles.addButton}>
+          <button
+            onClick={handleAssignAppointment}
+            className={styles.addButton}
+          >
             Assign Appointment
           </button>
-          <button onClick={() => setViewMode("active")} className={styles.addButton}>
+          <button
+            onClick={() => setViewMode("active")}
+            className={styles.addButton}
+          >
             Active
           </button>
-          <button onClick={() => setViewMode("history")} className={styles.addButton}>
+          <button
+            onClick={() => setViewMode("history")}
+            className={styles.addButton}
+          >
             History
           </button>
         </div>
@@ -154,14 +182,13 @@ const [viewMode, setViewMode] = useState<"active" | "history">(defaultTab);
         />
       )} */}
 
-{showPatientModal && (
-  <PatientSearchModal
-    doctorId={localStorage.getItem("userId") || ""} // ⬅️ this is how you're storing doctor ID elsewhere
-    onPatientSelect={handlePatientSelect}
-    onClose={() => setShowPatientModal(false)}
-  />
-)}
-
+      {showPatientModal && (
+        <PatientSearchModal
+          doctorId={localStorage.getItem("userId") || ""} // ⬅️ this is how you're storing doctor ID elsewhere
+          onPatientSelect={handlePatientSelect}
+          onClose={() => setShowPatientModal(false)}
+        />
+      )}
 
       {showTimeModal && (
         <TimeSelectionModal
