@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { Appointment } from "../../types/appointment";
 import { fetchAppointments } from "../../Services/appointmentService";
-import { Box, Typography, CircularProgress } from "@mui/material";
 import UrgentAppointments from "./UrgentAppointments";
 import TodayAppointments from "./TodayAppointments";
+import styles from "../../css/DoctorDashboard/DoctorDashboard.module.css";
 
 const DoctorDashboard: React.FC = () => {
   const [todayAppointments, setTodayAppointments] = useState<Appointment[]>([]);
@@ -38,31 +38,33 @@ const DoctorDashboard: React.FC = () => {
 
   if (loading) {
     return (
-      <Box display="flex" justifyContent="center" mt={4}>
-        <CircularProgress />
-      </Box>
+      <div className={styles.loadingContainer}>
+        <div className={styles.spinner}></div>
+        <p>Loading dashboard...</p>
+      </div>
     );
   }
+
   if (error) {
-    return (
-      <Box textAlign="center" color="red" mt={2}>
-        {error}
-      </Box>
-    );
+    return <div className={styles.errorMessage}>{error}</div>;
   }
 
   return (
-    <Box sx={{ p: 3, bgcolor: "#f5f5f5", minHeight: "100vh" }}>
-      <Typography variant="h4" gutterBottom>
-        Doctor Dashboard
-      </Typography>
+    <div className={styles.rootContainer}>
+      <div className={styles.dashboardHeroSection}>
+        <div className={styles.dashboardHeroContent}>
+          <h2 className={styles.dashboardHeroTitle}>Doctor Dashboard</h2>
+        </div>
+      </div>
 
-      <UrgentAppointments />
+      <div className={styles.dashboardMainContainer}>
+        <UrgentAppointments />
 
-      <Box mt={3}>
-        <TodayAppointments appointments={todayAppointments} />
-      </Box>
-    </Box>
+        <div style={{ marginTop: "20px" }}>
+          <TodayAppointments appointments={todayAppointments} />
+        </div>
+      </div>
+    </div>
   );
 };
 

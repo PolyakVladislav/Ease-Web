@@ -431,8 +431,8 @@ export const getUnassignedUrgentAppointments = async (
     }
 
     const appointments = await Appointment.find(filter)
-      .populate({ path: "patientId", model: "Users", select: "username email" })
-      .sort({ createdAt: 1 }); 
+    .populate({ path: "patientId", model: "Users", select: "username email" })
+    .sort({ createdAt: 1 }); 
 
     res.status(200).json({ appointments });
   } catch (error) {

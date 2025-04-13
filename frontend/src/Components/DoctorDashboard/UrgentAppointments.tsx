@@ -6,23 +6,12 @@ import {
   claimUrgentAppointment,
 } from "../../Services/appointmentService";
 import { formatDateShortFancy, timeAgoFromNow } from "../../utiles/dateUtils";
-
-import {
-  Box,
-  Card,
-  CardContent,
-  Typography,
-  Chip,
-  Button,
-  Alert,
-  CircularProgress,
-} from "@mui/material";
+import styles from "../../css/DoctorDashboard/UrgentAppointments.module.css";
 
 const UrgentAppointments: React.FC = () => {
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -45,84 +34,93 @@ const UrgentAppointments: React.FC = () => {
 
   async function handleClaim(appointmentId: string) {
     try {
+      setLoading(true);
       await claimUrgentAppointment(appointmentId);
       const updated = await fetchUnassignedUrgentAppointments();
       setAppointments(updated);
-
       navigate(`/meetings/${appointmentId}/chat`);
     } catch (err) {
       console.error("Error claiming appointment:", err);
       alert("Failed to claim appointment");
+    } finally {
+      setLoading(false);
     }
   }
 
-  if (loading) {
-    return (
-      <Box mt={2} textAlign="center">
-        <CircularProgress />
-      </Box>
-    );
+  function getWaitClass(createdAtStr: string) {
+    const createdMs = new Date(createdAtStr).getTime();
+    const nowMs = Date.now();
+    const diffMin = Math.floor((nowMs - createdMs) / 60000);
+
+    if (diffMin < 30) {
+      return styles.shortWait; 
+    } else if (diffMin < 90) {
+      return styles.mediumWait;  
+    } else {
+      return styles.longWait;    
+    }
   }
 
   return (
-    <Box mt={2}>
-      <Typography variant="h5" gutterBottom>
-        Urgent Appointments
-      </Typography>
-      {error && <Alert severity="error">{error}</Alert>}
+    <div className={styles.urgentContainer}>
+      <h3 className={styles.title}>Urgent Appointments</h3>
 
-      {appointments.length === 0 ? (
-        <Typography variant="body1" sx={{ fontStyle: "italic", color: "#666" }}>
-          No urgent appointments
-        </Typography>
+      {error && <div className={styles.errorAlert}>{error}</div>}
+
+      {loading ? (
+        <div className={styles.loadingContainer}>
+          <div className={styles.spinner}></div>
+          <p>Loading urgent appointments...</p>
+        </div>
       ) : (
-        <Box display="flex" flexDirection="column" gap={2}>
-          {appointments.map((appt) => {
-            const dateStr = formatDateShortFancy(appt.appointmentDate);
-            const createdAgo = appt.createdAt ? timeAgoFromNow(appt.createdAt) : "";
-            const patientName =
-              appt.patientName || appt.patientId?.username || "Unknown";
+        <>
+          {appointments.length === 0 ? (
+            <p style={{ fontStyle: "italic", color: "#666" }}>
+              No urgent appointments
+            </p>
+          ) : (
+            <div className={styles.list}>
+              {appointments.map((appt) => {
+                const dateStr = formatDateShortFancy(appt.appointmentDate);
+                const createdAgo = appt.createdAt ? timeAgoFromNow(appt.createdAt) : "";
+                const patientName =
+                  appt.patientName || appt.patientId?.username || "Unknown";
 
-            return (
-              <Card
-                key={appt._id}
-                sx={{
-                  borderLeft: "6px solid #d9534f",
-                  backgroundColor: "#fdeeee",
-                }}
-              >
-                <CardContent>
-                  <Box display="flex" alignItems="center" justifyContent="space-between">
-                    <Box>
-                      <Chip label="URGENT" color="error" size="small" />
-                      <Typography variant="subtitle1" sx={{ ml: 1, display: "inline" }}>
-                        {dateStr}{" "}
-                        <Typography variant="caption" sx={{ color: "#777" }}>
-                          ({createdAgo})
-                        </Typography>
-                      </Typography>
-                    </Box>
+                const waitClass = appt.createdAt ? getWaitClass(appt.createdAt) : "";
 
-                    <Button
-                      variant="contained"
-                      color="error"
-                      onClick={() => handleClaim(appt._id)}
-                      sx={{ ml: 2 }}
-                    >
-                      Claim
-                    </Button>
-                  </Box>
+                return (
+                  <div className={`${styles.card} ${waitClass}`} key={appt._id}>
+                    <div className={styles.cardHeader}>
+                      <div>
+                        <span className={styles.urgentLabel}>URGENT</span>
+                        <span className={styles.dateInfo}>
+                          {dateStr}
+                          {createdAgo && (
+                            <span className={styles.createdAgo}>
+                              ({createdAgo})
+                            </span>
+                          )}
+                        </span>
+                      </div>
+                      <button
+                        className={styles.claimButton}
+                        onClick={() => handleClaim(appt._id)}
+                      >
+                        Claim
+                      </button>
+                    </div>
 
-                  <Typography variant="body1" sx={{ mt: 1 }}>
-                    Patient: {patientName}
-                  </Typography>
-                </CardContent>
-              </Card>
-            );
-          })}
-        </Box>
+                    <p className={styles.patientInfo}>
+                      Patient: {patientName}
+                    </p>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </>
       )}
-    </Box>
+    </div>
   );
 };
 

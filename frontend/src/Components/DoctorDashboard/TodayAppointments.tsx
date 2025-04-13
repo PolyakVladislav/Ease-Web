@@ -2,18 +2,7 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 import { Appointment } from "../../types/appointment";
 import { timeLeftUntil } from "../../utiles/dateUtils";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Paper,
-  Button,
-  Typography,
-  Chip,
-} from "@mui/material";
+import styles from "../../css/DoctorDashboard/TodayAppointments.module.css";
 
 type Props = {
   appointments: Appointment[];
@@ -24,13 +13,9 @@ const TodayAppointments: React.FC<Props> = ({ appointments }) => {
 
   if (!appointments || appointments.length === 0) {
     return (
-      <div style={{ marginTop: 16 }}>
-        <Typography variant="h5" gutterBottom>
-          Today's Appointments
-        </Typography>
-        <Typography variant="body2" fontStyle="italic" color="#666">
-          No confirmed appointments for today
-        </Typography>
+      <div className={styles.container}>
+        <h3 className={styles.title}>Today's Appointments</h3>
+        <p className={styles.noData}>No confirmed appointments for today</p>
       </div>
     );
   }
@@ -40,24 +25,21 @@ const TodayAppointments: React.FC<Props> = ({ appointments }) => {
   }
 
   return (
-    <div style={{ marginTop: 16 }}>
-      <Typography variant="h5" gutterBottom>
-        Today's Appointments
-      </Typography>
+    <div className={styles.container}>
+      <h3 className={styles.title}>Today's Appointments</h3>
 
-      <TableContainer component={Paper}>
-        <Table>
-          <TableHead>
-            <TableRow>
-              <TableCell>Time</TableCell>
-              <TableCell>Type</TableCell>
-              <TableCell>Patient</TableCell>
-              <TableCell>Time Left</TableCell>
-              <TableCell>Action</TableCell>
-            </TableRow>
-          </TableHead>
-
-          <TableBody>
+      <div className={styles.tableWrapper}>
+        <table className={styles.table}>
+          <thead>
+            <tr>
+              <th>Time</th>
+              <th>Type</th>
+              <th>Patient</th>
+              <th>Time Left</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
             {appointments.map((appt) => {
               const dateObj = new Date(appt.appointmentDate);
               const timeStr = dateObj.toLocaleTimeString([], {
@@ -66,50 +48,44 @@ const TodayAppointments: React.FC<Props> = ({ appointments }) => {
               });
 
               const leftStr = timeLeftUntil(appt.appointmentDate);
-              const diffMin = Math.floor(
-                (dateObj.getTime() - Date.now()) / 60000
-              );
+              const diffMin = Math.floor((dateObj.getTime() - Date.now()) / 60000);
               const canStartChat = diffMin <= 10;
 
-              const patientName =
-                appt.patientName || appt.patientId?.username || "Unknown";
+              const patientName = appt.patientName || appt.patientId?.username || "Unknown";
 
-              const chipLabel = appt.isEmergency ? "Emergency" : "Regular";
-              const chipColor = appt.isEmergency ? "error" : "default";
+              const isEmergency = appt.isEmergency;
+              const chipClass = isEmergency ? styles.chipEmergency : "";
 
               return (
-                <TableRow key={appt._id}>
-                  <TableCell>{timeStr}</TableCell>
-
-                  <TableCell>
-                    <Chip label={chipLabel} color={chipColor} size="small" />
-                  </TableCell>
-
-                  <TableCell>{patientName}</TableCell>
-
-                  <TableCell>{leftStr}</TableCell>
-
-                  <TableCell>
+                <tr key={appt._id}>
+                  <td>{timeStr}</td>
+                  <td>
+                    <span className={`${styles.chip} ${chipClass}`}>
+                      {isEmergency ? "Emergency" : "Regular"}
+                    </span>
+                  </td>
+                  <td>{patientName}</td>
+                  <td>{leftStr}</td>
+                  <td>
                     {canStartChat ? (
-                      <Button
-                        variant="outlined"
-                        color="primary"
+                      <button
+                        className={styles.actionButton}
                         onClick={() => goToChat(appt._id)}
                       >
                         Go to Chat
-                      </Button>
+                      </button>
                     ) : (
-                      <Typography variant="caption" color="textSecondary">
+                      <span className={styles.infoText}>
                         Available 10 min before
-                      </Typography>
+                      </span>
                     )}
-                  </TableCell>
-                </TableRow>
+                  </td>
+                </tr>
               );
             })}
-          </TableBody>
-        </Table>
-      </TableContainer>
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 };
