@@ -63,8 +63,15 @@ export const fetchPatientsWithSessions = async (doctorId: string) => {
   return res.data;
 };
 
-export const getPatientSessions = async (patientId: string) => {
-  const res = await api.get(`/api/patients/${patientId}/sessions`);
+export const getPatientSessions = async (
+  patientId: string,
+  doctorId?: string
+) => {
+  let url = `/api/patients/${patientId}/sessions`;
+  if (doctorId) {
+    url += `?doctorId=${doctorId}`;
+  }
+  const res = await api.get(url);
   return res.data;
 };
 

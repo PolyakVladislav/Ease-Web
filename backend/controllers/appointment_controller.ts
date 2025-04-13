@@ -318,6 +318,7 @@ export const getSessionsByPatientId = async (
 ): Promise<void> => {
   try {
     const { patientId } = req.params;
+    const { doctorId } = req.query; 
 
     const patient = await User.findById(patientId).select("username");
     if (!patient) {
@@ -325,7 +326,12 @@ export const getSessionsByPatientId = async (
       return;
     }
 
-    const sessions = await Appointment.find({ patientId }).sort({
+    const filter: any = { patientId };
+    if (doctorId) {
+      filter.doctorId = doctorId;
+    }
+
+    const sessions = await Appointment.find(filter).sort({
       appointmentDate: -1,
     });
 

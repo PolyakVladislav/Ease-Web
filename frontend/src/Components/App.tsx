@@ -11,7 +11,7 @@ import UserProfileClean from "./DoctorProfile/UserProfileClean";
 import ChatContainer from "./Chat/ChatContainer";
 import NotAllowedPage from "./NotAllowedPage";
 import SessionSummaryPage from "./SessionSummary";
-import PatientRecord from "./PatientRecord";
+import PatientRecord from "./DoctorProfile/PatientRecord";
 import DoctorDashboard from "./DoctorDashboard/DoctorDashboard";
 
 function App() {

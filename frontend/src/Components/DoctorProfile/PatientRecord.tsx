@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import styles from "../css/ProfilePage.module.css";
-import patientsStyles from "../css/DoctorPatientsTable.module.css";
+import styles from "../../css/ProfilePage.module.css";
+import patientsStyles from "../../css/DoctorPatientsTable.module.css";
 
-import { getPatientSessions } from "../Services/appointmentService";
-import SessionSummaryModal from "../Components/SessionSummaryModal";
+import { getPatientSessions } from "../../Services/appointmentService";
+import SessionSummaryModal from "../SessionSummaryModal";
 
 interface Session {
-    _id: string;
+  _id: string;
   appointmentDate: string;
   status: string;
   summary?: string;
@@ -22,7 +22,9 @@ const PatientRecord: React.FC = () => {
 
   useEffect(() => {
     if (!patientId) return;
-    getPatientSessions(patientId)
+
+    const docId = localStorage.getItem("userId") || undefined;
+    getPatientSessions(patientId, docId)
       .then((res) => {
         setSessions(res.sessions);
         setPatientName(res.patientName);
