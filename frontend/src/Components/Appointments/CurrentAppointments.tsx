@@ -86,8 +86,9 @@ const CurrentAppointments: React.FC<CurrentAppointmentsProps> = ({
             <th>Full Name</th>
             <th>Status</th>
             <th>Appointment Date</th>
-            <th>Notes</th>
             <th>Actions</th>
+            <th>Notes</th>
+            
           </tr>
         </thead>
         <tbody>
@@ -104,7 +105,6 @@ const CurrentAppointments: React.FC<CurrentAppointmentsProps> = ({
                 </span>
               </td>
               <td>{new Date(apt.appointmentDate).toLocaleString()}</td>
-              <td>{apt.notes || "-"}</td>
               <td style={{ position: "relative" }} className={styles.actionsContainer}>
                 <>
                   <button onClick={() => handleEditClick(apt)} className={styles.editBtn}>
@@ -113,7 +113,7 @@ const CurrentAppointments: React.FC<CurrentAppointmentsProps> = ({
                   <button onClick={() => handleCancel(apt._id)} className={styles.cancelBtn}>
                     Cancel
                   </button>
-                  {/* Кнопка перехода в чат отображается только для активных встреч */}
+                  {}
                   {apt.status.toLowerCase() !== "passed" && (
                     <button className={styles.chatButton} onClick={() => goToChat(apt._id)}>
                       Go to Chat
@@ -132,6 +132,11 @@ const CurrentAppointments: React.FC<CurrentAppointmentsProps> = ({
                   </div>
                 )}
               </td>
+              <td>
+    {<span title={apt.notes} style={{ cursor: "pointer" }}>📝</span>}
+    
+     
+  </td>
             </tr>
           ))}
         </tbody>
