@@ -10,7 +10,7 @@ import AppointmentsPage from "./Appointments/ManageAppointmentsPage";
 import UserProfileClean from "./DoctorProfile/UserProfileClean";
 import ChatContainer from "./Chat/ChatContainer";
 import NotAllowedPage from "./NotAllowedPage";
-import SessionSummaryPage from "./SessionSummary";
+import SessionSummaryPage from "./DoctorProfile/SessionSummary";
 import PatientRecord from "./DoctorProfile/PatientRecord";
 import DoctorDashboard from "./DoctorDashboard/DoctorDashboard";
 

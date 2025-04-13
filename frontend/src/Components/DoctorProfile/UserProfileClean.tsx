@@ -1,44 +1,46 @@
 import React, { useState, useEffect, ChangeEvent } from "react";
 import styles from "../../css/ProfilePage.module.css";
 import stylesLoading from "../../css/Loading.module.css";
-import patientsStyles from "../../css/DoctorPatientsTable.module.css";
 
 import {
   fetchUserProfile,
   updateUserProfileWithImage,
 } from "../../Services/userService";
-import {
-  fetchAppointments,
-  fetchPatientsWithSessions,
-} from "../../Services/appointmentService";
+import { fetchPatientsWithSessions } from "../../Services/appointmentService";
 import { User } from "../../types/user";
-import { Appointment } from "../../types/appointment";
+
+import UserProfileHeader from "./UserProfileHeader";
+import UserProfileForm from "./UserProfileForm";
+import PatientsWithSessionsTable from "./PatientsWithSessionsTable";
 import ScheduleEditor from "./ScheduleEditor";
 import DayOffEditor from "./DayOffEditor";
-import { useNavigate } from "react-router-dom";
-import SessionSummaryModal from "../SessionSummaryModal";
 
-interface PatientSession {
-  appointmentId: string;
-  appointmentDate: string;
-  status: string;
-  summary?: string;
+
+interface PatientSessionsEntry {
+  patient: {
+    _id: string;
+    username: string;
+  };
+  sessions: {
+    appointmentDate: string;
+  }[];
 }
 
 const UserProfileClean: React.FC = () => {
   const [user, setUser] = useState<User | null>(null);
   const [editing, setEditing] = useState(false);
+
   const [fullName, setFullName] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
   const [dateOfBirth, setDateOfBirth] = useState("");
   const [gender, setGender] = useState("");
+
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-  const [appointments, setAppointments] = useState<Appointment[]>([]);
-  const [patientsWithSessions, setPatientsWithSessions] = useState<any[]>([]);
-  const [activeSummaryId, setActiveSummaryId] = useState<string | null>(null);
 
-  const navigate = useNavigate();
+  const [patientsWithSessions, setPatientsWithSessions] = useState<
+    PatientSessionsEntry[]
+  >([]);
 
   useEffect(() => {
     const userId = localStorage.getItem("userId");
@@ -56,18 +58,16 @@ const UserProfileClean: React.FC = () => {
           }
 
           fetchPatientsWithSessions(userId)
-            .then(setPatientsWithSessions)
+            .then((res) => setPatientsWithSessions(res))
             .catch((err) => console.error("Error fetching patients:", err));
         })
         .catch((err) => console.error("Error fetching user profile", err));
-
-      fetchAppointments()
-        .then((data) => setAppointments(data.appointments))
-        .catch((err) => console.error("Error fetching appointments", err));
     }
   }, []);
 
-  const handleEditClick = () => setEditing(true);
+  const handleEditClick = () => {
+    setEditing(true);
+  };
 
   const handleCancelClick = () => {
     if (!user) return;
@@ -96,6 +96,7 @@ const UserProfileClean: React.FC = () => {
     if (!user) return;
     const userId = localStorage.getItem("userId");
     if (!userId) return;
+
     try {
       const updatedData = {
         username: fullName,
@@ -103,6 +104,7 @@ const UserProfileClean: React.FC = () => {
         gender: gender as "male" | "female" | "other",
         dateOfBirth: dateOfBirth ? new Date(dateOfBirth) : undefined,
       };
+
       const res = await updateUserProfileWithImage(
         userId,
         updatedData,
@@ -121,6 +123,7 @@ const UserProfileClean: React.FC = () => {
       setSelectedFile(null);
       setPreviewUrl(null);
       setEditing(false);
+
       window.dispatchEvent(new Event("userProfileUpdated"));
     } catch (err) {
       console.error("Error updating profile", err);
@@ -138,155 +141,36 @@ const UserProfileClean: React.FC = () => {
 
   return (
     <div className={styles.profilePage}>
-      <div className={styles.heroSection}>
-        <div className={styles.heroContent}>
-          <div className={styles.avatarWrapper}>
-            {previewUrl ? (
-              <img src={previewUrl} alt="Preview" className={styles.avatar} />
-            ) : user.profilePicture ? (
-              <img
-                src={user.profilePicture}
-                alt="Avatar"
-                className={styles.avatar}
-              />
-            ) : (
-              <div className={styles.avatarPlaceholder} />
-            )}
-            {editing && (
-              <div className={styles.editPictureWrapper}>
-                <label className={styles.editPictureButton}>
-                  Edit Picture
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleFileChange}
-                    style={{ display: "none" }}
-                  />
-                </label>
-              </div>
-            )}
-          </div>
-          <div className={styles.userBasicInfo}>
-            <h2 className={styles.userFullName}>{user.username}</h2>
-            <p className={styles.userEmail}>{user.email}</p>
-          </div>
-          {!editing ? (
-            <button className={styles.editButton} onClick={handleEditClick}>
-              Edit
-            </button>
-          ) : (
-            <div className={styles.editButtons}>
-              <button className={styles.saveButton} onClick={handleSaveClick}>
-                Save
-              </button>
-              <button className={styles.cancelButton} onClick={handleCancelClick}>
-                Cancel
-              </button>
-            </div>
-          )}
-        </div>
-      </div>
+      <UserProfileHeader
+        username={user.username}
+        email={user.email || ""}
+        profilePicture={user.profilePicture}
+        previewUrl={previewUrl}
+        editing={editing}
+        onEditClick={handleEditClick}
+        onSaveClick={handleSaveClick}
+        onCancelClick={handleCancelClick}
+        onFileChange={handleFileChange}
+      />
 
-      <div className={styles.formContainer}>
-        <div className={styles.formRow}>
-          <div className={styles.formField}>
-            <label>Full Name</label>
-            <input
-              type="text"
-              value={fullName}
-              onChange={(e) => setFullName(e.target.value)}
-              disabled={!editing}
-            />
-          </div>
-          <div className={styles.formField}>
-            <label>Phone Number</label>
-            <input
-              type="text"
-              value={phoneNumber}
-              onChange={(e) => setPhoneNumber(e.target.value)}
-              disabled={!editing}
-            />
-          </div>
-        </div>
-        <div className={styles.formRow}>
-          <div className={styles.formField}>
-            <label>Date of Birth</label>
-            <input
-              type="date"
-              value={dateOfBirth}
-              onChange={(e) => setDateOfBirth(e.target.value)}
-              disabled={!editing}
-            />
-          </div>
-          <div className={styles.formField}>
-            <label>Gender</label>
-            <select
-              value={gender}
-              onChange={(e) => setGender(e.target.value)}
-              disabled={!editing}
-            >
-              <option value="">Your Gender</option>
-              <option value="male">Male</option>
-              <option value="female">Female</option>
-              <option value="other">Other</option>
-            </select>
-          </div>
-        </div>
-      </div>
-
-      {user && user.role === "doctor" && (
-        <div className={styles.scheduleSection}>
-          <h3 style={{ marginBottom: "1rem", textAlign: "center" }}>My Patients</h3>
-          <div className={styles.patientsTableContainer}>
-  <h3 className={styles.tableTitle}>My Patients</h3>
-  <table className={styles.patientsTable}>
-    <thead>
-      <tr>
-        <th>Full Name</th>
-        <th>Last Session</th>
-        <th>Next Appointment</th>
-        <th>Patient Record</th>
-      </tr>
-    </thead>
-    <tbody>
-      {patientsWithSessions.map((entry) => {
-        const sessions = entry.sessions || [];
-        const sorted = [...sessions].sort(
-          (a, b) => new Date(b.appointmentDate).getTime() - new Date(a.appointmentDate).getTime()
-        );
-        const last = sorted.find(s => new Date(s.appointmentDate) < new Date());
-        const next = sorted.find(s => new Date(s.appointmentDate) > new Date());
-        return (
-          <tr key={entry.patient._id}>
-            <td>{entry.patient.username}</td>
-            <td>{last ? new Date(last.appointmentDate).toLocaleString() : "N/A"}</td>
-            <td>{next ? new Date(next.appointmentDate).toLocaleString() : "N/A"}</td>
-            <td>
-              <button
-                className={styles.chatButton}
-                onClick={() => navigate(`/patients/${entry.patient._id}/record`)}
-              >
-                Patient Record
-              </button>
-            </td>
-          </tr>
-        );
-      })}
-    </tbody>
-  </table>
-</div>
-
-          <ScheduleEditor doctorId={user._id} />
-          <DayOffEditor doctorId={user._id} />
-        </div>
-      )}
-
-      {activeSummaryId && (
-        <SessionSummaryModal
-          appointmentId={activeSummaryId}
-          onClose={() => setActiveSummaryId(null)}
+      <UserProfileForm
+        editing={editing}
+        fullName={fullName}
+        phoneNumber={phoneNumber}
+        dateOfBirth={dateOfBirth}
+        gender={gender}
+        onFullNameChange={setFullName}
+        onPhoneNumberChange={setPhoneNumber}
+        onDateOfBirthChange={setDateOfBirth}
+        onGenderChange={setGender}
+      />
+      <div className={styles.scheduleSection}>
+        <PatientsWithSessionsTable
+          patientsWithSessions={patientsWithSessions}
         />
-      )}
+        <ScheduleEditor doctorId={user._id} />
+        <DayOffEditor doctorId={user._id} />
+      </div>
     </div>
   );
 };
