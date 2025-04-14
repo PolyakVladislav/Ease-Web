@@ -42,31 +42,13 @@ export const getUserProfile = async (
 ): Promise<void> => {
   try {
     const userId = req.query.userId as string;
-    const page = Number(req.query.page) || 1;
-    const limit = Number(req.query.limit) || 5;
-
     const user = await userModel.findById(userId).select("-password");
     if (!user) {
       res.status(404).json({ message: "User not found." });
       return;
     }
-
-    const filter = { author: user.username };
-    const skipCount = (page - 1) * limit;
-
-    const totalPosts = await postModel.countDocuments(filter);
-    const posts = await postModel
-      .find(filter)
-      .sort({ createdAt: -1 })
-      .skip(skipCount)
-      .limit(limit);
-
-    const hasMorePosts = skipCount + posts.length < totalPosts;
-
     res.status(200).json({
-      user,
-      posts,
-      hasMorePosts,
+      user
     });
   } catch (err) {
     res.status(500).json({ message: "Server Error." });

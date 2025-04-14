@@ -21,7 +21,6 @@ const DoctorDashboard: React.FC = () => {
       const resp = await fetchAppointments();
       const all = resp.appointments as Appointment[];
       const todayStr = new Date().toISOString().slice(0, 10);
-
       const filtered = all.filter(
         (appt) =>
           appt.status === "confirmed" &&
@@ -58,9 +57,11 @@ const DoctorDashboard: React.FC = () => {
       </div>
 
       <div className={styles.dashboardMainContainer}>
-        <UrgentAppointments />
+        <div className={styles.urgentBlock}>
+          <UrgentAppointments />
+        </div>
 
-        <div style={{ marginTop: "20px" }}>
+        <div className={styles.todayBlock}>
           <TodayAppointments appointments={todayAppointments} />
         </div>
       </div>

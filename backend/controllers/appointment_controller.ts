@@ -384,37 +384,34 @@ export const claimUrgentAppointment = async (
       return;
     }
 
-    const appointment = await Appointment.findById(appointmentId);
-    if (!appointment) {
-      res.status(404).json({ message: "Appointment not found" });
+    const updatedAppointment = await Appointment.findOneAndUpdate(
+      {
+        _id: appointmentId,
+        isEmergency: true,
+        doctorId: null,
+      },
+      {
+        $set: {
+          doctorId,
+          status: "confirmed",
+          appointmentDate: new Date(),
+        },
+      },
+      { new: true } 
+    );
+
+    if (!updatedAppointment) {
+      res.status(409).json({ message: "Appointment already claimed or not found" });
       return;
     }
-
-    if (!appointment.isEmergency) {
-      res.status(400).json({ message: "Not an emergency appointment" });
-      return;
-    }
-
-    if (appointment.doctorId) {
-      res.status(409).json({ message: "Already taken by another doctor" });
-      return;
-    }
-
-    appointment.doctorId = doctorId;
-    appointment.status = "confirmed";
-    appointment.appointmentDate = new Date();
-
-    await appointment.save();
 
     res.status(200).json({
       message: "Appointment claimed successfully",
-      appointment,
+      appointment: updatedAppointment,
     });
-    return;
   } catch (err) {
     console.error("Error claiming urgent appointment:", err);
     res.status(500).json({ message: "Internal server error" });
-    return;
   }
 };
 
