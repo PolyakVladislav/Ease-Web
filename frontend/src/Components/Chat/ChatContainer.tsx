@@ -1,28 +1,42 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { useParams } from "react-router-dom";
 import { Socket } from "socket.io-client";
-import { createSocket, startChat, requestAISuggestion, endConsultation, disconnectSocket } from "../../Services/Chat/socketService";
-import { fetchChatHistory, fetchMeetingDetails } from "../../Services/Chat/chatService";
+import {
+  createSocket,
+  startChat,
+  requestAISuggestion,
+  endConsultation,
+  disconnectSocket,
+} from "../../Services/Chat/socketService";
+import {
+  fetchChatHistory,
+  fetchMeetingDetails,
+} from "../../Services/Chat/chatService";
+import { fetchUserProfile } from "../../Services/userService";
+import { updateAppointment } from "../../Services/appointmentService";
 import MessageList from "./MessageList";
 import ChatInput from "./ChatInput";
 import AISuggestionsContainer from "./AISuggestionsContainer";
 import ToastNotification from "./ToastNotification";
 import styles from "../../css/MeetingChat.module.css";
 import { ChatMessage } from "../../types/ChatMessage";
-import { updateAppointment } from "../../Services/appointmentService";
 import { Appointment } from "../../types/appointment";
 
 const ChatContainer: React.FC = () => {
   const { meetingId } = useParams<{ meetingId: string }>();
-  const userId: string = localStorage.getItem("userId") || "";
+  const userId = localStorage.getItem("userId") || "";
   const [socket, setSocket] = useState<typeof Socket | null>(null);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [aiMessages, setAiMessages] = useState<string[]>([]);
-  const [toastMessage, setToastMessage] = useState<string>("");
-  const [readOnly, setReadOnly] = useState<boolean>(false);
+  const [toastMessage, setToastMessage] = useState("");
+  const [readOnly, setReadOnly] = useState(false);
   const [meetingData, setMeetingData] = useState<Appointment | null>(null);
+  const [acceptedSuggestion, setAcceptedSuggestion] = useState("");
+  const [partnerName, setPartnerName] = useState("");
+  const [partnerAvatar, setPartnerAvatar] = useState("");
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const lastAISuggestionRef = useRef<string>("");
 
   const scrollToBottom = useCallback(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -31,71 +45,66 @@ const ChatContainer: React.FC = () => {
   useEffect(() => {
     if (!meetingId) return;
     fetchChatHistory(meetingId)
-      .then((history: ChatMessage[]) => setMessages(history))
-      .catch((err: unknown) => {
-        console.error("Error fetching chat history", err);
-        setToastMessage("Error loading chat history");
-      });
+      .then((history) => setMessages(history))
+      .catch(() => setToastMessage("Error loading chat history"));
   }, [meetingId]);
 
   useEffect(() => {
     if (!meetingId) return;
     fetchMeetingDetails(meetingId)
-      .then((data: Appointment) => {
+      .then((data) => {
         setMeetingData(data);
-        if (data.aiMessages) {
-          setAiMessages(data.aiMessages);
-        }
-        if (data.status && data.status.toLowerCase() === "passed") {
-          setReadOnly(true);
-        }
+        if (data.aiMessages) setAiMessages(data.aiMessages);
+        if (data.status && data.status.toLowerCase() === "passed") setReadOnly(true);
       })
-      .catch((err: unknown) => {
-        console.error("Error fetching meeting details", err);
-        setToastMessage("Error loading meeting details");
-      });
+      .catch(() => setToastMessage("Error loading meeting details"));
   }, [meetingId]);
-
-  const lastAISuggestionRef = useRef<string>("");
 
   useEffect(() => {
     if (!userId || !meetingId) return;
-    const newSocket: typeof Socket = createSocket(userId);
-    setSocket(newSocket);
-    startChat(newSocket, meetingId, userId);
-  
-    newSocket.on("newMessage", (msg: ChatMessage) => {
+    const s = createSocket(userId);
+    setSocket(s);
+    startChat(s, meetingId, userId);
+
+    s.on("newMessage", (msg: ChatMessage) => {
       setMessages((prev) => {
-        const updatedMessages = [...prev, msg];
+        const updated = [...prev, msg];
         if (msg.from !== userId && lastAISuggestionRef.current !== msg.message) {
           lastAISuggestionRef.current = msg.message;
-          const chatContext = updatedMessages.map((m) => m.message).join("\n");
-          requestAISuggestion(newSocket, meetingId, chatContext, msg.message);
+          const ctx = updated.map((m) => m.message).join("\n");
+          requestAISuggestion(s, meetingId, ctx, msg.message);
         }
-        return updatedMessages;
+        return updated;
       });
     });
-  
-    newSocket.on("aiSuggestion", (data: { suggestion: string }) => {
+
+    s.on("aiSuggestion", (data: { suggestion: string }) => {
       setAiMessages((prev) => [...prev, data.suggestion]);
     });
-  
-    newSocket.on("consultationEnded", () => {
+
+    s.on("consultationEnded", () => {
       setReadOnly(true);
       setToastMessage("Consultation ended: AI summary is available in your profile");
     });
-  
+
     return () => {
-      disconnectSocket(newSocket);
+      disconnectSocket(s);
     };
   }, [userId, meetingId]);
-  
-  
-  
 
   useEffect(() => {
     scrollToBottom();
   }, [messages, scrollToBottom]);
+
+  useEffect(() => {
+    if (!meetingData || typeof meetingData.patientId !== "string") return;
+    fetchUserProfile(meetingData.patientId).then((res) => {
+      if (res.user) {
+        setPartnerName(res.user.username || "");
+        setPartnerAvatar(res.user.profilePicture || "");
+      }
+    });
+  }, [meetingData]);
 
   if (!meetingData) {
     return (
@@ -110,24 +119,30 @@ const ChatContainer: React.FC = () => {
       </div>
     );
   }
-  
-  const otherUserId = meetingData && typeof meetingData.patientId === "string" ? meetingData.patientId : "";
 
-  const handleManualAISuggestion = (): void => {
+  const otherUserId =
+    typeof meetingData.patientId === "string" ? meetingData.patientId : "";
+
+  const handleManualAISuggestion = () => {
     if (!socket || !meetingId) return;
-    const chatContext = messages.map(m => m.message).join("\n");
-    const lastMessage = messages.length > 0 ? messages[messages.length - 1].message : "";
-    requestAISuggestion(socket, meetingId, chatContext, lastMessage);
+    const ctx = messages.map((m) => m.message).join("\n");
+    const last = messages.length ? messages[messages.length - 1].message : "";
+    requestAISuggestion(socket, meetingId, ctx, last);
   };
 
-  const handleEndConsultation = async (): Promise<void> => {
+  const handleEndConsultation = async () => {
     if (!socket || !meetingId) return;
     endConsultation(socket, meetingId, userId);
     try {
       await updateAppointment(meetingId, { status: "passed" });
     } catch (error) {
-      console.error("Error updating appointment status:", error);
+      console.error("Failed to update appointment status:", error);
     }
+  };
+
+  const lastAiMessage = aiMessages.length ? aiMessages[aiMessages.length - 1] : "";
+  const handleAcceptSuggestion = () => {
+    if (lastAiMessage) setAcceptedSuggestion(lastAiMessage);
   };
 
   return (
@@ -146,21 +161,33 @@ const ChatContainer: React.FC = () => {
       </header>
       <div className={styles.chatContent}>
         <div className={styles.mainChat}>
-          <MessageList messages={messages} />
-          <div ref={messagesEndRef} />
+          <div className={styles.chatPartnerInfo}>
+            {partnerAvatar ? (
+              <img src={partnerAvatar} alt="" className={styles.partnerAvatar} />
+            ) : (
+              <div className={styles.partnerAvatarPlaceholder} />
+            )}
+            <span className={styles.partnerName}>{partnerName}</span>
+          </div>
+          <div className={styles.messagesContainer}>
+            <MessageList messages={messages} />
+            <div ref={messagesEndRef} />
+          </div>
           {!readOnly && socket && meetingId && meetingData && (
             <ChatInput
               socket={socket}
               meetingId={meetingId}
               userId={userId}
               otherUserId={otherUserId}
+              acceptedSuggestion={acceptedSuggestion}
             />
           )}
         </div>
         {!readOnly && (
           <AISuggestionsContainer
-            suggestions={aiMessages}
+            suggestion={lastAiMessage}
             onRequestSuggestion={handleManualAISuggestion}
+            onAcceptSuggestion={handleAcceptSuggestion}
           />
         )}
       </div>

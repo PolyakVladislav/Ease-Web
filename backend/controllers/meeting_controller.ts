@@ -1,7 +1,6 @@
 import { Request, Response } from "express";
 import Appointment from "../models/Appointment";
 import { getChatHistory, saveConsultationSummary } from "./chat_controller";
-import aiService from "./aiService";
 
 
 export const getMeeting = async (
