@@ -3,6 +3,7 @@ import { Request, Response } from "express";
 import Appointment from "../models/Appointment";
 import User from "../models/Users";
 import mongoose from "mongoose"; 
+import Diary, { IDiary } from "../models/Diary";
 
 export const createAppointment = async (
   req: Request,
@@ -21,14 +22,32 @@ export const createAppointment = async (
       res.status(400).json({ message: "Missing required fields" });
       return;
     }
-
+    let diaries: IDiary[] = [];
     const status = initiator === "patient" ? "confirmed" : "pending";
+    const lastAppointment = await Appointment.findOne({ doctorId })
+      .sort({ appointmentDate: -1 });
+    if (lastAppointment) {
+        diaries= await Diary.find({
+        authorId: patientId,
+        createdAt: { $gte: lastAppointment.appointmentDate }
+      })
+      .sort({ createdAt: -1 })
+      .limit(10);
+    }
+    else{
+      diaries= await Diary.find({
+        authorId: patientId,
+      })
+      .sort({ createdAt: -1 })
+      .limit(10);
 
+    }
+    const nlpReviews = diaries.map((diary) => diary.nlpSummary);
     const appointment = await Appointment.create({
       patientId,
       doctorId,
       appointmentDate: new Date(appointmentDate),
-      notes: notes || "",
+      notes: nlpReviews,
       isEmergency: isEmergency || false,
       initiator,
       status,
@@ -54,7 +73,7 @@ export const createAppointment = async (
       doctorId: populatedAppointment.doctorId,
       appointmentDate: populatedAppointment.appointmentDate,
       status: populatedAppointment.status,
-      notes: populatedAppointment.notes,
+      notes: nlpReviews,
       isEmergency: populatedAppointment.isEmergency,
       createdAt: populatedAppointment.createdAt,
       updatedAt: populatedAppointment.updatedAt,
