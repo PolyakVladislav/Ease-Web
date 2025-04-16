@@ -13,6 +13,7 @@ import NotAllowedPage from "./NotAllowedPage";
 import SessionSummaryPage from "./DoctorProfile/SessionSummary";
 import PatientRecord from "./DoctorProfile/PatientRecord";
 import DoctorDashboard from "./DoctorDashboard/DoctorDashboard";
+import NotFoundPage from "./NotFoundPage";
 
 function App() {
   return (
@@ -22,14 +23,7 @@ function App() {
         <Route path="/register" element={<Register />} />
         <Route path="/oauth/callback" element={<OAuthCallback />} />
         <Route path="/not-allowed" element={<NotAllowedPage />} />
-        <Route
-          path="/"
-          element={
-            <PrivateRoute>
-              <Layout />
-            </PrivateRoute>
-          }
-        >
+        <Route path="/"element={<PrivateRoute><Layout /></PrivateRoute>}>
           <Route path="/doctor/dashboard" element={<DoctorDashboard />} />
           <Route path="/profile" element={<UserProfileClean />} />
           <Route path="/chatgpt" element={<ChatGPTPage />} />
@@ -42,6 +36,7 @@ function App() {
             element={<PatientRecord />}
           />
         </Route>
+        <Route path="*" element={<NotFoundPage />} />
       </Routes>
     </Router>
   );
