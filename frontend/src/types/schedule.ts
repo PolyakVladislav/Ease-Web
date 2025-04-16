@@ -1,4 +1,3 @@
-// src/types/schedule.ts
 export interface Schedule {
     _id: string;
     doctorId: string;

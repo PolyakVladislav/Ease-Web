@@ -112,7 +112,7 @@
   margin-left: 250px;
   width: calc(100% - 250px);
   background-color: #f0f2f5;
-  min-height: calc(100vh - 60px);
+  height: calc(100vh - 60px);
 }
 
 @media (max-width: 768px) {
@@ -123,14 +123,78 @@
     border-right: none;
     border-bottom: 1px solid #e0e0e0;
   }
-  
+
   .mainContent {
     margin-left: 0;
     margin-top: 60px;
     width: 100%;
   }
-  
+
   .dashboardContainer {
     flex-direction: column;
   }
+}
+
+/* ==== Модальное окно подтверждения логаута ==== */
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+}
+
+.modalContent {
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  width: 300px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+  text-align: center;
+}
+
+.modalContent p {
+  margin: 0;
+  font-size: 1rem;
+  color: #333;
+}
+
+.modalButtons {
+  margin-top: 20px;
+  display: flex;
+  justify-content: space-around;
+}
+
+.modalButtons button {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: background-color 0.3s, transform 0.2s;
+}
+
+/* Первая кнопка (Yes) – красная */
+.modalButtons button:nth-child(1) {
+  background-color: #dc3545;
+  color: #fff;
+}
+.modalButtons button:nth-child(1):hover {
+  background-color: #c82333;
+  transform: translateY(-2px);
+}
+
+/* Вторая кнопка (Cancel) – серая */
+.modalButtons button:nth-child(2) {
+  background-color: #6c757d;
+  color: #fff;
+}
+.modalButtons button:nth-child(2):hover {
+  background-color: #5a6268;
+  transform: translateY(-2px);
 }

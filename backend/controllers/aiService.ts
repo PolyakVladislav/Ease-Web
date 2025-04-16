@@ -31,12 +31,7 @@ if (!OPENAI_API_KEY) {
 
 const cache = new NodeCache({ stdTTL: 3600 });
 
-/**
- * Get AI suggestion for chat reply.
- * @param chatContext - Current chat context.
- * @param newMessage - Message for which a suggestion is needed.
- * @returns AI recommendation.
- */
+
 async function getSuggestion(chatContext: any, newMessage: string): Promise<string> {
   const prompt = `
   Chat context:
@@ -192,11 +187,65 @@ async function getDiarySummary(DiaryNote: string): Promise<string> {
     let summary = data.choices[0]?.message?.content?.trim() || "";
     return summary;
   }
+  async function getOverallSummary(allSummaries: string[]): Promise<string> {
+    if (!allSummaries.length) {
+      return "";
+    }
+  
+    const combinedText = allSummaries.join("\n\n---\n\n");
+  
+    const prompt = `
+  You are an AI assistant analyzing multiple session summaries for the same patient-doctor relationship.
+  
+  Here are the session-based summaries:
+  
+  ${combinedText}
+  
+  Analyze them collectively and provide a single, concise "Overall AI Summary" that addresses:
+  - The main issues or symptoms that emerged across the sessions
+  - How the patient's condition evolved over time
+  - Key interventions or advice repeated across sessions
+  
+  Include a final note: "This is an overall summary for evaluation purposes only and does not constitute medical advice."
+  `;
+  
+    const response = await fetch("https://api.openai.com/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${OPENAI_API_KEY}`,
+      },
+      body: JSON.stringify({
+        model: "gpt-3.5-turbo",
+        messages: [
+          {
+            role: "system",
+            content: "You are an AI assistant summarizing multiple doctor-patient consultations.",
+          },
+          {
+            role: "user",
+            content: prompt,
+          },
+        ],
+        max_tokens: 700, 
+      }),
+    });
+  
+    if (!response.ok) {
+      throw new Error("Error in request to OpenAI for overall summary");
+    }
+  
+    const data: OpenAIResponse = await response.json();
+    const summary = data.choices[0]?.message?.content?.trim() || "";
+    return summary;
+  }
 
 
 export default {
   getSuggestion,
   getSummary,
+  getDiarySummary,
+  getOverallSummary, 
   cache,
-  getDiarySummary
+
 };
