@@ -17,9 +17,11 @@ const CurrentAppointments: React.FC<CurrentAppointmentsProps> = ({
 }) => {
   const [cancelConfirmId, setCancelConfirmId] = useState<string | null>(null);
   const [alertMessage, setAlertMessage] = useState<string>("");
+  const [selectedNotes, setSelectedNotes] = useState<string[] | null>(null);
+  const [showNotesPopup, setShowNotesPopup] = useState<boolean>(false);
+  const [currentNoteIndex, setCurrentNoteIndex] = useState<number>(0);
   const navigate = useNavigate();
 
-  // Активные встречи определяются по статусу (не passed и не canceled)
   const activeAppointments = (appointments || []).filter((apt) => {
     return apt.status.toLowerCase() !== "passed" && apt.status.toLowerCase() !== "canceled";
   });
@@ -55,7 +57,6 @@ const CurrentAppointments: React.FC<CurrentAppointmentsProps> = ({
     }
   };
 
-  // Функция для перехода в чат (доступна только если встреча активна)
   const goToChat = (appointmentId: string) => {
     navigate(`/meetings/${appointmentId}/chat`);
   };
@@ -86,8 +87,8 @@ const CurrentAppointments: React.FC<CurrentAppointmentsProps> = ({
             <th>Full Name</th>
             <th>Status</th>
             <th>Appointment Date</th>
-            <th>Notes</th>
             <th>Actions</th>
+            <th>Notes</th>
           </tr>
         </thead>
         <tbody>
@@ -104,7 +105,6 @@ const CurrentAppointments: React.FC<CurrentAppointmentsProps> = ({
                 </span>
               </td>
               <td>{new Date(apt.appointmentDate).toLocaleString()}</td>
-              <td>{apt.notes || "-"}</td>
               <td style={{ position: "relative" }} className={styles.actionsContainer}>
                 <>
                   <button onClick={() => handleEditClick(apt)} className={styles.editBtn}>
@@ -113,7 +113,6 @@ const CurrentAppointments: React.FC<CurrentAppointmentsProps> = ({
                   <button onClick={() => handleCancel(apt._id)} className={styles.cancelBtn}>
                     Cancel
                   </button>
-                  {/* Кнопка перехода в чат отображается только для активных встреч */}
                   {apt.status.toLowerCase() !== "passed" && (
                     <button className={styles.chatButton} onClick={() => goToChat(apt._id)}>
                       Go to Chat
@@ -132,10 +131,70 @@ const CurrentAppointments: React.FC<CurrentAppointmentsProps> = ({
                   </div>
                 )}
               </td>
+              <td>
+                <span
+                  style={{ cursor: "pointer" }}
+                  onClick={() => {
+                    const notesList = Array.isArray(apt.notes) ? apt.notes : [];
+                    setSelectedNotes(notesList);
+                    setCurrentNoteIndex(0);
+                    setShowNotesPopup(true);
+                  }}
+                >
+                  📝
+                </span>
+              </td>
             </tr>
           ))}
         </tbody>
       </table>
+
+      {showNotesPopup && selectedNotes && selectedNotes.length > 0 && (
+        <div className={styles.modalOverlay}>
+          <div className={styles.modal}>
+            <h3>Diary Notes</h3>
+            <div style={{ minHeight: "120px", marginBottom: "10px" }}>
+              {selectedNotes[currentNoteIndex]}
+            </div>
+
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                marginBottom: "15px",
+              }}
+            >
+              <button
+                onClick={() => setCurrentNoteIndex((prev) => prev - 1)}
+                disabled={currentNoteIndex === 0}
+              >
+                Previous
+              </button>
+
+              <span>
+                {currentNoteIndex + 1} / {selectedNotes.length}
+              </span>
+
+              <button
+                onClick={() => setCurrentNoteIndex((prev) => prev + 1)}
+                disabled={currentNoteIndex === selectedNotes.length - 1}
+              >
+                Next
+              </button>
+            </div>
+
+            <button
+              onClick={() => {
+                setShowNotesPopup(false);
+                setCurrentNoteIndex(0);
+              }}
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      )}
     </>
   );
 };
