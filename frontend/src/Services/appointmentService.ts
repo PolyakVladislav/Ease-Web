@@ -47,6 +47,18 @@ export const updateAppointment = async (
   );
   return response.data;
 };
+export const deleteAppointment = async (appointmentId: string, role: string) => {
+  const response = await api.delete(
+    `${CONFIG.SERVER_URL}/api/appointments/${appointmentId}`,
+    {
+      withCredentials: true,
+      data: { role },
+    }
+  );
+  return response.data;
+};
+
+
 
 export const getSummaryByAppointmentId = async (appointmentId: string) => {
   try {

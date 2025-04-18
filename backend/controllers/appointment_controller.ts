@@ -33,6 +33,14 @@ export const createAppointment = async (req: Request, res: Response): Promise<vo
     } else {
       status = initiator === "patient" ? "confirmed" : "pending";
     }
+    if (initiator === "doctor") {
+      const io = req.app.get("io");
+
+      io.to(patientId).emit("appointmentCreated", {
+        reason: "The therapist wants to set an appointment with you."
+      });
+
+    }
 
     const appointment = await Appointment.create({
       patientId,
@@ -360,6 +368,16 @@ export const deleteAppointment = async (
     if (!appointment) {
       res.status(404).json({ message: "Appointment not found" });
       return;
+    }
+    const { role } = req.body;
+    if (role == "doctor") {
+      const io = req.app.get("io");
+      const patientId = appointment.patientId.toString();
+
+      io.to(patientId).emit("appointmentCanceled", {
+        reason: "The therapist canceled your appointment.",
+        appointmentId,
+      });
     }
 
     await Appointment.findByIdAndDelete(appointmentId);

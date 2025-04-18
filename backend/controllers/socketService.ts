@@ -8,6 +8,10 @@ import Appointment from '../models/Appointment';
 export function initSocketServer(io: Server) {
   io.on('connection', (socket: Socket) => {
 
+    socket.on('joinUser', ({ userId }) => {
+      socket.join(userId);
+    });
+
     socket.on('joinRoom', async (data) => {
       const { meetingId, userId, role } = data;
       const accessGranted = await checkMeetingAccess(meetingId, userId);
@@ -17,6 +21,9 @@ export function initSocketServer(io: Server) {
       }
       
       socket.join(meetingId);
+      socket.join(userId);
+      socket.data.userId = userId;
+      socket.data.meetingId = meetingId;
       socket.to(meetingId).emit('userJoined', { userId, role });
 
       const clients = await io.in(meetingId).allSockets();
