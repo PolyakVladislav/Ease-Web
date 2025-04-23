@@ -2,6 +2,8 @@ import { Request, Response } from "express";
 import Diary, { IDiary } from "../models/Diary";
 import aiService from "./aiService";
 import Sentiment from 'sentiment';
+const dangerWords = ["losing", "hopeless", "worthless", "disappear", "die", "suicide", "kill", "cut", "pain", "end it", "no point", "nothing matters"];
+
 const sentiment = new Sentiment();
 export const getAllDiaryEntries = async (req: Request, res: Response): Promise<void> => {
   try {
@@ -71,24 +73,92 @@ export const createDiaryEntry = async (req: Request, res: Response): Promise<voi
         await newDiaryEntry.save();
         
         res.status(201).json({ message: "Diary entry created successfully", newDiaryEntry });
-       // let aiSummary= await aiSummaryDiary(newDiaryEntry);
-        const newAiDiary = newDiaryEntry;
-        //newAiDiary.aiSummary = aiSummary;
+        const diary = await generateClinicalSummary(newDiaryEntry);
         const last_Diary = await Diary.find({ _id: newDiaryEntry._id });
-        //last_Diary[0].aiSummary = aiSummary;
+        if (!diary) {
+            return;
+        }
+        last_Diary[0].nlpSummary =diary.nlpreview;
+        last_Diary[0].sentimentScore = diary.sentimentScore;
+        last_Diary[0].mood = diary.mood;
+        last_Diary[0].riskLevel = diary.riskLevel;
         await last_Diary[0].save();
     } catch (error) {
         res.status(500).json({ message: "Internal server error" });
     }
 };
-export const aiSummaryDiary = async () => {
+export const aiSummaryDiary = async (Diary:IDiary) => {
     try {
-       // const summary = await aiService.getDiarySummary(diaryEntry.context || "");
-       const summary =await sentiment.analyze( "Today was really hard. I woke up with this tight feeling in my chest again. It’s like something bad is about to happen, even when everything is fine. I tried to go outside, but my heart started racing and I couldn’t catch my breath. I just turned around and went back inside.I feel like I’m losing control. Everyone thinks I’m just being dramatic, but they don’t understand how exhausting it is to fight these thoughts all day. I’m scared that this is never going to go away. I want to feel normal again, just for one day.");
-       console.log("summary", summary);
-        //diaryEntry.aiSummary = summary;
-        //return summary;
+      if (!Diary.context) {
+        return ;
+      }
+      const summary =await sentiment.analyze(Diary.context);
+      console.log("summary", summary);
+      return summary;
     } catch (error) {
       return "Error generating summary";
     }
 }
+
+
+function generateClinicalSummary(Diary:IDiary) {
+  if (!Diary.context) {
+    return ;
+  }
+    const result = sentiment.analyze(Diary.context);
+
+    const { score, negative, positive } = result;
+
+    // Tone label
+    let emotionalTone = "neutral";
+    if (score <= -4) emotionalTone = "negative";
+    else if (score <= -1) emotionalTone = "slightly negative";
+    else if (score >= 4) emotionalTone = "very positive";
+    else if (score > 0) emotionalTone = "slightly positive";
+
+    // Red flag detection
+    const redFlags = negative.filter(word => dangerWords.includes(word.toLowerCase()));
+
+    // Risk level based on score + danger words
+    let riskLevel = "⚪ Stable";
+
+    if (redFlags.length > 0) {
+        riskLevel = "🔴 High Risk";
+    } else if (score <= -4) {
+        riskLevel = "🟠 Moderate Risk";
+    } else if (score <= -1) {
+        riskLevel = "🟡 Mild Emotional Distress";
+    } else if (score >= 1) {
+        riskLevel = "🟢 Positive/Improving";
+    }
+
+    // Clinical-style summary text
+    const summary_text = `
+📘 **Diary NLP Summary Report**
+
+- **Emotional Tone**: ${emotionalTone}
+- **Sentiment Score**: ${score}
+- **Risk Level**: ${riskLevel}
+- **Key Negative Expressions**: ${negative.length ? negative.join(", ") : "None detected"}
+- **Key Positive Expressions**: ${positive.length ? positive.join(", ") : "None detected"}
+
+📝 **Clinical Summary**:
+The patient's diary entry indicates a *${emotionalTone}* emotional tone. 
+Sentiment score of ${score} suggests a ${emotionalTone === "neutral" ? "stable emotional state" : emotionalTone}. 
+${redFlags.length > 0 
+    ? `⚠️ Red flag terms detected: "${redFlags.join(', ')}", which may indicate mental health risks requiring immediate attention.` 
+    : `No critical red flag expressions were identified in this entry.`}
+It is recommended to continue monitoring the emotional pattern over time.
+    `.trim();
+    const nlpSummary = {
+        authorId: Diary.authorId,
+        date: Diary.date,
+        context: Diary.context,
+        nlpreview: summary_text,
+        sentimentScore: score,
+        mood: emotionalTone,
+        riskLevel: riskLevel
+    };
+    return nlpSummary;
+}
+
