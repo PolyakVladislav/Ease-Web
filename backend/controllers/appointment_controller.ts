@@ -2,7 +2,9 @@ import "../models/Users";
 import { Request, Response } from "express";
 import Appointment from "../models/Appointment";
 import User from "../models/Users";
-import mongoose from "mongoose";
+import mongoose from "mongoose"; 
+import Diary, { IDiary } from "../models/Diary";
+
 
 
 export const createAppointment = async (req: Request, res: Response): Promise<void> => {
@@ -21,6 +23,25 @@ export const createAppointment = async (req: Request, res: Response): Promise<vo
       res.status(400).json({ message: "Missing required fields (patientId, appointmentDate, initiator)" });
       return;
     }
+    let diaries: IDiary[] = [];
+    const status = initiator === "patient" ? "confirmed" : "pending";
+    const lastAppointment = await Appointment.findOne({ doctorId })
+      .sort({ appointmentDate: -1 });
+    if (lastAppointment) {
+        diaries= await Diary.find({
+        authorId: patientId,
+        createdAt: { $gte: lastAppointment.appointmentDate }
+      })
+      .sort({ createdAt: -1 })
+      .limit(10);
+    }
+    else{
+      diaries= await Diary.find({
+        authorId: patientId,
+      })
+      .sort({ createdAt: -1 })
+      .limit(10);
+
 
     if (!isEmergency && !doctorId) {
       res.status(400).json({ message: "doctorId is required for non-emergency appointment" });
@@ -33,20 +54,15 @@ export const createAppointment = async (req: Request, res: Response): Promise<vo
     } else {
       status = initiator === "patient" ? "confirmed" : "pending";
     }
-    if (initiator === "doctor") {
-      const io = req.app.get("io");
 
-      io.to(patientId).emit("appointmentCreated", {
-        reason: "The therapist wants to set an appointment with you."
-      });
 
     }
-
+    const nlpReviews = diaries.map((diary) => diary.nlpSummary);
     const appointment = await Appointment.create({
       patientId,
       doctorId: doctorId || null,
       appointmentDate: new Date(appointmentDate),
-      notes: notes || "",
+      notes: nlpReviews,
       isEmergency: !!isEmergency,
       initiator,
       status,
@@ -72,7 +88,7 @@ export const createAppointment = async (req: Request, res: Response): Promise<vo
       doctorId: populatedAppointment.doctorId, 
       appointmentDate: populatedAppointment.appointmentDate,
       status: populatedAppointment.status,
-      notes: populatedAppointment.notes,
+      notes: nlpReviews,
       isEmergency: populatedAppointment.isEmergency,
       createdAt: populatedAppointment.createdAt,
       updatedAt: populatedAppointment.updatedAt,
@@ -368,16 +384,6 @@ export const deleteAppointment = async (
     if (!appointment) {
       res.status(404).json({ message: "Appointment not found" });
       return;
-    }
-    const { role } = req.body;
-    if (role == "doctor") {
-      const io = req.app.get("io");
-      const patientId = appointment.patientId.toString();
-
-      io.to(patientId).emit("appointmentCanceled", {
-        reason: "The therapist canceled your appointment.",
-        appointmentId,
-      });
     }
 
     await Appointment.findByIdAndDelete(appointmentId);
