@@ -167,6 +167,55 @@ const CurrentAppointments: React.FC<CurrentAppointmentsProps> = ({
           ))}
         </tbody>
       </table>
+
+
+      {showNotesPopup && selectedNotes && selectedNotes.length > 0 && (
+  <div className={styles.modalOverlay}>
+    <div className={`${styles.modal} ${styles.diaryModal}`}>
+      <h2>🗒️ Diary Notes</h2>
+
+      <div className={styles.diaryNoteContent}>
+        {selectedNotes[currentNoteIndex]}
+      </div>
+
+      <div className={styles.diaryPagination}>
+        <button
+          onClick={() => setCurrentNoteIndex((prev) => prev - 1)}
+          disabled={currentNoteIndex === 0}
+        >
+          ◀ Previous
+        </button>
+
+        <span>
+          {currentNoteIndex + 1} / {selectedNotes.length}
+        </span>
+
+        <button
+          onClick={() => setCurrentNoteIndex((prev) => prev + 1)}
+          disabled={currentNoteIndex === selectedNotes.length - 1}
+        >
+          Next ▶
+        </button>
+      </div>
+
+      <div className={styles.diaryCloseContainer}>
+        <button
+          onClick={() => {
+            setShowNotesPopup(false);
+            setCurrentNoteIndex(0);
+          }}
+          className={styles.diaryCloseBtn}
+        >
+          Close
+        </button>
+      </div>
+    </div>
+  </div>
+)}
+
+
+
+
     </>
   );
 };
