@@ -48,10 +48,13 @@ const TodayAppointments: React.FC<Props> = ({ appointments }) => {
               });
 
               const leftStr = timeLeftUntil(appt.appointmentDate);
-              const diffMin = Math.floor((dateObj.getTime() - Date.now()) / 60000);
-              const canStartChat = diffMin <= 10;
+              const diffMin = Math.floor(
+                (dateObj.getTime() - Date.now()) / 60000
+              );
+              const canStartChat = diffMin <= 10000000000000; // vlad lagaz
 
-              const patientName = appt.patientName || appt.patientId?.username || "Unknown";
+              const patientName =
+                appt.patientName || appt.patientId?.username || "Unknown";
 
               const isEmergency = appt.isEmergency;
               const chipClass = isEmergency ? styles.chipEmergency : "";

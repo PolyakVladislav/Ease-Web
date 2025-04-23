@@ -34,7 +34,6 @@ app.use(
     allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
-
 app.use(bodyParser.json());
 
 const swaggerOptions = {
@@ -87,6 +86,8 @@ const io = new socketIo.Server(server, {
     credentials: true,
   },
 });
+app.set("io", io);
+
 
 initSocketServer(io);
 
