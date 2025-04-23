@@ -351,3 +351,60 @@
     padding: 8px 10px;
   }
 }
+.diaryModal {
+  width: 500px;
+  max-width: 90%;
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+  max-height: 80vh;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.diaryModal h2 {
+  margin-bottom: 16px;
+  text-align: center;
+  font-size: 20px;
+  font-weight: bold;
+}
+
+.diaryNoteContent {
+  min-height: 180px;
+  padding: 10px;
+  background: #f9f9f9;
+  border-radius: 8px;
+  font-size: 15px;
+  line-height: 1.6;
+  white-space: pre-line;
+  overflow-y: auto;
+  width: 100%;
+}
+
+.diaryPagination {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 20px 0 10px;
+  width: 100%;
+}
+
+.diaryCloseContainer {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
+
+.diaryCloseBtn {
+  margin-top: 10px;
+  padding: 8px 16px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 500;
+}
+

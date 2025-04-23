@@ -150,51 +150,50 @@ const CurrentAppointments: React.FC<CurrentAppointmentsProps> = ({
       </table>
 
       {showNotesPopup && selectedNotes && selectedNotes.length > 0 && (
-        <div className={styles.modalOverlay}>
-          <div className={styles.modal}>
-            <h3>Diary Notes</h3>
-            <div style={{ minHeight: "120px", marginBottom: "10px" }}>
-              {selectedNotes[currentNoteIndex]}
-            </div>
+  <div className={styles.modalOverlay}>
+    <div className={`${styles.modal} ${styles.diaryModal}`}>
+      <h2>🗒️ Diary Notes</h2>
 
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-                marginBottom: "15px",
-              }}
-            >
-              <button
-                onClick={() => setCurrentNoteIndex((prev) => prev - 1)}
-                disabled={currentNoteIndex === 0}
-              >
-                Previous
-              </button>
+      <div className={styles.diaryNoteContent}>
+        {selectedNotes[currentNoteIndex]}
+      </div>
 
-              <span>
-                {currentNoteIndex + 1} / {selectedNotes.length}
-              </span>
+      <div className={styles.diaryPagination}>
+        <button
+          onClick={() => setCurrentNoteIndex((prev) => prev - 1)}
+          disabled={currentNoteIndex === 0}
+        >
+          ◀ Previous
+        </button>
 
-              <button
-                onClick={() => setCurrentNoteIndex((prev) => prev + 1)}
-                disabled={currentNoteIndex === selectedNotes.length - 1}
-              >
-                Next
-              </button>
-            </div>
+        <span>
+          {currentNoteIndex + 1} / {selectedNotes.length}
+        </span>
 
-            <button
-              onClick={() => {
-                setShowNotesPopup(false);
-                setCurrentNoteIndex(0);
-              }}
-            >
-              Close
-            </button>
-          </div>
-        </div>
-      )}
+        <button
+          onClick={() => setCurrentNoteIndex((prev) => prev + 1)}
+          disabled={currentNoteIndex === selectedNotes.length - 1}
+        >
+          Next ▶
+        </button>
+      </div>
+
+      <div className={styles.diaryCloseContainer}>
+        <button
+          onClick={() => {
+            setShowNotesPopup(false);
+            setCurrentNoteIndex(0);
+          }}
+          className={styles.diaryCloseBtn}
+        >
+          Close
+        </button>
+      </div>
+    </div>
+  </div>
+)}
+
+
     </>
   );
 };
