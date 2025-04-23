@@ -1,7 +1,10 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import styles from "../../css/ManageAppointmentsPage.module.css";
-import { updateAppointment } from "../../Services/appointmentService";
+import {
+  updateAppointment,
+  deleteAppointment,
+} from "../../Services/appointmentService";
 import { Appointment } from "../../types/appointment";
 
 interface CurrentAppointmentsProps {
@@ -21,7 +24,11 @@ const CurrentAppointments: React.FC<CurrentAppointmentsProps> = ({
 
   // Активные встречи определяются по статусу (не passed и не canceled)
   const activeAppointments = (appointments || []).filter((apt) => {
-    return apt.status.toLowerCase() !== "passed" && apt.status.toLowerCase() !== "canceled";
+    return (
+      apt &&
+      apt.status.toLowerCase() !== "passed" &&
+      apt.status.toLowerCase() !== "canceled"
+    );
   });
 
   const showAlert = (message: string) => {
@@ -43,11 +50,12 @@ const CurrentAppointments: React.FC<CurrentAppointmentsProps> = ({
 
   const confirmCancel = async (appointmentId: string) => {
     try {
-      const res = await updateAppointment(appointmentId, {
-        status: "canceled",
-      });
+      //const res = await updateAppointment(appointmentId, {
+      //   status: "canceled",
+      // });
+      const res = await deleteAppointment(appointmentId, "doctor");
       setAppointments((prev) =>
-        prev.map((apt) => (apt._id === appointmentId ? res.appointment : apt))
+        prev.filter((apt) => apt._id !== appointmentId)
       );
       setCancelConfirmId(null);
     } catch (error) {
@@ -92,12 +100,19 @@ const CurrentAppointments: React.FC<CurrentAppointmentsProps> = ({
         </thead>
         <tbody>
           {activeAppointments.map((apt) => (
-            <tr key={apt._id} className={apt.isEmergency ? styles.emergencyRow : ""}>
+            <tr
+              key={apt._id}
+              className={apt.isEmergency ? styles.emergencyRow : ""}
+            >
               <td>{apt.patientId && apt.patientId.username}</td>
               <td>
                 <span
                   className={`${styles.statusBadge} ${
-                    styles["status" + apt.status.charAt(0).toUpperCase() + apt.status.slice(1)]
+                    styles[
+                      "status" +
+                        apt.status.charAt(0).toUpperCase() +
+                        apt.status.slice(1)
+                    ]
                   }`}
                 >
                   {apt.status}
@@ -105,17 +120,29 @@ const CurrentAppointments: React.FC<CurrentAppointmentsProps> = ({
               </td>
               <td>{new Date(apt.appointmentDate).toLocaleString()}</td>
               <td>{apt.notes || "-"}</td>
-              <td style={{ position: "relative" }} className={styles.actionsContainer}>
+              <td
+                style={{ position: "relative" }}
+                className={styles.actionsContainer}
+              >
                 <>
-                  <button onClick={() => handleEditClick(apt)} className={styles.editBtn}>
+                  <button
+                    onClick={() => handleEditClick(apt)}
+                    className={styles.editBtn}
+                  >
                     Edit
                   </button>
-                  <button onClick={() => handleCancel(apt._id)} className={styles.cancelBtn}>
+                  <button
+                    onClick={() => handleCancel(apt._id)}
+                    className={styles.cancelBtn}
+                  >
                     Cancel
                   </button>
                   {/* Кнопка перехода в чат отображается только для активных встреч */}
                   {apt.status.toLowerCase() !== "passed" && (
-                    <button className={styles.chatButton} onClick={() => goToChat(apt._id)}>
+                    <button
+                      className={styles.chatButton}
+                      onClick={() => goToChat(apt._id)}
+                    >
                       Go to Chat
                     </button>
                   )}
@@ -125,8 +152,12 @@ const CurrentAppointments: React.FC<CurrentAppointmentsProps> = ({
                     <div className={styles.modal}>
                       <p>Are you sure you want to cancel the appointment?</p>
                       <div className={styles.modalButtons}>
-                        <button onClick={() => confirmCancel(apt._id)}>Yes</button>
-                        <button onClick={() => setCancelConfirmId(null)}>No</button>
+                        <button onClick={() => confirmCancel(apt._id)}>
+                          Yes
+                        </button>
+                        <button onClick={() => setCancelConfirmId(null)}>
+                          No
+                        </button>
                       </div>
                     </div>
                   </div>
