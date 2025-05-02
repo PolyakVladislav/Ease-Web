@@ -1,0 +1,21 @@
+.legend {
+    display: flex;
+    justify-content: center;
+    gap: 24px;
+    margin-top: 8px;
+  }
+  
+  .legendItem {
+    display: flex;
+    align-items: center;
+    font-size: 0.9rem;
+    color: #555;
+  }
+  
+  .swatch {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    display: inline-block;
+    margin-right: 6px;
+  }

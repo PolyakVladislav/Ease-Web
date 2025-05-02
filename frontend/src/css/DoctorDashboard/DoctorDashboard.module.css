@@ -31,19 +31,18 @@
   font-weight: 600;
 }
 
-
-   .dashboardMainContainer {
-    display: flex;
-    flex-direction: column;
-    height: 700px;
-    max-width: 1200px;
-    margin: 0 auto;
-    margin-top: 30px;
-    padding: 20px;
-    background-color: #fff;
-    border-radius: 8px;
-    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
-  }
+.dashboardMainContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 24px; 
+  max-width: 1200px;
+  margin: 30px auto 40px;
+  padding: 20px;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+  overflow-y: auto;
+}
 
 .urgentBlock {
   margin-bottom: auto;
@@ -51,8 +50,6 @@
 
 .todayBlock {
   margin-top: auto;
-  margin-bottom: 200px; 
-
 }
 
 .loadingContainer {
@@ -83,4 +80,7 @@
   text-align: center;
   color: red;
   margin-top: 20px;
+}
+.chartBlock {
+  margin-top: 10px;
 }
