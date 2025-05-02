@@ -25,7 +25,7 @@ export const createAppointment = async (req: Request, res: Response): Promise<vo
     }
     let diaries: IDiary[] = [];
     const status = initiator === "patient" ? "confirmed" : "pending";
-    const lastAppointment = await Appointment.findOne({ doctorId })
+    const lastAppointment = await Appointment.findOne({ doctorId, status: "passed" })
       .sort({ appointmentDate: -1 });
     if (lastAppointment) {
         diaries= await Diary.find({

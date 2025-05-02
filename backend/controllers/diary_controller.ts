@@ -3,7 +3,7 @@ import Diary, { IDiary } from "../models/Diary";
 import aiService from "./aiService";
 import Sentiment from 'sentiment';
 const dangerWords = ["losing", "hopeless", "worthless", "disappear", "die", "suicide", "kill", "cut", "pain", "end it", "no point", "nothing matters"];
-
+const dangerPhrases = ["end it", "no point", "nothing matters", "kill myself", "better off without me", "stop the pain", "take my life"];
 const sentiment = new Sentiment();
 export const getAllDiaryEntries = async (req: Request, res: Response): Promise<void> => {
   try {
@@ -78,7 +78,7 @@ export const createDiaryEntry = async (req: Request, res: Response): Promise<voi
         if (!diary) {
             return;
         }
-        last_Diary[0].nlpSummary =diary.nlpreview;
+        last_Diary[0].nlpSummary =diary.nlpSummary;
         last_Diary[0].sentimentScore = diary.sentimentScore;
         last_Diary[0].mood = diary.mood;
         last_Diary[0].riskLevel = diary.riskLevel;
@@ -101,64 +101,77 @@ export const aiSummaryDiary = async (Diary:IDiary) => {
 }
 
 
-function generateClinicalSummary(Diary:IDiary) {
-  if (!Diary.context) {
-    return ;
+
+
+
+function generateClinicalSummary(Diary: IDiary) {
+  if (!Diary.context) return;
+
+  const text = Diary.context.trim();
+  const result = sentiment.analyze(text);
+  const { score, negative, positive } = result;
+  const lowerText = text.toLowerCase();
+
+  // Detect red flag words
+  const redFlagWords = negative.filter(word => dangerWords.includes(word.toLowerCase()));
+  
+  // Detect red flag phrases in the full text
+  const redFlagPhrases = dangerPhrases.filter(phrase => lowerText.includes(phrase));
+
+  // Combine and deduplicate
+  const allRedFlags = [...new Set([...redFlagWords, ...redFlagPhrases])];
+
+  // Emotional tone logic
+  let emotionalTone = "neutral";
+  if (score <= -4) emotionalTone = "negative";
+  else if (score <= -1) emotionalTone = "slightly negative";
+  else if (score >= 4) emotionalTone = "very positive";
+  else if (score > 0) emotionalTone = "slightly positive";
+
+  // Default risk level
+  let riskLevel = "⚪ Stable";
+
+  // 🔥 Override logic: phrase overrides sentiment
+  if (allRedFlags.length > 0 || lowerText.includes("kill myself")) {
+    emotionalTone = "critical emotional distress";
+    riskLevel = "🔴 High Risk";
+  } else if (score <= -4) {
+    riskLevel = "🟠 Moderate Risk";
+  } else if (score <= -1) {
+    riskLevel = "🟡 Mild Emotional Distress";
+  } else if (score >= 1) {
+    riskLevel = "🟢 Positive/Improving";
   }
-    const result = sentiment.analyze(Diary.context);
 
-    const { score, negative, positive } = result;
-
-    // Tone label
-    let emotionalTone = "neutral";
-    if (score <= -4) emotionalTone = "negative";
-    else if (score <= -1) emotionalTone = "slightly negative";
-    else if (score >= 4) emotionalTone = "very positive";
-    else if (score > 0) emotionalTone = "slightly positive";
-
-    // Red flag detection
-    const redFlags = negative.filter(word => dangerWords.includes(word.toLowerCase()));
-
-    // Risk level based on score + danger words
-    let riskLevel = "⚪ Stable";
-
-    if (redFlags.length > 0) {
-        riskLevel = "🔴 High Risk";
-    } else if (score <= -4) {
-        riskLevel = "🟠 Moderate Risk";
-    } else if (score <= -1) {
-        riskLevel = "🟡 Mild Emotional Distress";
-    } else if (score >= 1) {
-        riskLevel = "🟢 Positive/Improving";
-    }
-
-    // Clinical-style summary text
-    const summary_text = `
+  // 📘 Clinical-style summary
+  const summary_text = `
 📘 **Diary NLP Summary Report**
 
 - **Emotional Tone**: ${emotionalTone}
 - **Sentiment Score**: ${score}
 - **Risk Level**: ${riskLevel}
-- **Key Negative Expressions**: ${negative.length ? negative.join(", ") : "None detected"}
-- **Key Positive Expressions**: ${positive.length ? positive.join(", ") : "None detected"}
+- **Key Negative Expressions**: ${negative.length ? negative.join(", ") : "None"}
+- **Key Positive Expressions**: ${positive.length ? positive.join(", ") : "None"}
 
 📝 **Clinical Summary**:
-The patient's diary entry indicates a *${emotionalTone}* emotional tone. 
-Sentiment score of ${score} suggests a ${emotionalTone === "neutral" ? "stable emotional state" : emotionalTone}. 
-${redFlags.length > 0 
-    ? `⚠️ Red flag terms detected: "${redFlags.join(', ')}", which may indicate mental health risks requiring immediate attention.` 
-    : `No critical red flag expressions were identified in this entry.`}
-It is recommended to continue monitoring the emotional pattern over time.
-    `.trim();
-    const nlpSummary = {
-        authorId: Diary.authorId,
-        date: Diary.date,
-        context: Diary.context,
-        nlpreview: summary_text,
-        sentimentScore: score,
-        mood: emotionalTone,
-        riskLevel: riskLevel
-    };
-    return nlpSummary;
+The patient expresses a *${emotionalTone}* tone. 
+Sentiment score of ${score} supports this assessment. 
+${allRedFlags.length > 0 
+    ? `⚠️ Critical red flag terms detected: "${allRedFlags.join(', ')}", indicating possible mental health crisis or suicidal ideation. Immediate clinical attention is advised.` 
+    : `No explicit red flag expressions detected in this entry.`}
+Monitor emotional trends over time and intervene if similar entries persist.
+  `.trim();
+
+  return {
+    authorId: Diary.authorId,
+    date: Diary.date,
+    context: Diary.context,
+    nlpSummary: summary_text,
+    sentimentScore: score,
+    mood: emotionalTone,
+    riskLevel: riskLevel,
+    redFlags: allRedFlags
+  };
 }
+
 
