@@ -12,7 +12,7 @@ export const getAllDiaryEntries = async (req: Request, res: Response): Promise<v
       res.status(400).json({ message: "Patient ID is required" });
       return;
     }
-    const Diary_List = await Diary.find({ authorId: patientId })
+    const Diary_List = await Diary.find({ authorId: patientId }).sort({ date: -1 });
     res.status(200).json(Diary_List);
     return;
   } catch (error) {
