@@ -1,12 +1,25 @@
 import React, { useEffect, useState } from "react";
 import { Appointment } from "../../types/appointment";
+
 import { fetchAppointments } from "../../Services/appointmentService";
+import {
+  fetchAppointmentsByWeek,
+  AppointmentsByWeek,
+  fetchSessionStatus,
+  SessionStatus,
+} from "../../Services/statsService";
+
 import UrgentAppointments from "./UrgentAppointments";
 import TodayAppointments from "./TodayAppointments";
+import AppointmentsByWeekChart from "./AppointmentsByWeekChart";
+import SessionStatusDonut from "./SessionStatusDonut";
+
 import styles from "../../css/DoctorDashboard/DoctorDashboard.module.css";
 
 const DoctorDashboard: React.FC = () => {
   const [todayAppointments, setTodayAppointments] = useState<Appointment[]>([]);
+  const [weekStats, setWeekStats] = useState<AppointmentsByWeek[]>([]);
+  const [statusStats, setStatusStats] = useState<SessionStatus>({});
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -18,15 +31,25 @@ const DoctorDashboard: React.FC = () => {
     try {
       setLoading(true);
       setError("");
+
       const resp = await fetchAppointments();
       const all = resp.appointments as Appointment[];
+      const doctorId = resp.doctorId as string;
+
       const todayStr = new Date().toISOString().slice(0, 10);
-      const filtered = all.filter(
-        (appt) =>
-          appt.status === "confirmed" &&
-          appt.appointmentDate.slice(0, 10) === todayStr
+      setTodayAppointments(
+        all.filter(
+          (a) =>
+            a.status === "confirmed" &&
+            a.appointmentDate.slice(0, 10) === todayStr
+        )
       );
-      setTodayAppointments(filtered);
+
+      const weeks = await fetchAppointmentsByWeek(doctorId);
+      setWeekStats(weeks);
+
+      const status = await fetchSessionStatus(doctorId);
+      setStatusStats(status);
     } catch (err) {
       console.error(err);
       setError("Failed to load data");
@@ -43,10 +66,7 @@ const DoctorDashboard: React.FC = () => {
       </div>
     );
   }
-
-  if (error) {
-    return <div className={styles.errorMessage}>{error}</div>;
-  }
+  if (error) return <div className={styles.errorMessage}>{error}</div>;
 
   return (
     <div className={styles.rootContainer}>
@@ -63,6 +83,16 @@ const DoctorDashboard: React.FC = () => {
 
         <div className={styles.todayBlock}>
           <TodayAppointments appointments={todayAppointments} />
+        </div>
+
+        <div className={styles.chartBlock}>
+          <h3>Appointments per Week</h3>
+          <AppointmentsByWeekChart data={weekStats} />
+        </div>
+
+        <div className={styles.chartBlock}>
+          <h3>Session Status</h3>
+          <SessionStatusDonut data={statusStats} />
         </div>
       </div>
     </div>
