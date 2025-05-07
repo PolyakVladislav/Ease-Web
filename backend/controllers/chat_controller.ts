@@ -1,4 +1,5 @@
 import { Message } from "../models/Message";
+import Appointment from "../models/Appointment";    
 import { ConsultationSummary } from "../models/ConsultationSummary";
 
 
@@ -45,9 +46,15 @@ export async function saveConsultationSummary(
   summary: string
 ): Promise<void> {
   try {
+    const appointment = await Appointment.findById(meetingId).lean();
+    if (!appointment) throw new Error("Appointment not found");
+
+    const patientId = String(appointment.patientId);
+
     await ConsultationSummary.create({
       appointmentId: meetingId,
       doctorId,
+      patientId,
       summary,
     });
   } catch (error) {
