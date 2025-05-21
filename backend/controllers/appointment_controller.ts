@@ -9,6 +9,7 @@ import Diary, { IDiary } from "../models/Diary";
 
 export const createAppointment = async (req: Request, res: Response): Promise<void> => {
   try {
+    let status_: "pending" | "confirmed" | "canceled" | "passed" = "pending";
     const {
       patientId,
       doctorId,
@@ -24,7 +25,7 @@ export const createAppointment = async (req: Request, res: Response): Promise<vo
       return;
     }
     let diaries: IDiary[] = [];
-    const status = initiator === "patient" ? "confirmed" : "pending";
+    status_ = initiator === "patient" ? "confirmed" : "pending";
     const lastAppointment = await Appointment.findOne({ doctorId, status: "passed" })
       .sort({ appointmentDate: -1 });
     if (lastAppointment) {
@@ -48,11 +49,11 @@ export const createAppointment = async (req: Request, res: Response): Promise<vo
       return;
     }
 
-    let status: "pending" | "confirmed" | "canceled" | "passed" = "pending";
+    
     if (isEmergency) {
-      status = "pending";
+      status_ = "pending";
     } else {
-      status = initiator === "patient" ? "confirmed" : "pending";
+      status_ = initiator === "patient" ? "confirmed" : "pending";
     }
 
 
@@ -65,7 +66,7 @@ export const createAppointment = async (req: Request, res: Response): Promise<vo
       notes: nlpReviews,
       isEmergency: !!isEmergency,
       initiator,
-      status,
+      status: status_,
     });
 
     const populatedAppointment = await Appointment.findById(appointment._id)
@@ -124,10 +125,10 @@ export const updateAppointment = async (
     }
 
 
-    if (appointment.initiator === "doctor" && status === "confirmed") {
-      res.status(403).json({ message: "Doctor cannot set status to confirmed in this flow" });
-      return;
-    }
+    // if (appointment.initiator === "doctor" && status === "confirmed") {
+    //   res.status(403).json({ message: "Doctor cannot set status to confirmed in this flow" });
+    //   return;
+    // }
     const updateData: any = {};
     if (status) {
       const validStatuses = ["pending", "confirmed", "canceled", "passed"];

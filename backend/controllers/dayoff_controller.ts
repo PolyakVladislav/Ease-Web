@@ -95,9 +95,10 @@ export const getAvailableSlots = async (req: Request, res: Response): Promise<vo
         $lte: endOfDay,
       },
     });
-
+    const busyAppointments = appointments.filter(appt => appt.status !== "canceled");
+    const canceledAppointments = appointments.filter(appt => appt.status === "canceled");
     const busySlotsSet = new Set(
-      appointments.map((appt) => {
+      busyAppointments.map((appt) => {
         const d = new Date(appt.appointmentDate);
         d.setSeconds(0, 0);
         return d.toISOString();
@@ -107,7 +108,7 @@ export const getAvailableSlots = async (req: Request, res: Response): Promise<vo
     const freeSlots = slots.filter((slot) => !busySlotsSet.has(slot));
 
     res.status(200).json({ slots: freeSlots });
-    return;
+        return;
   } catch (error) {
     console.error("Error getAvailableSlots:", error);
     res.status(500).json({ message: "Internal server error" });
