@@ -12,6 +12,17 @@ import { generateAndSaveOverallSummary } from "./overall_summary_controller";
 
 export function initSocketServer(io: Server) {
   const inactivityTimers: Record<string, NodeJS.Timeout> = {};
+  const emptyMeetingTimers: Record<string, NodeJS.Timeout> = {};
+
+  function resetInactivityTimer(meetingId: string, doctorId: string) {
+    if (inactivityTimers[meetingId]) {
+      clearTimeout(inactivityTimers[meetingId]);
+    }
+
+    inactivityTimers[meetingId] = setTimeout(() => {
+      autoEndConsultation(meetingId, doctorId);
+    }, 30 * 60 * 1000);
+  }
 
   async function autoEndConsultation(meetingId: string, doctorId: string) {
     try {
@@ -29,7 +40,6 @@ export function initSocketServer(io: Server) {
       const chatHistory = await getChatHistory(meetingId);
       const summary = await aiService.getSummary(chatHistory);
       await saveConsultationSummary(meetingId, doctorId, summary);
-
       await generateAndSaveOverallSummary(
         String(appointment.patientId),
         String(appointment.doctorId)
@@ -39,15 +49,31 @@ export function initSocketServer(io: Server) {
     }
   }
 
-  function resetInactivityTimer(meetingId: string, doctorId: string) {
-    if (inactivityTimers[meetingId]) {
-      clearTimeout(inactivityTimers[meetingId]);
-    }
+  function startEmptyRoomTimer(meetingId: string) {
+    if (emptyMeetingTimers[meetingId]) return;
 
-    inactivityTimers[meetingId] = setTimeout(() => {
-      console.log(`Auto-ending consultation for meeting ${meetingId} due to inactivity`);
-      autoEndConsultation(meetingId, doctorId);
-    }, 1 * 30 * 1000); // 30 דקות
+    emptyMeetingTimers[meetingId] = setTimeout(async () => {
+      try {
+        const appointment = await Appointment.findById(meetingId);
+        if (!appointment || appointment.status !== "confirmed") return;
+
+        const sockets = await io.in(meetingId).allSockets();
+        if (sockets.size === 0) {
+          appointment.status = "canceled";
+          await appointment.save();
+
+          io.to(meetingId).emit("consultationEnded", {
+            meetingId,
+            summary: "Consultation was canceled because no one joined.",
+          });
+
+        }
+
+        delete emptyMeetingTimers[meetingId];
+      } catch (err) {
+        console.error("Error canceling empty meeting:", err);
+      }
+    }, 30 * 60 * 1000);
   }
 
   io.on("connection", (socket: Socket) => {
@@ -69,13 +95,19 @@ export function initSocketServer(io: Server) {
       socket.data.userId = userId;
       socket.data.meetingId = meetingId;
 
+      if (emptyMeetingTimers[meetingId]) {
+        clearTimeout(emptyMeetingTimers[meetingId]);
+        delete emptyMeetingTimers[meetingId];
+      }
+
+      startEmptyRoomTimer(meetingId);
+
       socket.to(meetingId).emit("userJoined", { userId, role });
 
       const clients = await io.in(meetingId).allSockets();
       if (clients.size === 2) {
         io.to(meetingId).emit("consultationStarted", { meetingId });
 
-        // טיימר התחלה כשנמצאים 2 אנשים
         const appointment = await Appointment.findById(meetingId).lean();
         if (appointment?.doctorId) {
           resetInactivityTimer(meetingId, String(appointment.doctorId));
@@ -173,7 +205,31 @@ export function initSocketServer(io: Server) {
 
     socket.on("disconnect", () => {
       const meetingId = socket.data.meetingId;
-      
     });
   });
+
+  const THREE_HOURS = 3 * 60 * 60 * 1000;
+
+  setInterval(async () => {
+    try {
+      const now = new Date();
+      const expiredAppointments = await Appointment.find({
+        status: "confirmed",
+        appointmentDate: {
+          $lt: new Date(now.getTime() - 2 * 60 * 60 * 1000),
+        },
+      });
+
+      for (const appointment of expiredAppointments) {
+        const roomId = String(appointment._id);
+        const sockets = await io.in(roomId).allSockets();
+        if (sockets.size === 0) {
+          appointment.status = "canceled";
+          await appointment.save();
+        }
+      }
+    } catch (err) {
+      console.error("\u274C Error in canceling expired unjoined meetings:", err);
+    }
+  }, THREE_HOURS);
 }
