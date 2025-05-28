@@ -1,16 +1,55 @@
 import { Server, Socket } from "socket.io";
 import { checkMeetingAccess } from "../Middlewares/verifyMeetingAccess";
+import Appointment from "../models/Appointment";
 import aiService from "./aiService";
+import { buildChatContext } from "./buildChatContext";
 import {
-  saveMessage,
   getChatHistory,
   saveConsultationSummary,
+  saveMessage,
 } from "./chat_controller";
 import { generateAndSaveOverallSummary } from "./overall_summary_controller";
-import Appointment from "../models/Appointment";
-import { buildChatContext } from "./buildChatContext"; 
 
 export function initSocketServer(io: Server) {
+  const inactivityTimers: Record<string, NodeJS.Timeout> = {};
+
+  async function autoEndConsultation(meetingId: string, doctorId: string) {
+    try {
+      const appointment = await Appointment.findById(meetingId);
+      if (!appointment || appointment.status === "passed") return;
+
+      appointment.status = "passed";
+      await appointment.save();
+
+      io.to(meetingId).emit("consultationEnded", {
+        meetingId,
+        summary: "Consultation ended due to inactivity.",
+      });
+
+      const chatHistory = await getChatHistory(meetingId);
+      const summary = await aiService.getSummary(chatHistory);
+      await saveConsultationSummary(meetingId, doctorId, summary);
+
+      await generateAndSaveOverallSummary(
+        String(appointment.patientId),
+        String(appointment.doctorId)
+      );
+    } catch (error) {
+      console.error("Error auto-ending consultation:", error);
+    }
+  }
+
+  function resetInactivityTimer(meetingId: string, doctorId: string) {
+    if (inactivityTimers[meetingId]) {
+      clearTimeout(inactivityTimers[meetingId]);
+    }
+
+    inactivityTimers[meetingId] = setTimeout(() => {
+      console.log(`Auto-ending consultation for meeting ${meetingId} due to inactivity`);
+      autoEndConsultation(meetingId, doctorId);
+    }, 30 * 60 * 1000); // 30 דקות
+  }
+
   io.on("connection", (socket: Socket) => {
     socket.on("joinUser", ({ userId }) => {
       socket.join(userId);
@@ -29,43 +68,49 @@ export function initSocketServer(io: Server) {
       socket.join(userId);
       socket.data.userId = userId;
       socket.data.meetingId = meetingId;
+
       socket.to(meetingId).emit("userJoined", { userId, role });
 
       const clients = await io.in(meetingId).allSockets();
       if (clients.size === 2) {
         io.to(meetingId).emit("consultationStarted", { meetingId });
+
+        // טיימר התחלה כשנמצאים 2 אנשים
+        const appointment = await Appointment.findById(meetingId).lean();
+        if (appointment?.doctorId) {
+          resetInactivityTimer(meetingId, String(appointment.doctorId));
+        }
       }
     });
 
     socket.on("sendMessage", async (data) => {
       const { meetingId, from, to, message, timestamp } = data;
+
       try {
         await saveMessage(meetingId, from, to, message, timestamp);
         io.to(meetingId).emit("newMessage", { from, message, timestamp });
+
+        const appointment = await Appointment.findById(meetingId).lean();
+        if (appointment?.doctorId) {
+          resetInactivityTimer(meetingId, String(appointment.doctorId));
+        }
       } catch (err) {
         socket.emit("error", { message: "Error saving message." });
       }
     });
 
     socket.on("requestAISuggestion", async (data) => {
-      const { meetingId, currentChatContext, newMessage } = data; 
+      const { meetingId, newMessage } = data;
+
       try {
         const appointment = await Appointment.findById(meetingId).lean();
         if (!appointment) throw new Error("Meeting not found");
 
-        const doctorId  = String(appointment.doctorId);
+        const doctorId = String(appointment.doctorId);
         const patientId = String(appointment.patientId);
 
-        const chatContext = await buildChatContext(
-          meetingId,
-          doctorId,
-          patientId
-        );
-
-        const suggestion = await aiService.getSuggestion(
-          chatContext,
-          newMessage
-        );
+        const chatContext = await buildChatContext(meetingId, doctorId, patientId);
+        const suggestion = await aiService.getSuggestion(chatContext, newMessage);
 
         socket.emit("aiSuggestion", { suggestion });
 
@@ -88,18 +133,18 @@ export function initSocketServer(io: Server) {
           return;
         }
 
-        const doctorIdStr = appointment.doctorId
-          ? appointment.doctorId.toString()
-          : null;
-        if (doctorIdStr !== doctorId) {
-          socket.emit("error", {
-            message: "Only the doctor can end the consultation.",
-          });
+        if (String(appointment.doctorId) !== doctorId) {
+          socket.emit("error", { message: "Only the doctor can end the consultation." });
           return;
         }
 
         appointment.status = "passed";
         await appointment.save();
+
+        if (inactivityTimers[meetingId]) {
+          clearTimeout(inactivityTimers[meetingId]);
+          delete inactivityTimers[meetingId];
+        }
 
         io.to(meetingId).emit("consultationEnded", {
           meetingId,
@@ -109,28 +154,15 @@ export function initSocketServer(io: Server) {
         setImmediate(async () => {
           try {
             const chatHistory = await getChatHistory(meetingId);
+            const localSummary = await aiService.getSummary(chatHistory);
 
-            let localSummary: string;
-            try {
-              localSummary = await aiService.getSummary(chatHistory);
-            } catch (error) {
-              localSummary = "Failed to generate consultation summary";
-            }
             await saveConsultationSummary(meetingId, doctorId, localSummary);
-    
-            try {
-              await generateAndSaveOverallSummary(
-                String(appointment.patientId),
-                String(appointment.doctorId)
-              );
-            } catch (err) {
-              console.error(
-                "Failed to generate overall summary automatically:",
-                err
-              );
-            }
-          } catch (error) {
-            console.error("Error in background endConsultation logic:", error);
+            await generateAndSaveOverallSummary(
+              String(appointment.patientId),
+              String(appointment.doctorId)
+            );
+          } catch (err) {
+            console.error("Error in background endConsultation logic:", err);
           }
         });
       } catch (err) {
@@ -139,6 +171,12 @@ export function initSocketServer(io: Server) {
       }
     });
 
-    socket.on("disconnect", () => {});
+    socket.on("disconnect", () => {
+      const meetingId = socket.data.meetingId;
+      if (meetingId && inactivityTimers[meetingId]) {
+        clearTimeout(inactivityTimers[meetingId]);
+        delete inactivityTimers[meetingId];
+      }
+    });
   });
 }
