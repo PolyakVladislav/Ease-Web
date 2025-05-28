@@ -47,7 +47,7 @@ export function initSocketServer(io: Server) {
     inactivityTimers[meetingId] = setTimeout(() => {
       console.log(`Auto-ending consultation for meeting ${meetingId} due to inactivity`);
       autoEndConsultation(meetingId, doctorId);
-    }, 30 * 60 * 1000); // 30 דקות
+    }, 1 * 30 * 1000); // 30 דקות
   }
 
   io.on("connection", (socket: Socket) => {
@@ -173,10 +173,7 @@ export function initSocketServer(io: Server) {
 
     socket.on("disconnect", () => {
       const meetingId = socket.data.meetingId;
-      if (meetingId && inactivityTimers[meetingId]) {
-        clearTimeout(inactivityTimers[meetingId]);
-        delete inactivityTimers[meetingId];
-      }
+      
     });
   });
 }
