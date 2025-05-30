@@ -80,7 +80,7 @@ export const updateDiaryEntry = async (req: Request, res: Response): Promise<voi
 };
 export const createDiaryEntry = async (req: Request, res: Response): Promise<void> => {
     try {
-      
+        const dateIL = new Date().toLocaleString("en-IL", { timeZone: "Asia/Jerusalem" });
         const { authorId, date, context } = req.body;
         if (!authorId || !date) {
             res.status(400).json({ message: "Author ID and date are required" });
