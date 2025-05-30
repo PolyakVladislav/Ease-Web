@@ -21,7 +21,7 @@ export function initSocketServer(io: Server) {
 
     inactivityTimers[meetingId] = setTimeout(() => {
       autoEndConsultation(meetingId, doctorId);
-    }, 30 * 60 * 1000);
+    }, 90 * 60 * 1000);
   }
 
   async function autoEndConsultation(meetingId: string, doctorId: string) {
@@ -73,7 +73,7 @@ export function initSocketServer(io: Server) {
       } catch (err) {
         console.error("Error canceling empty meeting:", err);
       }
-    }, 30 * 60 * 1000);
+    }, 90 * 60 * 1000);
   }
 
   io.on("connection", (socket: Socket) => {
