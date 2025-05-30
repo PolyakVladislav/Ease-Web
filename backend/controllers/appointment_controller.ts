@@ -28,10 +28,13 @@ export const createAppointment = async (req: Request, res: Response): Promise<vo
     status_ = initiator === "patient" ? "confirmed" : "pending";
     const lastAppointment = await Appointment.findOne({ doctorId, status: "passed" })
       .sort({ appointmentDate: -1 });
+    
     if (lastAppointment) {
-        diaries= await Diary.find({
+      const originalDate: Date = lastAppointment.appointmentDate;
+      const adjustedDate = new Date(originalDate.getTime() - 3 * 60 * 60 * 1000);
+      diaries = await Diary.find({
         authorId: patientId,
-        createdAt: { $gte: lastAppointment.appointmentDate }
+        date: { $gte: adjustedDate }
       })
       .sort({ createdAt: -1 })
       .limit(10);
@@ -40,7 +43,7 @@ export const createAppointment = async (req: Request, res: Response): Promise<vo
       diaries= await Diary.find({
         authorId: patientId,
       })
-      .sort({ createdAt: -1 })
+      .sort({ date: -1 })
       .limit(10);
 
 

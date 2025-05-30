@@ -58,8 +58,8 @@ export const deleteDiaryEntry = async (req: Request, res: Response): Promise<voi
 
 export const updateDiaryEntry = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { id } = req.params;
-    const { context,date } = req.body;
+ const date = new Date();     const { id } = req.params;
+    const { context } = req.body;
     if (!id) {
       res.status(400).json({ message: "Diary entry ID is required" });
       return;
@@ -80,13 +80,13 @@ export const updateDiaryEntry = async (req: Request, res: Response): Promise<voi
 };
 export const createDiaryEntry = async (req: Request, res: Response): Promise<void> => {
     try {
-        const dateIL = new Date().toLocaleString("en-IL", { timeZone: "Asia/Jerusalem" });
-        const { authorId, date, context } = req.body;
-        if (!authorId || !date) {
+         const date = new Date();   
+        const { authorId, context } = req.body;
+        if (!authorId ) {
             res.status(400).json({ message: "Author ID and date are required" });
             return;
             }
-        const newDiaryEntry = new Diary({ authorId, date, context });
+        const newDiaryEntry = new Diary({ authorId,  date, context });
         await newDiaryEntry.save();
         
         res.status(201).json({ message: "Diary entry created successfully", newDiaryEntry });

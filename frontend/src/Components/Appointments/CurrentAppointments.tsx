@@ -104,7 +104,9 @@ const CurrentAppointments: React.FC<CurrentAppointmentsProps> = ({
                   {apt.status}
                 </span>
               </td>
-              <td>{new Date(apt.appointmentDate).toLocaleString()}</td>
+              <td>
+  {`${apt.appointmentDate.slice(0,10)} ${apt.appointmentDate.slice(11,16)}`}
+</td>
               <td style={{ position: "relative" }} className={styles.actionsContainer}>
                 <>
                   <button onClick={() => handleEditClick(apt)} className={styles.editBtn}>
