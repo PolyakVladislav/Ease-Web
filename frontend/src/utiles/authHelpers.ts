@@ -24,7 +24,7 @@ export async function handleLogin(
       if (response.data._id) localStorage.setItem("userId", response.data._id);
       if (response.data.username) localStorage.setItem("username", response.data.username);
 
-      navigate("/all-posts");
+      navigate("/doctor/dashboard");
     } else {
       setErrorMessage(response.data?.message || "Login failed");
     }
