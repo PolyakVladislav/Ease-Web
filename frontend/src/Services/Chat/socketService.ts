@@ -13,7 +13,7 @@ export const createSocket = (userId: string): typeof Socket => {
   });
 };
 export const startChat = (socket: typeof Socket, meetingId: string, userId: string): void => {
-  const role = localStorage.getItem("userRole") || "";
+  const role = localStorage.getItem("userRole") || "doctor";
   socket.emit("joinRoom", { meetingId, userId, role });
 };
 

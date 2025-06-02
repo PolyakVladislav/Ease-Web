@@ -92,9 +92,10 @@ export function initSocketServer(io: Server) {
 
       socket.join(meetingId);
       socket.join(userId);
+      socket.join(role);
       socket.data.userId = userId;
       socket.data.meetingId = meetingId;
-
+      socket.data.role = role; 
       if (emptyMeetingTimers[meetingId]) {
         clearTimeout(emptyMeetingTimers[meetingId]);
         delete emptyMeetingTimers[meetingId];
@@ -130,7 +131,23 @@ export function initSocketServer(io: Server) {
         socket.emit("error", { message: "Error saving message." });
       }
     });
+socket.on("getRoomUsers", async ({ meetingId }) => {
+  try {
+    const sockets = await io.in(meetingId).fetchSockets();
 
+    const users = sockets.map((s) => {
+      return {
+        userId: s.data.userId,
+        role: s.data.role || "", 
+      };
+    });
+
+    socket.emit("roomUsers", { users });
+  } catch (err) {
+    console.error("Error in getRoomUsers:", err);
+    socket.emit("error", { message: "Could not get room users." });
+  }
+});
     socket.on("requestAISuggestion", async (data) => {
       const { meetingId, newMessage } = data;
 
