@@ -108,7 +108,6 @@ import Notification from "../models/Notification";
 
 export const createAppointment = async (req: Request, res: Response): Promise<void> => {
   try {
-    let status_: "pending" | "confirmed" | "canceled" | "passed" = "pending";
     const {
       patientId,
       doctorId,
@@ -123,20 +122,20 @@ export const createAppointment = async (req: Request, res: Response): Promise<vo
       return;
     }
 
+    let status: "pending" | "confirmed" | "canceled" | "passed" = "pending";
     let diaries: IDiary[] = [];
 
-    status_ = initiator === "patient" ? "confirmed" : "pending";
+    status = initiator === "patient" ? "confirmed" : "pending";
+
     const lastAppointment = await Appointment.findOne({ doctorId, status: "passed" })
       .sort({ appointmentDate: -1 });
 
-    
     if (lastAppointment) {
-      diaries = await Diary.find({
-      const originalDate: Date = lastAppointment.appointmentDate;
-      const adjustedDate = new Date(originalDate.getTime() - 3 * 60 * 60 * 1000);
+      // If you want to filter diaries after a specific date:
+      const adjustedDate = new Date(lastAppointment.appointmentDate.getTime() - 3 * 60 * 60 * 1000); // 3 hours earlier
       diaries = await Diary.find({
         authorId: patientId,
-        date: { $gte: adjustedDate }
+        createdAt: { $gte: adjustedDate }
       })
         .sort({ createdAt: -1 })
         .limit(10);
@@ -145,29 +144,16 @@ export const createAppointment = async (req: Request, res: Response): Promise<vo
         .sort({ createdAt: -1 })
         .limit(10);
     }
-      .sort({ createdAt: -1 })
-      .limit(10);
-    }
-    else{
-      diaries= await Diary.find({
-        authorId: patientId,
-      })
-      .sort({ date: -1 })
-      .limit(10);
-
 
     if (!isEmergency && !doctorId) {
       res.status(400).json({ message: "doctorId is required for non-emergency appointment" });
       return;
     }
 
-    let status: "pending" | "confirmed" | "canceled" | "passed";
-
-    
     if (isEmergency) {
-      status_ = "pending";
+      status = "pending";
     } else {
-      status_ = initiator === "patient" ? "confirmed" : "pending";
+      status = initiator === "patient" ? "confirmed" : "pending";
     }
 
     const nlpReviews = diaries.map((diary) => diary.nlpSummary);
@@ -194,10 +180,8 @@ export const createAppointment = async (req: Request, res: Response): Promise<vo
     // 🔔 Notification logic
     try {
       const creatorRole = initiator === "patient" ? "Patient" : "Doctor";
-      const recipientId = initiator === "patient" ? doctorId : patientId;
       const appointmentDateStr = new Date(appointmentDate).toLocaleString();
       const patientUsername = (populatedAppointment.patientId as any).username || "Unknown";
-
       const message = `A new appointment with ${patientUsername} is set to be on ${appointmentDateStr} and was created by the ${creatorRole}.`;
 
       await Notification.create([
@@ -242,6 +226,7 @@ export const createAppointment = async (req: Request, res: Response): Promise<vo
     res.status(500).json({ message: "Internal server error" });
   }
 };
+
 
 
 
