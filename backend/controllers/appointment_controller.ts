@@ -4,8 +4,107 @@ import Appointment from "../models/Appointment";
 import User from "../models/Users";
 import mongoose from "mongoose"; 
 import Diary, { IDiary } from "../models/Diary";
+import Notification from "../models/Notification";
 
 
+
+
+// export const createAppointment = async (req: Request, res: Response): Promise<void> => {
+//   try {
+//     const {
+//       patientId,
+//       doctorId,
+//       appointmentDate,
+//       notes,
+//       isEmergency,
+//       initiator,
+//     } = req.body;
+
+
+//     if (!patientId || !appointmentDate || !initiator) {
+//       res.status(400).json({ message: "Missing required fields (patientId, appointmentDate, initiator)" });
+//       return;
+//     }
+//     let diaries: IDiary[] = [];
+//     const status = initiator === "patient" ? "confirmed" : "pending";
+//     const lastAppointment = await Appointment.findOne({ doctorId, status: "passed" })
+//       .sort({ appointmentDate: -1 });
+//     if (lastAppointment) {
+//         diaries= await Diary.find({
+//         authorId: patientId,
+//         createdAt: { $gte: lastAppointment.appointmentDate }
+//       })
+//       .sort({ createdAt: -1 })
+//       .limit(10);
+//     }
+//     else{
+//       diaries= await Diary.find({
+//         authorId: patientId,
+//       })
+//       .sort({ createdAt: -1 })
+//       .limit(10);
+
+
+//     if (!isEmergency && !doctorId) {
+//       res.status(400).json({ message: "doctorId is required for non-emergency appointment" });
+//       return;
+//     }
+
+//     let status: "pending" | "confirmed" | "canceled" | "passed" = "pending";
+//     if (isEmergency) {
+//       status = "pending";
+//     } else {
+//       status = initiator === "patient" ? "confirmed" : "pending";
+//     }
+
+
+//     }
+//     const nlpReviews = diaries.map((diary) => diary.nlpSummary);
+//     const appointment = await Appointment.create({
+//       patientId,
+//       doctorId: doctorId || null,
+//       appointmentDate: new Date(appointmentDate),
+//       notes: nlpReviews,
+//       isEmergency: !!isEmergency,
+//       initiator,
+//       status,
+//     });
+
+//     const populatedAppointment = await Appointment.findById(appointment._id)
+//       .populate({ path: "patientId", model: "Users", select: "username" })
+//       .exec();
+
+//     if (!populatedAppointment) {
+//       res.status(404).json({ message: "Appointment not found after creation" });
+//       return;
+//     }
+
+//     const appointmentResponse = {
+//       _id: populatedAppointment._id,
+//       patientId: populatedAppointment.patientId,
+//       patientName:
+//         populatedAppointment.patientId &&
+//         (populatedAppointment.patientId as any).username
+//           ? (populatedAppointment.patientId as any).username
+//           : "Unknown",
+//       doctorId: populatedAppointment.doctorId, 
+//       appointmentDate: populatedAppointment.appointmentDate,
+//       status: populatedAppointment.status,
+//       notes: nlpReviews,
+//       isEmergency: populatedAppointment.isEmergency,
+//       createdAt: populatedAppointment.createdAt,
+//       updatedAt: populatedAppointment.updatedAt,
+//     };
+
+//     res.status(201).json({
+//       message: "Appointment created successfully",
+//       appointment: appointmentResponse,
+//     });
+//   } catch (error) {
+//     console.error("Error creating appointment:", error);
+//     res.status(500).json({ message: "Internal server error" });
+//   }
+// };
 
 export const createAppointment = async (req: Request, res: Response): Promise<void> => {
   try {
@@ -19,23 +118,33 @@ export const createAppointment = async (req: Request, res: Response): Promise<vo
       initiator,
     } = req.body;
 
-
     if (!patientId || !appointmentDate || !initiator) {
       res.status(400).json({ message: "Missing required fields (patientId, appointmentDate, initiator)" });
       return;
     }
+
     let diaries: IDiary[] = [];
+
     status_ = initiator === "patient" ? "confirmed" : "pending";
     const lastAppointment = await Appointment.findOne({ doctorId, status: "passed" })
       .sort({ appointmentDate: -1 });
+
     
     if (lastAppointment) {
+      diaries = await Diary.find({
       const originalDate: Date = lastAppointment.appointmentDate;
       const adjustedDate = new Date(originalDate.getTime() - 3 * 60 * 60 * 1000);
       diaries = await Diary.find({
         authorId: patientId,
         date: { $gte: adjustedDate }
       })
+        .sort({ createdAt: -1 })
+        .limit(10);
+    } else {
+      diaries = await Diary.find({ authorId: patientId })
+        .sort({ createdAt: -1 })
+        .limit(10);
+    }
       .sort({ createdAt: -1 })
       .limit(10);
     }
@@ -52,6 +161,8 @@ export const createAppointment = async (req: Request, res: Response): Promise<vo
       return;
     }
 
+    let status: "pending" | "confirmed" | "canceled" | "passed";
+
     
     if (isEmergency) {
       status_ = "pending";
@@ -59,9 +170,8 @@ export const createAppointment = async (req: Request, res: Response): Promise<vo
       status_ = initiator === "patient" ? "confirmed" : "pending";
     }
 
-
-    }
     const nlpReviews = diaries.map((diary) => diary.nlpSummary);
+
     const appointment = await Appointment.create({
       patientId,
       doctorId: doctorId || null,
@@ -69,7 +179,7 @@ export const createAppointment = async (req: Request, res: Response): Promise<vo
       notes: nlpReviews,
       isEmergency: !!isEmergency,
       initiator,
-      status: status_,
+      status,
     });
 
     const populatedAppointment = await Appointment.findById(appointment._id)
@@ -81,6 +191,31 @@ export const createAppointment = async (req: Request, res: Response): Promise<vo
       return;
     }
 
+    // 🔔 Notification logic
+    try {
+      const creatorRole = initiator === "patient" ? "Patient" : "Doctor";
+      const recipientId = initiator === "patient" ? doctorId : patientId;
+      const appointmentDateStr = new Date(appointmentDate).toLocaleString();
+      const patientUsername = (populatedAppointment.patientId as any).username || "Unknown";
+
+      const message = `A new appointment with ${patientUsername} is set to be on ${appointmentDateStr} and was created by the ${creatorRole}.`;
+
+      await Notification.create([
+        {
+          userId: patientId,
+          message,
+          appointmentId: appointment._id,
+        },
+        {
+          userId: doctorId,
+          message,
+          appointmentId: appointment._id,
+        },
+      ]);
+    } catch (notifyErr) {
+      console.error("Failed to create notifications:", notifyErr);
+    }
+
     const appointmentResponse = {
       _id: populatedAppointment._id,
       patientId: populatedAppointment.patientId,
@@ -89,7 +224,7 @@ export const createAppointment = async (req: Request, res: Response): Promise<vo
         (populatedAppointment.patientId as any).username
           ? (populatedAppointment.patientId as any).username
           : "Unknown",
-      doctorId: populatedAppointment.doctorId, 
+      doctorId: populatedAppointment.doctorId,
       appointmentDate: populatedAppointment.appointmentDate,
       status: populatedAppointment.status,
       notes: nlpReviews,
@@ -107,6 +242,91 @@ export const createAppointment = async (req: Request, res: Response): Promise<vo
     res.status(500).json({ message: "Internal server error" });
   }
 };
+
+
+
+
+// export const updateAppointment = async (
+//   req: Request,
+//   res: Response
+// ): Promise<void> => {
+//   try {
+//     const { appointmentId } = req.params;
+//     const { status, appointmentDate, notes, isEmergency } = req.body;
+
+//     if (!appointmentId) {
+//       res.status(400).json({ message: "Appointment ID is required" });
+//       return;
+//     }
+
+//     const appointment = await Appointment.findById(appointmentId);
+//     if (!appointment) {
+//       res.status(404).json({ message: "Appointment not found" });
+//       return;
+//     }
+
+
+//     if (appointment.initiator === "doctor" && status === "confirmed") {
+//       res.status(403).json({ message: "Doctor cannot set status to confirmed in this flow" });
+//       return;
+//     }
+//     const updateData: any = {};
+//     if (status) {
+//       const validStatuses = ["pending", "confirmed", "canceled", "passed"];
+//       if (!validStatuses.includes(status)) {
+//         res.status(400).json({ message: "Invalid status value" });
+//         return;
+//       }
+//       updateData.status = status;
+//     }
+//     if (appointmentDate) {
+//       updateData.appointmentDate = new Date(appointmentDate);
+//     }
+//     if (notes !== undefined) {
+//       updateData.notes = notes;
+//     }
+//     if (isEmergency !== undefined) {
+//       updateData.isEmergency = isEmergency;
+//     }
+
+//     const updatedAppointment = await Appointment.findByIdAndUpdate(
+//       appointmentId,
+//       updateData,
+//       { new: true }
+//     ).populate({ path: "patientId", model: "Users", select: "username" });
+
+//     if (!updatedAppointment) {
+//       res.status(404).json({ message: "Appointment not found after update" });
+//       return;
+//     }
+
+//     const appointmentResponse = {
+//       _id: updatedAppointment._id,
+//       patientId: updatedAppointment.patientId,
+//       patientName:
+//         updatedAppointment.patientId &&
+//         (updatedAppointment.patientId as any).username
+//           ? (updatedAppointment.patientId as any).username
+//           : "Unknown",
+//       doctorId: updatedAppointment.doctorId,
+//       appointmentDate: updatedAppointment.appointmentDate,
+//       status: updatedAppointment.status,
+//       notes: updatedAppointment.notes,
+//       isEmergency: updatedAppointment.isEmergency,
+//       createdAt: updatedAppointment.createdAt,
+//       updatedAt: updatedAppointment.updatedAt,
+//     };
+
+//     res.status(200).json({
+//       message: "Appointment updated successfully",
+//       appointment: appointmentResponse,
+//     });
+//   } catch (error) {
+//     console.error("Error updating appointment:", error);
+//     res.status(500).json({ message: "Internal server error" });
+//   }
+// };
+
 
 export const updateAppointment = async (
   req: Request,
@@ -127,6 +347,10 @@ export const updateAppointment = async (
       return;
     }
 
+    if (appointment.initiator === "doctor" && status === "confirmed") {
+      res.status(403).json({ message: "Doctor cannot set status to confirmed in this flow" });
+      return;
+    }
 
     // if (appointment.initiator === "doctor" && status === "confirmed") {
     //   res.status(403).json({ message: "Doctor cannot set status to confirmed in this flow" });
@@ -141,6 +365,7 @@ export const updateAppointment = async (
       }
       updateData.status = status;
     }
+
     if (appointmentDate) {
       updateData.appointmentDate = new Date(appointmentDate);
     }
@@ -160,6 +385,29 @@ export const updateAppointment = async (
     if (!updatedAppointment) {
       res.status(404).json({ message: "Appointment not found after update" });
       return;
+    }
+
+    // 🔔 Notification Logic
+    try {
+      const patientUsername = (updatedAppointment.patientId as any)?.username || "Unknown";
+      const formattedDate = updatedAppointment.appointmentDate.toLocaleString();
+
+      const message = `Appointment with ${patientUsername} on ${formattedDate} was updated.`;
+
+      await Notification.create([
+        {
+          userId: updatedAppointment.patientId,
+          message,
+          appointmentId: updatedAppointment._id,
+        },
+        {
+          userId: updatedAppointment.doctorId,
+          message,
+          appointmentId: updatedAppointment._id,
+        },
+      ]);
+    } catch (notifyErr) {
+      console.error("Failed to create update notifications:", notifyErr);
     }
 
     const appointmentResponse = {
@@ -188,6 +436,7 @@ export const updateAppointment = async (
     res.status(500).json({ message: "Internal server error" });
   }
 };
+
 
 export const getAppointmentsByDoctor = async (
   req: Request,
@@ -389,6 +638,23 @@ export const deleteAppointment = async (
       res.status(404).json({ message: "Appointment not found" });
       return;
     }
+
+    if (appointment) {
+  const message = `Appointment on ${appointment.appointmentDate.toLocaleString()} has been canceled.`;
+  await Notification.create([
+    {
+      userId: appointment.patientId,
+      message,
+      appointmentId: appointment._id,
+    },
+    {
+      userId: appointment.doctorId,
+      message,
+      appointmentId: appointment._id,
+    },
+  ]);
+}
+
 
     await Appointment.findByIdAndDelete(appointmentId);
 

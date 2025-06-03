@@ -6,11 +6,13 @@ import {
   FaUserShield,
   FaCalendarCheck,
   FaBrain,
+  FaBell,
 } from "react-icons/fa";
 import layoutStyles from "../css/Layout.module.css";
 import loadingStyles from "../css/Loading.module.css";
 import { handleLogout } from "../utiles/authHelpers";
 import { fetchUserProfile } from "../Services/userService";
+import { getUnreadNotificationCount } from "../Services/notificationService";
 import { User } from "../types/user";
 
 const Layout: React.FC = () => {
@@ -19,6 +21,7 @@ const Layout: React.FC = () => {
   const [user, setUser] = useState<User | null>(null);
   const [loadingUser, setLoadingUser] = useState<boolean>(true);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+  const [unreadCount, setUnreadCount] = useState<number>(0);
 
   const loadUserProfile = () => {
     const userId = localStorage.getItem("userId");
@@ -38,13 +41,33 @@ const Layout: React.FC = () => {
     }
   };
 
+  const fetchUnread = async () => {
+    const count = await getUnreadNotificationCount();
+    setUnreadCount(count);
+  };
+
+  // useEffect(() => {
+  //   loadUserProfile();
+  //   fetchUnread();
+  //   window.addEventListener("userProfileUpdated", loadUserProfile);
+  //   return () => {
+  //     window.removeEventListener("userProfileUpdated", loadUserProfile);
+  //   };
+  // }, []);
+
   useEffect(() => {
-    loadUserProfile();
-    window.addEventListener("userProfileUpdated", loadUserProfile);
-    return () => {
-      window.removeEventListener("userProfileUpdated", loadUserProfile);
-    };
-  }, []);
+  loadUserProfile();
+  fetchUnread();
+
+  window.addEventListener("userProfileUpdated", loadUserProfile);
+  window.addEventListener("notificationsUpdated", fetchUnread); // 🔄 NEW
+
+  return () => {
+    window.removeEventListener("userProfileUpdated", loadUserProfile);
+    window.removeEventListener("notificationsUpdated", fetchUnread); // 🔄 NEW
+  };
+}, []);
+
 
   const onLogoutClick = () => {
     setShowLogoutConfirm(true);
@@ -119,6 +142,16 @@ const Layout: React.FC = () => {
             <Link to="/chatgpt" className={layoutStyles.sidebarLink}>
               <FaBrain className={layoutStyles.icon} /> AI Assistant
             </Link>
+          </li>
+          <li className={layoutStyles.sidebarItem}>
+            <Link to="/notifications" className={layoutStyles.sidebarLink}>
+              <FaBell className={layoutStyles.icon} /> Notification Center
+            </Link>
+            {unreadCount > 0 && (
+              <p style={{margin: "1px 0 0 45px", fontSize: "16px", color: "red" }}>
+                {unreadCount} unread notification{unreadCount > 1 ? "s" : ""}
+              </p>
+            )}
           </li>
         </ul>
       </aside>

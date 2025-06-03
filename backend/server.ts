@@ -16,6 +16,8 @@ import appointmentRoutes from "./routes/appointment_routes";
 import searchRoutes from "./routes/user_route";
 import scheduleRoutes from "./routes/schedule_routes";
 import meetingRoutes from "./routes/meetingRoutes";
+import notificationRoutes from "./routes/notification_route";
+
 import Diary from "./routes/diary_route";
 import statsRouter from "./routes/stats";
 import "./config/passport";
@@ -75,10 +77,11 @@ app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 app.use("/api", admin_routes);
 app.use("/api", appointmentRoutes);
 app.use("/api", searchRoutes);
-app.use("/api", scheduleRoutes);
+app.use("/api", scheduleRoutes);  
 app.use("/api", meetingRoutes);
 app.use("/api", Diary);
 app.use("/stats", statsRouter);
+app.use("/api", notificationRoutes);
 
 const server = http.createServer(app);
 const io = new socketIo.Server(server, {

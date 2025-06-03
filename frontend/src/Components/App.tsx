@@ -14,6 +14,8 @@ import SessionSummaryPage from "./DoctorProfile/SessionSummary";
 import PatientRecord from "./DoctorProfile/PatientRecord";
 import DoctorDashboard from "./DoctorDashboard/DoctorDashboard";
 import NotFoundPage from "./NotFoundPage";
+import NotificationCenter from "./Notifications/NotificationCenter";
+
 
 function App() {
   return (
@@ -30,6 +32,7 @@ function App() {
           <Route path="/appointmens" element={<AppointmentsPage />} />
           <Route path="/admin" element={<AdminPanel />} />
           <Route path="/meetings/:meetingId/chat" element={<ChatContainer />} />
+          <Route path="/notifications" element={<NotificationCenter />} />
           <Route path="/summary/:meetingId" element={<SessionSummaryPage />} />
           <Route
             path="/patients/:patientId/record"
