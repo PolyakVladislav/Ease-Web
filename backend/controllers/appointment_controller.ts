@@ -332,15 +332,6 @@ export const updateAppointment = async (
       return;
     }
 
-    if (appointment.initiator === "doctor" && status === "confirmed") {
-      res.status(403).json({ message: "Doctor cannot set status to confirmed in this flow" });
-      return;
-    }
-
-    // if (appointment.initiator === "doctor" && status === "confirmed") {
-    //   res.status(403).json({ message: "Doctor cannot set status to confirmed in this flow" });
-    //   return;
-    // }
     const updateData: any = {};
     if (status) {
       const validStatuses = ["pending", "confirmed", "canceled", "passed"];
