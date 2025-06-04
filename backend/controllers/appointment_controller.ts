@@ -5,6 +5,7 @@ import User from "../models/Users";
 import mongoose from "mongoose"; 
 import Diary, { IDiary } from "../models/Diary";
 import Notification from "../models/Notification";
+import socketIo from "socket.io";
 
 
 
@@ -370,7 +371,7 @@ export const updateAppointment = async (
 
       const message = `Appointment with ${patientUsername} on ${formattedDate} was updated.`;
 
-      await Notification.create([
+      const created =  await Notification.create([
         {
           userId: updatedAppointment.patientId,
           message,
@@ -382,6 +383,17 @@ export const updateAppointment = async (
           appointmentId: updatedAppointment._id,
         },
       ]);
+      //vlad al tichas alay ze haya lebdika
+      const io = req.app.get("io") as socketIo.Server;
+      created.forEach((notif) => {
+        // assume `io` is your Socket.IO server instance
+        io.to(notif.userId.toString()).emit("newNotification", {
+          notificationId: notif._id,
+          message: notif.message,
+          appointmentId: notif.appointmentId,
+          createdAt: notif.createdAt,
+        });
+      });
     } catch (notifyErr) {
       console.error("Failed to create update notifications:", notifyErr);
     }
