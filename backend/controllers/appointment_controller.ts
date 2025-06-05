@@ -642,33 +642,33 @@ export const deleteAppointment = async (
       return;
     }
 
-    const message = `Appointment on ${appointment.appointmentDate.toLocaleString()} has been canceled.`;
+    // const message = `Appointment on ${appointment.appointmentDate.toLocaleString()} has been canceled.`;
 
-    const notifications = await Notification.create([
-      {
-        userId: appointment.patientId,
-        message,
-        appointmentId: appointment._id,
-      },
-      {
-        userId: appointment.doctorId,
-        message,
-        appointmentId: appointment._id,
-      },
-    ]);
+    // const notifications = await Notification.create([
+    //   {
+    //     userId: appointment.patientId,
+    //     message,
+    //     appointmentId: appointment._id,
+    //   },
+    //   {
+    //     userId: appointment.doctorId,
+    //     message,
+    //     appointmentId: appointment._id,
+    //   },
+    // ]);
 
-    const io = req.app.get("io") as socketIo.Server;
-    console.log("📡 emitting socket deleteNotification to users");
+    // const io = req.app.get("io") as socketIo.Server;
+    // console.log("📡 emitting socket deleteNotification to users");
 
-    notifications.forEach((notif) => {
-      console.log(`📨 sending to ${notif.userId.toString()}: ${notif.message}`);
-      io.to(notif.userId.toString()).emit("newNotification", {
-        notificationId: notif._id,
-        message: notif.message,
-        appointmentId: notif.appointmentId,
-        createdAt: notif.createdAt,
-      });
-    });
+    // notifications.forEach((notif) => {
+    //   console.log(`📨 sending to ${notif.userId.toString()}: ${notif.message}`);
+    //   io.to(notif.userId.toString()).emit("newNotification", {
+    //     notificationId: notif._id,
+    //     message: notif.message,
+    //     appointmentId: notif.appointmentId,
+    //     createdAt: notif.createdAt,
+    //   });
+    // });
 
     await Appointment.findByIdAndDelete(appointmentId);
 
