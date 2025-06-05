@@ -132,8 +132,7 @@ export const createAppointment = async (req: Request, res: Response): Promise<vo
       .sort({ appointmentDate: -1 });
 
     if (lastAppointment) {
-      // If you want to filter diaries after a specific date:
-      const adjustedDate = new Date(lastAppointment.appointmentDate.getTime() - 3 * 60 * 60 * 1000); // 3 hours earlier
+      const adjustedDate = new Date(lastAppointment.appointmentDate.getTime() - 3 * 60 * 60 * 1000);
       diaries = await Diary.find({
         authorId: patientId,
         createdAt: { $gte: adjustedDate }
@@ -178,14 +177,14 @@ export const createAppointment = async (req: Request, res: Response): Promise<vo
       return;
     }
 
-    // 🔔 Notification logic
+    // 🔔 Notification logic + socket emit
     try {
       const creatorRole = initiator === "patient" ? "Patient" : "Doctor";
       const appointmentDateStr = new Date(appointmentDate).toLocaleString();
       const patientUsername = (populatedAppointment.patientId as any).username || "Unknown";
       const message = `A new appointment with ${patientUsername} is set to be on ${appointmentDateStr} and was created by the ${creatorRole}.`;
 
-      await Notification.create([
+      const createdNotifications = await Notification.create([
         {
           userId: patientId,
           message,
@@ -197,8 +196,20 @@ export const createAppointment = async (req: Request, res: Response): Promise<vo
           appointmentId: appointment._id,
         },
       ]);
+
+      // Emit socket event to both users
+      const io = req.app.get("io") as socketIo.Server;
+      createdNotifications.forEach((notif) => {
+        io.to(notif.userId.toString()).emit("newNotification", {
+          notificationId: notif._id,
+          message: notif.message,
+          appointmentId: notif.appointmentId,
+          createdAt: notif.createdAt,
+        });
+      });
+
     } catch (notifyErr) {
-      console.error("Failed to create notifications:", notifyErr);
+      console.error("Failed to create/send notifications:", notifyErr);
     }
 
     const appointmentResponse = {
@@ -371,7 +382,7 @@ export const updateAppointment = async (
 
       const message = `Appointment with ${patientUsername} on ${formattedDate} was updated.`;
 
-      const created =  await Notification.create([
+      const created = await Notification.create([
         {
           userId: updatedAppointment.patientId,
           message,
@@ -383,16 +394,19 @@ export const updateAppointment = async (
           appointmentId: updatedAppointment._id,
         },
       ]);
-      //vlad al tichas alay ze haya lebdika
+
       const io = req.app.get("io") as socketIo.Server;
       created.forEach((notif) => {
-        // assume `io` is your Socket.IO server instance
-        io.to(notif.userId.toString()).emit("newNotification", {
-          notificationId: notif._id,
-          message: notif.message,
-          appointmentId: notif.appointmentId,
-          createdAt: notif.createdAt,
-        });
+        const userId = (notif.userId as any)._id?.toString() || notif.userId?.toString();
+        if (userId) {
+        io.to(userId).emit("newNotification", {
+        notificationId: notif._id,
+        message: notif.message,
+        appointmentId: notif.appointmentId,
+        createdAt: notif.createdAt,
+  });
+}
+
       });
     } catch (notifyErr) {
       console.error("Failed to create update notifications:", notifyErr);
@@ -424,6 +438,7 @@ export const updateAppointment = async (
     res.status(500).json({ message: "Internal server error" });
   }
 };
+
 
 
 export const getAppointmentsByDoctor = async (
@@ -627,22 +642,33 @@ export const deleteAppointment = async (
       return;
     }
 
-    if (appointment) {
-  const message = `Appointment on ${appointment.appointmentDate.toLocaleString()} has been canceled.`;
-  await Notification.create([
-    {
-      userId: appointment.patientId,
-      message,
-      appointmentId: appointment._id,
-    },
-    {
-      userId: appointment.doctorId,
-      message,
-      appointmentId: appointment._id,
-    },
-  ]);
-}
+    const message = `Appointment on ${appointment.appointmentDate.toLocaleString()} has been canceled.`;
 
+    const notifications = await Notification.create([
+      {
+        userId: appointment.patientId,
+        message,
+        appointmentId: appointment._id,
+      },
+      {
+        userId: appointment.doctorId,
+        message,
+        appointmentId: appointment._id,
+      },
+    ]);
+
+    const io = req.app.get("io") as socketIo.Server;
+    console.log("📡 emitting socket deleteNotification to users");
+
+    notifications.forEach((notif) => {
+      console.log(`📨 sending to ${notif.userId.toString()}: ${notif.message}`);
+      io.to(notif.userId.toString()).emit("newNotification", {
+        notificationId: notif._id,
+        message: notif.message,
+        appointmentId: notif.appointmentId,
+        createdAt: notif.createdAt,
+      });
+    });
 
     await Appointment.findByIdAndDelete(appointmentId);
 
@@ -652,6 +678,8 @@ export const deleteAppointment = async (
     res.status(500).json({ message: "Internal server error" });
   }
 };
+
+
 
 export const claimUrgentAppointment = async (
   req: Request,

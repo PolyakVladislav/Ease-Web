@@ -7,7 +7,17 @@ export const getNotificationsForUser = async (req: Request, res: Response) => {
     const notifications = await Notification.find({ userId })
       .sort({ createdAt: -1 })
       .limit(100);
-    res.status(200).json(notifications);
+    res.status(200).json(
+  notifications.map(n => ({
+    id: n._id,
+    userId: n.userId,
+    message: n.message,
+    appointmentId: n.appointmentId,
+    isRead: n.isRead,
+    createdAt: n.createdAt,
+  }))
+);
+
   } catch (err) {
     console.error("Failed to fetch notifications", err);
     res.status(500).json({ message: "Internal server error" });
