@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 import Agenda, { Job } from "agenda";
 import Appointment from "../models/Appointment";
 
-const mongoDb: any = mongoose.connection.db;
+const mongoDb: any = mongoose.connection.db;  //process.env.DB_CONNECT
 
 const agenda: Agenda = new (Agenda as any)(mongoDb, "agendaJobs");
 

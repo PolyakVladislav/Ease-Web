@@ -105,6 +105,7 @@ const initApp = (): Promise<http.Server> => {
       mongoose
         .connect(process.env.DB_CONNECT)
         .then(() => {
+          require("./Middlewares/job"); 
           console.log("Connected to database");
           resolve(server);
         })

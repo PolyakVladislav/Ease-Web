@@ -6,7 +6,7 @@ import mongoose from "mongoose";
 import Diary, { IDiary } from "../models/Diary";
 import Notification from "../models/Notification";
 import socketIo from "socket.io";
-
+import agenda from '../Middlewares/job';
 
 
 
@@ -167,7 +167,10 @@ export const createAppointment = async (req: Request, res: Response): Promise<vo
       initiator,
       status,
     });
-
+    const jobTime = new Date(appointment.appointmentDate.getTime() + 2 * 60 * 60 * 1000); // 2 hours before the appointment
+    await agenda.schedule(jobTime,'cancel appointment', {
+      appointmentId: (appointment._id as mongoose.Types.ObjectId).toString(),
+    });
     const populatedAppointment = await Appointment.findById(appointment._id)
       .populate({ path: "patientId", model: "Users", select: "username" })
       .exec();
