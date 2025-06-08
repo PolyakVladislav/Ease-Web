@@ -1,7 +1,13 @@
 import React, { useEffect, useState } from "react";
-import { addDayOff, deleteDayOff, getDayOffs } from "../../Services/dayOffService";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import {
+  addDayOff,
+  deleteDayOff,
+  getDayOffs,
+} from "../../Services/dayOffService";
 import { DayOff } from "../../types/schedule";
-import dayOffStyles from "../../css/DayOffEditor.module.css"; 
+import dayOffStyles from "../../css/DayOffEditor.module.css";
 
 interface DayOffEditorProps {
   doctorId: string;
@@ -14,6 +20,10 @@ const DayOffEditor: React.FC<DayOffEditorProps> = ({ doctorId }) => {
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+
+  const tomorrow = new Date();
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  const minDateString = tomorrow.toISOString().split("T")[0];
 
   useEffect(() => {
     if (!doctorId) return;
@@ -31,6 +41,9 @@ const DayOffEditor: React.FC<DayOffEditorProps> = ({ doctorId }) => {
 
   const handleAddDayOff = async () => {
     if (!newDayOffDate) return;
+    if (!newDayOffDate || newDayOffDate < minDateString) {
+      return toast.error("Please choose a date of tomorrow or later.");
+    }
     try {
       await addDayOff({ doctorId, date: newDayOffDate, reason });
       const data = await getDayOffs(doctorId);
@@ -74,10 +87,10 @@ const DayOffEditor: React.FC<DayOffEditorProps> = ({ doctorId }) => {
         <tbody>
           {dayOffs.map((item) => (
             <tr key={item._id}>
-              <td>{new Date(item.date).toLocaleDateString()}</td>
+              <td>{new Date(item.date).toLocaleDateString("en-GB")}</td>
               <td>{item.reason || "-"}</td>
               <td>
-              <button
+                <button
                   className={dayOffStyles.deleteDayOffButton}
                   onClick={() => handleDeleteDayOff(item._id)}
                 >
@@ -106,10 +119,20 @@ const DayOffEditor: React.FC<DayOffEditorProps> = ({ doctorId }) => {
           value={reason}
           onChange={(e) => setReason(e.target.value)}
         />
-        <button className={dayOffStyles.addDayOffButton} onClick={handleAddDayOff}>
+        <button
+          className={dayOffStyles.addDayOffButton}
+          onClick={handleAddDayOff}
+        >
           Add Day Off
         </button>
       </div>
+      <ToastContainer
+        position="bottom-right"
+        autoClose={3000}
+        hideProgressBar
+        closeOnClick
+        pauseOnHover
+      />
     </div>
   );
 };
