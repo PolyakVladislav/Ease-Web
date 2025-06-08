@@ -182,10 +182,6 @@ socket.on("getRoomUsers", async ({ meetingId }) => {
           return;
         }
 
-        if (String(appointment.doctorId) !== doctorId) {
-          socket.emit("error", { message: "Only the doctor can end the consultation." });
-          return;
-        }
 
         appointment.status = "passed";
         await appointment.save();
