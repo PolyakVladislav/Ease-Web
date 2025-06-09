@@ -38,7 +38,7 @@ const generateToken = (userId: string): tTokens | null => {
 //
 const register = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
-    const { username, email, password } = req.body;
+    const { username, email, password,phoneNumber,gender, } = req.body;
 
     if (!username || !email || !password) {
       res.status(400).json({ message: 'Username, email, and password are required' });
@@ -73,6 +73,8 @@ const register = async (req: Request, res: Response, next: NextFunction): Promis
       username,
       email,
       password: hashedPassword,
+      phoneNumber,
+      gender,
       profilePicture: profilePictureUrl
     });
 
