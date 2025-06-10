@@ -137,22 +137,22 @@ export const createAppointment = async (req: Request, res: Response): Promise<vo
 
     status = initiator === "patient" ? "confirmed" : "pending";
 
-    const lastAppointment = await Appointment.findOne({ doctorId, status: "passed" })
-      .sort({ appointmentDate: -1 });
+    // const lastAppointment = await Appointment.findOne({ doctorId, status: "passed" })
+    //   .sort({ appointmentDate: -1 });
 
-    if (lastAppointment) {
-      const adjustedDate = new Date(lastAppointment.appointmentDate.getTime() - 3 * 60 * 60 * 1000);
-      diaries = await Diary.find({
-        authorId: patientId,
-        createdAt: { $gte: adjustedDate }
-      })
-        .sort({ createdAt: -1 })
-        .limit(10);
-    } else {
+    // if (lastAppointment) {
+    //   const adjustedDate = new Date(lastAppointment.appointmentDate.getTime() - 3 * 60 * 60 * 1000);
+    //   diaries = await Diary.find({
+    //     authorId: patientId,
+    //     createdAt: { $gte: adjustedDate }
+    //   })
+    //     .sort({ createdAt: -1 })
+    //     .limit(10);
+    // } else {
       diaries = await Diary.find({ authorId: patientId })
-        .sort({ createdAt: -1 })
+        .sort({ date: -1 })
         .limit(10);
-    }
+    //}
 
     if (!isEmergency && !doctorId) {
       res.status(400).json({ message: "doctorId is required for non-emergency appointment" });
