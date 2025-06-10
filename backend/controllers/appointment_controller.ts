@@ -122,7 +122,16 @@ export const createAppointment = async (req: Request, res: Response): Promise<vo
       res.status(400).json({ message: "Missing required fields (patientId, appointmentDate, initiator)" });
       return;
     }
-
+    const currentDate = new Date();
+    const existingMeeting = await Appointment.findOne({
+      patientId,
+      status: "confirmed",
+      appointmentDate: { $gte: currentDate },
+    });
+    if (existingMeeting) {
+      res.status(400).json({ message: "A confirmed meeting already exists for this patient." });
+      return;
+    }
     let status: "pending" | "confirmed" | "canceled" | "passed" = "pending";
     let diaries: IDiary[] = [];
 
@@ -169,7 +178,7 @@ export const createAppointment = async (req: Request, res: Response): Promise<vo
     });
     const jobTime = new Date(appointment.appointmentDate.getTime() + 2 * 60 * 60 * 1000); // 2 hours before the appointment
     await agenda.schedule(jobTime,'cancel appointment', {
-      appointmentId: (appointment._id as mongoose.Types.ObjectId).toString(),
+      appointmentId: (appointment.id as mongoose.Types.ObjectId).toString(),
     });
     const populatedAppointment = await Appointment.findById(appointment._id)
       .populate({ path: "patientId", model: "Users", select: "username" })
