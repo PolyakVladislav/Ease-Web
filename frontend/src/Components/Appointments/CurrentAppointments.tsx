@@ -23,7 +23,10 @@ const CurrentAppointments: React.FC<CurrentAppointmentsProps> = ({
   const navigate = useNavigate();
 
   const activeAppointments = (appointments || []).filter((apt) => {
-    return apt.status.toLowerCase() !== "passed" && apt.status.toLowerCase() !== "canceled";
+    return (
+      apt.status.toLowerCase() !== "passed" &&
+      apt.status.toLowerCase() !== "canceled"
+    );
   });
 
   const showAlert = (message: string) => {
@@ -92,110 +95,153 @@ const CurrentAppointments: React.FC<CurrentAppointmentsProps> = ({
           </tr>
         </thead>
         <tbody>
-          {activeAppointments.map((apt) => (
-            <tr key={apt._id} className={apt.isEmergency ? styles.emergencyRow : ""}>
-              <td>{apt.patientId && apt.patientId.username}</td>
-              <td>
-                <span
-                  className={`${styles.statusBadge} ${
-                    styles["status" + apt.status.charAt(0).toUpperCase() + apt.status.slice(1)]
-                  }`}
-                >
-                  {apt.status}
-                </span>
-              </td>
-              <td>
-  {`${apt.appointmentDate.slice(0,10)} ${apt.appointmentDate.slice(11,16)}`}
-</td>
-              <td style={{ position: "relative" }} className={styles.actionsContainer}>
-                <>
-                  <button onClick={() => handleEditClick(apt)} className={styles.editBtn}>
-                    Edit
-                  </button>
-                  <button onClick={() => handleCancel(apt._id)} className={styles.cancelBtn}>
-                    Cancel
-                  </button>
-                  {apt.status.toLowerCase() !== "passed" && (
-                    <button className={styles.chatButton} onClick={() => goToChat(apt._id)}>
-                      Go to Chat
+          {activeAppointments.map((apt) => {
+            const notesList = Array.isArray(apt.notes) ? apt.notes : [];
+            const hasNotes = notesList.length > 0;
+
+            return (
+              <tr
+                key={apt._id}
+                className={apt.isEmergency ? styles.emergencyRow : ""}
+              >
+                <td>{apt.patientId?.username}</td>
+                <td>
+                  <span
+                    className={`${styles.statusBadge} ${
+                      styles[
+                        "status" +
+                          apt.status.charAt(0).toUpperCase() +
+                          apt.status.slice(1)
+                      ]
+                    }`}
+                  >
+                    {apt.status}
+                  </span>
+                </td>
+                <td>
+                  {`${apt.appointmentDate.slice(0, 10)} ${apt.appointmentDate.slice(
+                    11,
+                    16
+                  )}`}
+                </td>
+                <td style={{ position: "relative" }} className={styles.actionsContainer}>
+                  <>
+                    <button
+                      onClick={() => handleEditClick(apt)}
+                      className={styles.editBtn}
+                    >
+                      Edit
                     </button>
-                  )}
-                </>
-                {cancelConfirmId === apt._id && (
-                  <div className={styles.modalOverlay}>
-                    <div className={styles.modal}>
-                      <p>Are you sure you want to cancel the appointment?</p>
-                      <div className={styles.modalButtons}>
-                        <button onClick={() => confirmCancel(apt._id)}>Yes</button>
-                        <button onClick={() => setCancelConfirmId(null)}>No</button>
+                    <button
+                      onClick={() => handleCancel(apt._id)}
+                      className={styles.cancelBtn}
+                    >
+                      Cancel
+                    </button>
+                    {apt.status.toLowerCase() !== "passed" && (
+                      <button
+                        className={styles.chatButton}
+                        onClick={() => goToChat(apt._id)}
+                      >
+                        Go to Chat
+                      </button>
+                    )}
+                  </>
+                  {cancelConfirmId === apt._id && (
+                    <div className={styles.modalOverlay}>
+                      <div className={styles.modal}>
+                        <p>Are you sure you want to cancel the appointment?</p>
+                        <div className={styles.modalButtons}>
+                          <button onClick={() => confirmCancel(apt._id)}>
+                            Yes
+                          </button>
+                          <button onClick={() => setCancelConfirmId(null)}>
+                            No
+                          </button>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                )}
-              </td>
-              <td>
-                <span
-                  style={{ cursor: "pointer" }}
-                  onClick={() => {
-                    const notesList = Array.isArray(apt.notes) ? apt.notes : [];
-                    setSelectedNotes(notesList);
-                    setCurrentNoteIndex(0);
-                    setShowNotesPopup(true);
-                  }}
-                >
-                  📝
-                </span>
-              </td>
-            </tr>
-          ))}
+                  )}
+                </td>
+                <td>
+                  {hasNotes ? (
+                    <span
+                      style={{ cursor: "pointer" }}
+                      onClick={() => {
+                        setSelectedNotes(notesList);
+                        setCurrentNoteIndex(0);
+                        setShowNotesPopup(true);
+                      }}
+                    >
+                      📝
+                    </span>
+                  ) : (
+                    <span
+                      style={{
+                        color: "#666",
+                        fontStyle: "italic",
+                        fontSize: "0.9rem",
+                      }}
+                    >
+                      No diary yet
+                    </span>
+                  )}
+                </td>
+              </tr>
+            );
+          })}
         </tbody>
       </table>
 
       {showNotesPopup && selectedNotes && selectedNotes.length > 0 && (
-  <div className={styles.modalOverlay}>
-    <div className={`${styles.modal} ${styles.diaryModal}`}>
-      <h2>🗒️ Diary Notes</h2>
+        <div className={styles.modalOverlay}>
+          <div className={`${styles.modal} ${styles.diaryModal}`}>
+            <h2>🗒️ Diary Notes</h2>
 
-      <div className={styles.diaryNoteContent}>
-        {selectedNotes[currentNoteIndex]}
-      </div>
+            <div className={styles.diaryNoteContent}>
+              {selectedNotes[currentNoteIndex]}
+            </div>
 
-      <div className={styles.diaryPagination}>
-        <button
-          onClick={() => setCurrentNoteIndex((prev) => prev - 1)}
-          disabled={currentNoteIndex === 0}
-        >
-          ◀ Previous
-        </button>
+            <div className={styles.diaryPagination}>
+              <button
+                onClick={() =>
+                  setCurrentNoteIndex((prev) => Math.max(prev - 1, 0))
+                }
+                disabled={currentNoteIndex === 0}
+              >
+                ◀ Previous
+              </button>
 
-        <span>
-          {currentNoteIndex + 1} / {selectedNotes.length}
-        </span>
+              <span>
+                {currentNoteIndex + 1} / {selectedNotes.length}
+              </span>
 
-        <button
-          onClick={() => setCurrentNoteIndex((prev) => prev + 1)}
-          disabled={currentNoteIndex === selectedNotes.length - 1}
-        >
-          Next ▶
-        </button>
-      </div>
+              <button
+                onClick={() =>
+                  setCurrentNoteIndex((prev) =>
+                    Math.min(prev + 1, selectedNotes.length - 1)
+                  )
+                }
+                disabled={currentNoteIndex === selectedNotes.length - 1}
+              >
+                Next ▶
+              </button>
+            </div>
 
-      <div className={styles.diaryCloseContainer}>
-        <button
-          onClick={() => {
-            setShowNotesPopup(false);
-            setCurrentNoteIndex(0);
-          }}
-          className={styles.diaryCloseBtn}
-        >
-          Close
-        </button>
-      </div>
-    </div>
-  </div>
-)}
-
-
+            <div className={styles.diaryCloseContainer}>
+              <button
+                onClick={() => {
+                  setShowNotesPopup(false);
+                  setCurrentNoteIndex(0);
+                }}
+                className={styles.diaryCloseBtn}
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 };
