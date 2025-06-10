@@ -2,30 +2,34 @@ import mongoose from "mongoose";
 import Agenda, { Job } from "agenda";
 import Appointment from "../models/Appointment";
 
-const mongoDb: any = mongoose.connection.db;  //process.env.DB_CONNECT
+const mongoConnectionString = process.env.DB_CONNECT;
+if (!mongoConnectionString) {
+  throw new Error("DB_CONNECT must be set in env");
+}
 
-const agenda: Agenda = new (Agenda as any)(mongoDb, "agendaJobs");
+const agenda = new Agenda({
+  db: {
+    address: mongoConnectionString,
+    collection: "agendaJobs",
+    
+  }
+});
 
 agenda.define("cancel appointment", async (job: Job) => {
   const { appointmentId } = job.attrs.data as { appointmentId: string };
   const appt = await Appointment.findById(appointmentId);
   if (!appt) return;
-
-  if (appt.status === "confirmed") {
+  if (appt.status === "confirmed" || appt.status === "pending") {
     appt.status = "canceled";
     await appt.save();
-    console.log(`Appointment ${appointmentId} was automatically canceled.`);
   }
 });
 
-(async function () {
-  if (mongoose.connection.readyState === 1) {
-    await agenda.start();
-  } else {
-    mongoose.connection.once("open", async () => {
-      await agenda.start();
-    });
-  }
-})();
+
+agenda.on("ready", () => {
+  agenda.start()
+    .then(() => console.log("Agenda started"))
+    .catch(err => console.error("Agenda failed to start:", err));
+});
 
 export default agenda;
