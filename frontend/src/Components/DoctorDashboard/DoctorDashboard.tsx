@@ -91,7 +91,7 @@ const DoctorDashboard: React.FC = () => {
         </div>
 
         <div className={styles.chartBlock}>
-          <h3>Session Status</h3>
+          <h3> All Session Statuses </h3>
           <SessionStatusDonut data={statusStats} />
         </div>
       </div>

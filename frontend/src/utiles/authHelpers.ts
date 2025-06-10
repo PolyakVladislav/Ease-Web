@@ -18,9 +18,9 @@ export async function handleLogin(
 
   try {
     const response = await api.post("/auth/login", { email, password });
+    
     if (response.status === 200 && response.data && response.data.accessToken) {
       localStorage.setItem("accessToken", response.data.accessToken);
-
       if (response.data._id) localStorage.setItem("userId", response.data._id);
       if (response.data.username) localStorage.setItem("username", response.data.username);
 
@@ -28,11 +28,17 @@ export async function handleLogin(
     } else {
       setErrorMessage(response.data?.message || "Login failed");
     }
-  } catch {
+  } catch (error: any) {
+    if (error.response && error.response.data && error.response.data.message) {
+      
+      setErrorMessage(error.response.data.message);
+    } else {
+      
       setErrorMessage("An unexpected error occurred");
     }
-  
+  }
 }
+
 
 export function handleKeyDown(
   e: React.KeyboardEvent,

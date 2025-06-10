@@ -132,3 +132,69 @@ export const getSessionsPerMonth = async (req: Request, res: Response) => {
     res.status(500).json({ message: "Server error" });
   }
 };
+
+export const getSessionsPerWeek = async (req: Request, res: Response) => {
+  try {
+    const today = new Date();
+    const start = new Date(today);
+    start.setDate(start.getDate() - 7 * 5); // התחלה לפני 6 שבועות
+
+    const result = await Appointment.aggregate([
+      {
+        $match: {
+          appointmentDate: { $gte: start },
+        },
+      },
+      {
+        $group: {
+          _id: {
+            year: { $isoWeekYear: "$appointmentDate" },
+            week: { $isoWeek: "$appointmentDate" },
+          },
+          count: { $sum: 1 },
+        },
+      },
+      {
+        $sort: {
+          "_id.year": 1,
+          "_id.week": 1,
+        },
+      },
+    ]);
+
+    const fullWeeks = Array.from({ length: 6 }).map((_, i) => {
+      const date = new Date(today);
+      date.setDate(today.getDate() - 7 * (5 - i)); // מציג את השבועות האחרונים (מהעתיד אל העבר)
+      const weekLabel = `Week ${getWeekNumber(date)} (${date.toLocaleDateString("en-GB")})`;
+      return {
+        key: `${date.getFullYear()}-${getWeekNumber(date)}`,
+        label: weekLabel,
+        count: 0,
+      };
+    });
+
+    result.forEach((entry) => {
+      const key = `${entry._id.year}-${entry._id.week}`;
+      const match = fullWeeks.find((w) => w.key === key);
+      if (match) match.count = entry.count;
+    });
+
+    res.json(
+      fullWeeks.map(({ label, count }) => ({
+        week: label,
+        count,
+      }))
+    );
+  } catch (err) {
+    console.error("Failed to aggregate weekly session stats", err);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+function getWeekNumber(date: Date) {
+  const temp = new Date(date.getTime());
+  temp.setHours(0, 0, 0, 0);
+  temp.setDate(temp.getDate() + 3 - ((temp.getDay() + 6) % 7));
+  const week1 = new Date(temp.getFullYear(), 0, 4);
+  return 1 + Math.round(((temp.getTime() - week1.getTime()) / 86400000 - 3 + ((week1.getDay() + 6) % 7)) / 7);
+}

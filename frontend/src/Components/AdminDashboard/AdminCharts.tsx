@@ -10,7 +10,7 @@ import {
 } from "recharts";
 import {
   fetchSessionsPerDoctor,
-  fetchSessionsPerMonth,
+  fetchSessionsPerWeek,
 } from "../../Services/adminService";
 import styles from "../../css/AdminPanel.module.css";
 
@@ -18,13 +18,13 @@ const AdminCharts: React.FC = () => {
   const [doctorData, setDoctorData] = useState<
     { doctor: string; count: number }[]
   >([]);
-  const [monthlyData, setMonthlyData] = useState<
-    { month: string; count: number }[]
+  const [weeklyData, setWeeklyData] = useState<
+    { week: string; count: number }[]
   >([]);
 
   useEffect(() => {
     fetchSessionsPerDoctor().then(setDoctorData).catch(console.error);
-    fetchSessionsPerMonth().then(setMonthlyData).catch(console.error);
+    fetchSessionsPerWeek().then(setWeeklyData).catch(console.error);
   }, []);
 
   return (
@@ -40,10 +40,10 @@ const AdminCharts: React.FC = () => {
         </BarChart>
       </ResponsiveContainer>
 
-      <h3>📊 Monthly Sessions (Last 12 Months)</h3>
+      <h3>📊 Weekly Sessions (Last 6 Weeks)</h3>
       <ResponsiveContainer width="100%" height={300}>
-        <BarChart data={monthlyData}>
-          <XAxis dataKey="month" />
+        <BarChart data={weeklyData}>
+          <XAxis dataKey="week" />
           <YAxis />
           <Tooltip />
           <CartesianGrid strokeDasharray="3 3" />

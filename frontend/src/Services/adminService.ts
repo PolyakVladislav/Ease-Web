@@ -5,7 +5,7 @@ export const getAllUsers = async () => {
   const response = await api.get(`${CONFIG.SERVER_URL}/api/admin/users`, {
     withCredentials: true,
   });
-  return response.data; 
+  return response.data;
 };
 
 export const updateUserRole = async (
@@ -20,7 +20,7 @@ export const updateUserRole = async (
       withCredentials: true,
     }
   );
-  return response.data; 
+  return response.data;
 };
 
 // 1. Sessions per Doctor
@@ -33,4 +33,9 @@ export const fetchSessionsPerDoctor = async () => {
 export const fetchSessionsPerMonth = async () => {
   const res = await api.get("/api/analytics/sessions-per-month");
   return res.data; // format: [{ month: "2024-03", count: 5 }]
+};
+
+export const fetchSessionsPerWeek = async () => {
+  const res = await api.get("/api/analytics/sessions-per-week");
+  return res.data; // format: [{ week: "Week 22", count: 3 }]
 };
