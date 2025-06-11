@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import socketClient from "socket.io-client";
 import styles from "../../css/NotificationCenter.module.css";
 import {
   getNotifications,
@@ -7,56 +8,76 @@ import {
   clearAllNotifications,
 } from "../../Services/notificationService";
 import { FaTrash } from "react-icons/fa";
+import CONFIG from "../../config";
 
 interface Notification {
-  _id: string;
+  id: string;
   message: string;
   isRead: boolean;
   createdAt: string;
 }
 
+// use the default export
+const socket = socketClient(CONFIG.SERVER_URL);
+
+
 const NotificationCenter: React.FC = () => {
-  const [notifications, setNotifications] = useState<Notification[] | null>(null);
+  const [notifications, setNotifications] = useState<Notification[]>([]);
   const [loading, setLoading] = useState(true);
 
+  // fetch existing notifications
   useEffect(() => {
-    const fetchData = async () => {
+    (async () => {
       try {
         const data = await getNotifications();
         setNotifications(data);
-      } catch (error) {
-        console.error("Failed to load notifications:", error);
+      } catch {
         setNotifications([]);
       } finally {
         setLoading(false);
       }
-    };
+    })();
+  }, []);
 
-    fetchData();
+  // join room & listen for real-time
+  useEffect(() => {
+    const userId = localStorage.getItem("userId");
+    if (userId) socket.emit("joinUser", { userId });
+
+    socket.on("newNotification", (notif: any) => {
+      setNotifications(prev => [
+        {
+          id: notif.notificationId,
+          message: notif.message,
+          isRead: false,
+          createdAt: notif.createdAt,
+        },
+        ...prev,
+      ]);
+      window.dispatchEvent(new Event("notificationsUpdated"));
+    });
+
+    return () => {
+      socket.off("newNotification");
+    };
   }, []);
 
   const handleMarkRead = async (id: string) => {
     try {
       await markNotificationAsRead(id);
-      setNotifications((prev) =>
-        prev ? prev.map((n) => (n._id === id ? { ...n, isRead: true } : n)) : []
+      setNotifications(prev =>
+        prev.map(n => (n.id === id ? { ...n, isRead: true } : n))
       );
       window.dispatchEvent(new Event("notificationsUpdated"));
-    } catch (err) {
-      console.error("Could not mark notification as read");
-    }
+    } catch {}
   };
 
   const handleDelete = async (id: string) => {
     try {
       await deleteNotification(id);
-      setNotifications((prev) =>
-        prev ? prev.filter((n) => n._id !== id) : []
-      );
+      setNotifications(prev => prev.filter(n => n.id !== id));
       window.dispatchEvent(new Event("notificationsUpdated"));
-    } catch (err) {
-      console.error("Could not delete notification");
-    }
+    } catch {}
   };
 
   const handleClearAll = async () => {
@@ -64,23 +85,22 @@ const NotificationCenter: React.FC = () => {
       await clearAllNotifications();
       setNotifications([]);
       window.dispatchEvent(new Event("notificationsUpdated"));
-    } catch (err) {
-      console.error("Could not clear all notifications");
-    }
+    } catch {}
   };
 
   return (
     <div className={styles.container}>
       <h2 className={styles.title}>Notification Center</h2>
+
       {loading ? (
         <div className={styles.loading}>Loading...</div>
-      ) : !notifications || notifications.length === 0 ? (
+      ) : notifications.length === 0 ? (
         <div className={styles.empty}>No notifications yet.</div>
       ) : (
         <div className={styles.list}>
-          {notifications.map((notification) => (
+          {notifications.map(notification => (
             <div
-              key={notification._id}
+              key={notification.id}
               className={`${styles.message} ${
                 notification.isRead ? styles.read : styles.unread
               }`}
@@ -89,10 +109,7 @@ const NotificationCenter: React.FC = () => {
                 <div className={styles.notificationDetails}>
                   <div className={styles.topRow}>
                     {!notification.isRead && (
-                      <span
-                        className={styles.unreadDot}
-                        title="Unread"
-                      />
+                      <span className={styles.unreadDot} title="Unread" />
                     )}
                     <div className={styles.text}>{notification.message}</div>
                   </div>
@@ -105,13 +122,13 @@ const NotificationCenter: React.FC = () => {
                   {!notification.isRead && (
                     <button
                       className={styles.markReadBtn}
-                      onClick={() => handleMarkRead(notification._id)}
+                      onClick={() => handleMarkRead(notification.id)}
                     >
                       Mark as read
                     </button>
                   )}
                   <FaTrash
-                    onClick={() => handleDelete(notification._id)}
+                    onClick={() => handleDelete(notification.id)}
                     style={{ cursor: "pointer", color: "#d32f2f" }}
                     title="Delete notification"
                   />
@@ -120,13 +137,10 @@ const NotificationCenter: React.FC = () => {
             </div>
           ))}
 
-          {/* ✅ Clear All Button */}
+          {/* Clear All Button */}
           {notifications.length > 0 && (
             <div style={{ textAlign: "right", marginTop: "20px" }}>
-              <button
-                onClick={handleClearAll}
-                className={styles.clearAllBtn}
-              >
+              <button onClick={handleClearAll} className={styles.clearAllBtn}>
                 Clear All
               </button>
             </div>

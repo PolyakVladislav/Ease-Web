@@ -8,12 +8,17 @@ import {
   FaBrain,
   FaBell,
 } from "react-icons/fa";
+import socketClient from "socket.io-client";
+import CONFIG from "../config";
 import layoutStyles from "../css/Layout.module.css";
 import loadingStyles from "../css/Loading.module.css";
 import { handleLogout } from "../utiles/authHelpers";
 import { fetchUserProfile } from "../Services/userService";
 import { getUnreadNotificationCount } from "../Services/notificationService";
 import { User } from "../types/user";
+
+// establish a single Socket.IO connection
+const socket = socketClient(CONFIG.SERVER_URL);
 
 const Layout: React.FC = () => {
   const navigate = useNavigate();
@@ -27,15 +32,9 @@ const Layout: React.FC = () => {
     const userId = localStorage.getItem("userId");
     if (userId) {
       fetchUserProfile(userId)
-        .then((data) => {
-          setUser(data.user);
-        })
-        .catch((err) => {
-          console.error("Error fetching user profile", err);
-        })
-        .finally(() => {
-          setLoadingUser(false);
-        });
+        .then((data) => setUser(data.user))
+        .catch((err) => console.error("Error fetching user profile", err))
+        .finally(() => setLoadingUser(false));
     } else {
       setLoadingUser(false);
     }
@@ -46,41 +45,39 @@ const Layout: React.FC = () => {
     setUnreadCount(count);
   };
 
-  // useEffect(() => {
-  //   loadUserProfile();
-  //   fetchUnread();
-  //   window.addEventListener("userProfileUpdated", loadUserProfile);
-  //   return () => {
-  //     window.removeEventListener("userProfileUpdated", loadUserProfile);
-  //   };
-  // }, []);
-
   useEffect(() => {
-  loadUserProfile();
-  fetchUnread();
+    // initial load
+    loadUserProfile();
+    fetchUnread();
 
-  window.addEventListener("userProfileUpdated", loadUserProfile);
-  window.addEventListener("notificationsUpdated", fetchUnread); // 🔄 NEW
+    // join this user's room for live pushes
+    const userId = localStorage.getItem("userId");
+    if (userId) {
+      socket.emit("joinUser", { userId });  
+    }
 
-  return () => {
-    window.removeEventListener("userProfileUpdated", loadUserProfile);
-    window.removeEventListener("notificationsUpdated", fetchUnread); // 🔄 NEW
-  };
-}, []);
+    // whenever a new notification arrives, re-fetch unread count
+    socket.on("newNotification", () => {
+      fetchUnread();
+    });
 
+    // also listen to our custom event (e.g. mark-as-read, delete)
+    window.addEventListener("notificationsUpdated", fetchUnread);
+    window.addEventListener("userProfileUpdated", loadUserProfile);
 
-  const onLogoutClick = () => {
-    setShowLogoutConfirm(true);
-  };
+    return () => {
+      socket.off("newNotification");
+      window.removeEventListener("notificationsUpdated", fetchUnread);
+      window.removeEventListener("userProfileUpdated", loadUserProfile);
+    };
+  }, []);
 
+  const onLogoutClick = () => setShowLogoutConfirm(true);
   const onConfirmLogout = async () => {
     setShowLogoutConfirm(false);
     await handleLogout(navigate);
   };
-
-  const onCancelLogout = () => {
-    setShowLogoutConfirm(false);
-  };
+  const onCancelLogout = () => setShowLogoutConfirm(false);
 
   if (loadingUser) {
     return (
@@ -148,7 +145,7 @@ const Layout: React.FC = () => {
               <FaBell className={layoutStyles.icon} /> Notification Center
             </Link>
             {unreadCount > 0 && (
-              <p style={{margin: "1px 0 0 45px", fontSize: "16px", color: "red" }}>
+              <p style={{ margin: "1px 0 0 45px", fontSize: "16px", color: "red" }}>
                 {unreadCount} unread notification{unreadCount > 1 ? "s" : ""}
               </p>
             )}
