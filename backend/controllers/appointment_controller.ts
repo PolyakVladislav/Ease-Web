@@ -190,6 +190,7 @@ export const createAppointment = async (req: Request, res: Response): Promise<vo
     }
 
     // 🔔 Notification logic + socket emit
+    
     try {
       const creatorRole = initiator === "patient" ? "Patient" : "Doctor";
       const appointmentDateStr = new Date(appointmentDate).toLocaleString();

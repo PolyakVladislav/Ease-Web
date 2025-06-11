@@ -4,18 +4,20 @@ import postModel from "../models/Post";
 import multer from "multer";
 import Appointment from "../models/Appointment";
 import { ConsultationSummary } from "../models/ConsultationSummary";
-
-
-
+import path from 'path';
+import { v4 as uuidv4 } from 'uuid';
+import fs from 'fs';
 const SERVER_CONNECT = process.env.SERVER_CONNECT;
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, "uploads/");
+    cb(null, 'uploads/');
   },
   filename: (req, file, cb) => {
-    cb(null, `${Date.now()}-${file.originalname}`);
-  },
+    const ext = path.extname(file.originalname);
+    const uniqueName = `profile_${uuidv4()}${ext}`;
+    cb(null, uniqueName);
+  }
 });
 
 const upload = multer({ storage });
@@ -55,14 +57,9 @@ export const getUserProfile = async (
   }
 };
 
-export const updateUserProfile = async (
-  req: Request,
-  res: Response
-): Promise<void> => {
+export const updateUserProfile = async (req: Request, res: Response): Promise<void> => {
   const userId = req.query.userId as string;
   const { username, phoneNumber, dateOfBirth, gender } = req.body;
-
-  const profilePicture = req.file ? `/uploads/${req.file.filename}` : undefined;
 
   try {
     if (!username) {
@@ -70,10 +67,7 @@ export const updateUserProfile = async (
       return;
     }
 
-    const existingUser = await userModel.findOne({
-      username,
-      _id: { $ne: userId },
-    });
+    const existingUser = await userModel.findOne({ username, _id: { $ne: userId } });
     if (existingUser) {
       res.status(409).json({ message: "Username is already taken." });
       return;
@@ -85,26 +79,47 @@ export const updateUserProfile = async (
       return;
     }
 
+    // ✅ התחלת שינוי תמונה - שימוש חד-פעמי ב-UUID
+    if (req.file) {
+  const uploadedFileName = req.file.filename; // 💥 השם שנקבע ע"י multer
+  const newRelativePath = `/uploads/${uploadedFileName}`;
+
+  // מחיקת קובץ קודם אם קיים
+  if (user.profilePicture && SERVER_CONNECT) {
+    const relativePath = user.profilePicture.replace(SERVER_CONNECT, '');
+    const oldPath = path.join(__dirname, '..', relativePath);
+    if (fs.existsSync(oldPath)) {
+      fs.unlinkSync(oldPath);
+    }
+  }
+
+  // ❌ אין fs.renameSync. הקובץ כבר נכון
+
+  if (SERVER_CONNECT) {
+    user.profilePicture = `${SERVER_CONNECT}${newRelativePath}`;
+  }
+}
+
+    // ✅ עדכון שדות נוספים
     user.username = username;
     user.phoneNumber = phoneNumber;
     user.gender = gender;
     if (dateOfBirth) {
       user.dateOfBirth = new Date(dateOfBirth);
     }
-    if (profilePicture) {
-      user.profilePicture = `${SERVER_CONNECT}${profilePicture}`;
-    }
 
     await user.save();
 
     res.status(200).json({
       message: "User updated successfully",
-      user,
+      user
     });
   } catch (error) {
-    res.status(500).json({ message: "Server error here." });
+    console.error("Update user error:", error);
+    res.status(500).json({ message: "Server error.", error });
   }
 };
+
 
 export const updateUserRole = async (
   req: Request,
