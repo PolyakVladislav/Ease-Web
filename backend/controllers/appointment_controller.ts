@@ -128,7 +128,7 @@ export const createAppointment = async (req: Request, res: Response): Promise<vo
       status: "confirmed",
       appointmentDate: { $gte: currentDate },
     });
-    if (existingMeeting) {
+    if (existingMeeting && !isEmergency) {
       res.status(400).json({ message: "A confirmed meeting already exists for this patient." });
       return;
     }

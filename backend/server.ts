@@ -82,6 +82,10 @@ app.use("/api", meetingRoutes);
 app.use("/api", Diary);
 app.use("/stats", statsRouter);
 app.use("/api", notificationRoutes);
+app.use(express.static(path.resolve(__dirname, '..', 'front')));
+app.get('*', (req, res) => {
+  res.sendFile(path.resolve(__dirname, '..', 'front', 'index.html'));
+});
 
 const server = http.createServer(app);
 const io = new socketIo.Server(server, {

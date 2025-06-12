@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import Agenda, { Job } from "agenda";
+import { Agenda, Job } from "@hokify/agenda";
 import Appointment from "../models/Appointment";
 
 const mongoConnectionString = process.env.DB_CONNECT;
