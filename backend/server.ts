@@ -31,7 +31,7 @@ app.use(cookieParser());
 
 app.use(
   cors({
-    origin: ["http://localhost:5173", "http://10.0.2.2:5173"],
+    origin: ["http://localhost:5173", "http://10.0.2.2:5173","https://ease.cs.colman.ac.il" ],
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
@@ -67,13 +67,13 @@ const swaggerOptions = {
 };
 
 const swaggerDocs = swaggerJsDoc(swaggerOptions);
+const uploadsDir = path.resolve(__dirname, '..', 'uploads');
 
+app.use('/uploads', express.static(uploadsDir));
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 app.use("/auth", authRoutes);
-app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 app.use("/api/users", userRoutes);
 app.use("/api", chatgptRoutes);
-app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 app.use("/api", admin_routes);
 app.use("/api", appointmentRoutes);
 app.use("/api", searchRoutes);
