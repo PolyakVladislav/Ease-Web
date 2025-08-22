@@ -117,3 +117,20 @@ export const fetchStoredOverallSummary = async (patientId: string, doctorId: str
   const response = await api.get(`/api/patients/${patientId}/doctor/${doctorId}/overall-summary`);
   return response.data;
 };
+
+export const getAppointmentNotes = async (patientId: string) => {
+  try {
+    const response = await api.get(`/api/diary?patientId=${patientId}`, {
+      withCredentials: true,
+    });
+    return { notes: response.data };
+  } catch (error: unknown) {
+    if (error instanceof AxiosError) {
+      const message =
+        error?.response?.data?.message || "Unknown error fetching diary entries";
+      throw new Error(message);
+    } else {
+      throw new Error("Unknown error fetching diary entries");
+    }
+  }
+};

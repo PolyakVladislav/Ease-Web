@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import styles from "../../css/ManageAppointmentsPage.module.css";
 import { updateAppointment } from "../../Services/appointmentService";
 import { Appointment } from "../../types/appointment";
+import { getAppointmentNotes } from "../../Services/appointmentService";
 
 interface CurrentAppointmentsProps {
   appointments: Appointment[];
@@ -17,7 +18,7 @@ const CurrentAppointments: React.FC<CurrentAppointmentsProps> = ({
 }) => {
   const [cancelConfirmId, setCancelConfirmId] = useState<string | null>(null);
   const [alertMessage, setAlertMessage] = useState<string>("");
-  const [selectedNotes, setSelectedNotes] = useState<string[] | null>(null);
+  const [selectedNotes, setSelectedNotes] = useState<any[] | null>(null);
   const [showNotesPopup, setShowNotesPopup] = useState<boolean>(false);
   const [currentNoteIndex, setCurrentNoteIndex] = useState<number>(0);
   const navigate = useNavigate();
@@ -42,6 +43,18 @@ const CurrentAppointments: React.FC<CurrentAppointmentsProps> = ({
     onEditClick?.(apt);
   };
 
+  const fetchNotes = async (patientId: string) => {
+    try {
+      const response = await getAppointmentNotes(patientId); 
+      setSelectedNotes(response.notes || []);
+      setCurrentNoteIndex(0);
+      setShowNotesPopup(true);
+    } catch (error) {
+      console.error("Failed to fetch notes:", error);
+      showAlert("Failed to load notes");
+    }
+  };
+
   const handleCancel = (appointmentId: string) => {
     setCancelConfirmId(appointmentId);
   };
@@ -62,6 +75,14 @@ const CurrentAppointments: React.FC<CurrentAppointmentsProps> = ({
 
   const goToChat = (appointmentId: string) => {
     navigate(`/meetings/${appointmentId}/chat`);
+  };
+
+  // Helper function to check if notes exist and have content
+  const hasNotes = (notes: any): boolean => {
+    if (!notes) return false;
+    if (Array.isArray(notes)) return notes.length > 0;
+    if (typeof notes === 'string') return notes.trim().length > 0;
+    return false;
   };
 
   return (
@@ -96,9 +117,6 @@ const CurrentAppointments: React.FC<CurrentAppointmentsProps> = ({
         </thead>
         <tbody>
           {activeAppointments.map((apt) => {
-            const notesList = Array.isArray(apt.notes) ? apt.notes : [];
-            const hasNotes = notesList.length > 0;
-
             return (
               <tr
                 key={apt._id}
@@ -164,14 +182,10 @@ const CurrentAppointments: React.FC<CurrentAppointmentsProps> = ({
                   )}
                 </td>
                 <td>
-                  {hasNotes ? (
+                  {hasNotes(apt.notes) ? (
                     <span
                       style={{ cursor: "pointer" }}
-                      onClick={() => {
-                        setSelectedNotes(notesList);
-                        setCurrentNoteIndex(0);
-                        setShowNotesPopup(true);
-                      }}
+                      onClick={() => fetchNotes(apt.patientId?._id || "")}
                     >
                       📝
                     </span>
@@ -199,7 +213,16 @@ const CurrentAppointments: React.FC<CurrentAppointmentsProps> = ({
             <h2>🗒️ Diary Notes</h2>
 
             <div className={styles.diaryNoteContent}>
-              {selectedNotes[currentNoteIndex]}
+              {selectedNotes[currentNoteIndex] && (
+                <>
+                  <div style={{ marginBottom: '10px' }}>
+                    <strong>Date:</strong> {new Date(selectedNotes[currentNoteIndex].date).toLocaleDateString()}
+                  </div>
+                  <div style={{ whiteSpace: 'pre-wrap', lineHeight: '1.5' }}>
+                    {selectedNotes[currentNoteIndex].nlpSummary || 'No NLP summary available'}
+                  </div>
+                </>
+              )}
             </div>
 
             <div className={styles.diaryPagination}>
